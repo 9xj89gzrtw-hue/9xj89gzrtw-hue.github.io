@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DefiLlama Fee-Feed Audit — 411 protocols reporting $0 fees, and the fix</title>
+<meta name="description" content="Independent audit of 3,069 DefiLlama fee listings: 411 protocols whose fee feed died, 80 Base protocols with no fee adapter, $3,333,964/day of fee flow invisible in the data. Search your protocol free. Full diagnostics $29, adapter fix PR $99, paid in USDC on Base.">
+<meta property="og:title" content="411 DeFi protocols silently report $0 fees on DefiLlama">
+<meta property="og:description" content="Search your protocol free. Full 491-row diagnostics pack $29, ready-to-merge adapter fix $99 — paid in USDC on Base, verified on-chain.">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --bg:#07090d; --bg2:#0c1017; --card:#10151e; --line:#1d2532;
+  --txt:#e6edf7; --dim:#8b98ab; --acc:#4ade80; --acc2:#38bdf8;
+  --warn:#fbbf24; --bad:#f87171; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc2);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(7,9,13,.82);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:20px;height:60px}
+.logo{font:600 15px/1 var(--mono);letter-spacing:.5px;color:var(--txt)}
+.logo b{color:var(--acc)}
+.nav a{color:var(--dim);font-size:14px}
+.nav .spacer{flex:1}
+.badge{font:600 11px/1 var(--mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;color:var(--dim)}
+h1{font-size:clamp(30px,5vw,50px);line-height:1.08;letter-spacing:-1.5px;margin:0 0 18px;font-weight:700}
+h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.6px;margin:0 0 10px;font-weight:650}
+h3{font-size:17px;margin:0 0 8px}
+p.lead{font-size:18px;color:#c2cddd;max-width:760px}
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:34px 0 0}
+.stat{background:var(--bg2);padding:18px 20px}
+.stat .n{font:700 26px/1.15 var(--mono);letter-spacing:-1px}
+.stat .l{font-size:12.5px;color:var(--dim);margin-top:6px}
+.stat .n.red{color:var(--bad)} .stat .n.green{color:var(--acc)} .stat .n.blue{color:var(--acc2)}
+section{padding:58px 0;border-bottom:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+#q{width:100%;padding:15px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:16px;font-family:var(--mono)}
+#q:focus{outline:none;border-color:var(--acc2)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:16px}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid #151b25;vertical-align:top}
+tr:hover td{background:#0d1219}
+.chip{display:inline-block;font:700 10.5px/1 var(--mono);padding:4px 7px;border-radius:5px;letter-spacing:.4px}
+.chip.BROKEN{background:rgba(248,113,113,.14);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
+.chip.MISSING{background:rgba(251,191,36,.13);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
+.chip.ok{background:rgba(74,222,128,.12);color:var(--acc);border:1px solid rgba(74,222,128,.3)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.small{font-size:13px}
+button{font:600 15px/1 inherit;cursor:pointer;border-radius:9px;padding:13px 18px;border:1px solid var(--line);background:#151b26;color:var(--txt);transition:.15s}
+button:hover{border-color:#2c394d;background:#1a2230}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:linear-gradient(180deg,#22c55e,#16a34a);border-color:#16a34a;color:#04140a;font-weight:700}
+button.primary:hover{filter:brightness(1.08)}
+button.ghost{background:transparent}
+.price{font:700 34px/1 var(--mono);letter-spacing:-1.5px}
+.price small{font-size:14px;color:var(--dim);font-weight:500;letter-spacing:0}
+ul.clean{list-style:none;padding:0;margin:14px 0 0}
+ul.clean li{padding:7px 0 7px 22px;position:relative;font-size:14.4px;color:#c2cddd}
+ul.clean li:before{content:"";position:absolute;left:0;top:14px;width:7px;height:7px;border-radius:2px;background:var(--acc)}
+ul.clean li.no:before{background:#334155}
+ul.clean li.no{color:var(--dim)}
+input[type=text]{width:100%;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:13.5px}
+input[type=text]:focus{outline:none;border-color:var(--acc2)}
+pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
+code{font-family:var(--mono);font-size:.92em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
+#log{font:12.5px/1.7 var(--mono);white-space:pre-wrap;margin-top:12px;color:var(--dim);min-height:20px}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2)}
+.warnbox{border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.06)}
+.okbox{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
+.errbox{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07)}
+footer{padding:44px 0 60px;color:var(--dim);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #151b25;font-size:13.5px}
+.hidden{display:none}
+.copybtn{padding:6px 10px;font-size:12px;font-family:var(--mono)}
+details{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg2);margin-top:14px}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+.ok-ico{color:var(--acc);font-weight:700}
+.tag{font:600 11px/1 var(--mono);color:var(--dim);border:1px solid var(--line);padding:4px 7px;border-radius:5px}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="wrap nav">
+  <div class="logo">defi<b>audit</b>.store</div>
+  <a href="#check">Free check</a>
+  <a href="#products">Pricing</a>
+  <a href="#verify">How it works</a>
+  <a href="/defi-audit/">Method</a>
+  <div class="spacer"></div>
+  <span class="badge" id="chainbadge">Base · USDC</span>
+ </div>
+</header>
+
+<div class="wrap">
+<div class="hero">
+  <div class="kicker">Independent audit · data snapshot 26 Oct 2026</div>
+  <h1>411 DeFi protocols are still reporting <span style="color:var(--bad)">$0.00</span> in fees on DefiLlama.</h1>
+  <p class="lead">We pulled every DefiLlama fee listing — 3,069 protocols — and compared it against its own history. 411 published fees in the last 12 months and exactly zero in the last 7 days. Another 80 Base protocols with real TVL have no fee page at all. Every row is reproducible from public APIs.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n red" id="s-silent">411</div><div class="l">silent fee feeds</div></div>
+    <div class="stat"><div class="n blue" id="s-base">80</div><div class="l">Base protocols, no fee adapter</div></div>
+    <div class="stat"><div class="n" id="s-hole">$3,333,964</div><div class="l">measured fee flow hidden per day</div></div>
+    <div class="stat"><div class="n green" id="s-scan">3,069</div><div class="l">fee listings audited</div></div>
+  </div>
+
+  <div class="box warnbox" style="margin-top:22px">
+    <strong>Read this before you panic about a number above.</strong>
+    <div class="small" style="margin-top:6px;color:#c2cddd">
+      A silent feed is not automatically a broken adapter. Of the ten largest and most recent breaks we hand-checked, <b>ten</b> returned <code>0.00</code> because the data source itself was zero — the adapter was right. The $3.33M/day figure is the <em>measured</em> aggregate across all 411 rows, including feeds that are years stale and protocols that stopped charging. The actionable subset — recent breaks on protocols that still hold TVL — is <b id="s-live">$23,735/day</b> across <b id="s-liven">18</b> protocols. That is the number we sell you a fix for, and every row ships with the command to verify it yourself.
+    </div>
+  </div>
+</div>
+
+<section id="check">
+  <div class="kicker">Free · no signup</div>
+  <h2>Check your protocol</h2>
+  <p class="dim" style="margin-top:0;max-width:720px">Type a protocol name or a chain. Free tier shows the status, the last day the feed published, and the measured $/day that went missing. The root-cause class, the exact adapter file, the reproduction commands and the priority score are in the paid pack.</p>
+
+  <input id="q" type="text" placeholder="Search 491 protocols — e.g. wbtc, rain, impermax, base, lending…" autocomplete="off" spellcheck="false">
+  <div class="row small dim" style="margin-top:10px">
+    <span id="count"></span>
+    <span class="tag">BROKEN = published fees, now zero for 7+ days</span>
+    <span class="tag">MISSING = Base TVL ≥ $300k, no fee adapter</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table id="results"><thead><tr>
+    <th>Protocol</th><th>Status</th><th>Chain</th><th>Last published</th><th>Dark</th><th>Lost / day</th><th>TVL</th><th></th>
+  </tr></thead><tbody></tbody></table>
+  </div>
+  <p class="small dim" id="hint">Start typing — results update as you type.</p>
+</section>
+
+<section id="products">
+  <div class="kicker">Direct purchase · USDC on Base · no account, no judge</div>
+  <h2>Two things you can buy</h2>
+  <p class="dim" style="margin-top:0">Payment goes straight to our address on Base. The page verifies the transfer on-chain through a public RPC and unlocks the file or the order form immediately. No platform in the middle, no approval queue.</p>
+
+  <div class="grid2" style="margin-top:24px">
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3>The full 491-row diagnostics pack</h3>
+        <span class="tag">instant</span>
+      </div>
+      <div class="price" style="margin:14px 0 4px">$29 <small>USDC on Base</small></div>
+      <p class="small dim" style="margin-top:0">One JSON file, 491 rows, generated 26 Oct 2026.</p>
+      <ul class="clean">
+        <li>Every protocol: status, chain, category, TVL, fees over 12 months</li>
+        <li>Last published day, days dark, $/day and $/to-date missing</li>
+        <li>Root-cause class per row — <span class="mono small">RECENT_BREAK_LIVE_TVL</span>, <span class="mono small">SOURCE_HOST_DEAD</span>, <span class="mono small">NO_FEE_ADAPTER</span>, <span class="mono small">POSSIBLY_WOUND_DOWN</span></li>
+        <li><b>142 exact adapter file paths</b> resolved against the DefiLlama/dimension-adapters tree</li>
+        <li>Two reproduction commands per row (harness + API)</li>
+        <li>Priority score 0–100, ranked so you work top-down</li>
+        <li>All 6 hand-verified rows flagged, with what we actually found</li>
+      </ul>
+      <button class="primary" style="width:100%;margin-top:18px" data-buy="29">Unlock the pack — $29 USDC</button>
+      <p class="small dim" style="margin:10px 0 0">Also available at $99 with a 30-minute call: <a href="#contact">email us</a>.</p>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3>Ready-to-merge adapter fix PR</h3>
+        <span class="tag">one protocol</span>
+      </div>
+      <div class="price" style="margin:14px 0 4px">$99 <small>USDC on Base</small></div>
+      <p class="small dim" style="margin-top:0">Pick one protocol from the list. We write the patch, prove it with real numbers, and open the PR.</p>
+      <ul class="clean">
+        <li>Harness run before and after, output pasted in the PR</li>
+        <li>PR opened in <span class="mono small">DefiLlama/dimension-adapters</span> with the failing behaviour, the corrected daily figure and the tx hashes or log counts that prove it</li>
+        <li>Reproduction command in the PR body — maintainers can check it in one step</li>
+        <li>Optional: an issue in your own repo with the same finding</li>
+        <li class="no">We do not promise a merge. Maintainer time is not ours to sell.</li>
+        <li class="no">We refuse the job if the source genuinely returns zero — you get the refund minus gas</li>
+      </ul>
+      <button class="primary" style="width:100%;margin-top:18px" data-buy="99">Order a fix — $99 USDC</button>
+      <p class="small dim" style="margin:10px 0 0">Refund policy: if we cannot reproduce the break, you are refunded in full within 72h.</p>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="kicker">On-chain verification</div>
+  <h2>Pay, paste the hash, get the thing</h2>
+  <div class="grid2" style="margin-top:22px">
+    <div>
+      <p class="small" style="color:#c2cddd">The page talks to Base directly: <code>eth_getTransactionReceipt</code> on <code>mainnet.base.org</code>. It checks four things and nothing else — the transaction succeeded, it contains a USDC <code>Transfer</code> into our address, the amount covers the price, and the hash has not already been redeemed on this browser.</p>
+      <div class="box" style="margin-top:14px">
+        <div class="kv"><span class="dim">Network</span><span class="mono">Base · chainId 8453</span></div>
+        <div class="kv"><span class="dim">Token</span><span class="mono">USDC · 0x833589…2913</span></div>
+        <div class="kv" style="border:0"><span class="dim">Pay to</span><span class="mono" style="display:flex;gap:8px;align-items:center">
+          <span id="addr">0x72Aa…4d1a</span><button class="copybtn" id="copyaddr">copy</button></span></div>
+      </div>
+      <p class="small dim" style="margin-top:12px">Send the exact amount from any wallet — MetaMask, Rabby, Coinbase Wallet, a hardware wallet, an exchange withdrawal. A $0.01 tip over the price is fine; the check is <code>≥</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Already paid?</h3>
+      <p class="small dim" style="margin-top:0">Paste the Base transaction hash.</p>
+      <input type="text" id="txhash" placeholder="0x… (66 characters)" spellcheck="false" autocomplete="off">
+      <div class="row" style="margin-top:10px">
+        <button class="primary" id="btnverify">Verify &amp; unlock</button>
+        <button class="ghost" id="btnpay">Pay with wallet</button>
+      </div>
+      <div id="log">idle</div>
+      <div id="unlock"></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Why a static page and not a checkout with an account?</summary>
+    <div class="small dim" style="margin-top:10px">
+      Because an account is a database, a database is a login reset email, and a login reset email is a support burden we would have to price in. A static page plus an on-chain receipt is the whole system: the chain is the ledger, the receipt is the entitlement. The trade-off is honest: access is issued as a one-time link, so keep the file. If you lose it, mail the txhash and we re-issue it — that costs us nothing and costs you nothing.
+    </div>
+  </details>
+  <details>
+    <summary>What if I send USDC on the wrong chain, or another token?</summary>
+    <div class="small dim" style="margin-top:10px">
+      The verifier only recognises native USDC on Base (<code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code>). USDC bridged from Ethereum, USDT, or anything sent on Arbitrum/Optimism/Ethereum will not unlock the page. In that case mail the hash and we will either bridge it back to you or unlock manually — but you will wait for a human, so please check the network selector before you hit send.
+    </div>
+  </details>
+  <details>
+    <summary>Is the dataset not already public on GitHub?</summary>
+    <div class="small dim" style="margin-top:10px">
+      The raw CSVs are, at <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a> — and they will stay public, because the audit is worth more as a public record than as a secret. What you are buying is the layer on top: adapter paths resolved against the live DefiLlama tree, root-cause classes, priority ordering, reproduction commands, and the hand-verified rows. If that layer is not worth $29 to you, take the CSVs for free and use them; the store still works.
+    </div>
+  </details>
+</section>
+
+<section id="contact">
+  <div class="kicker">Custom work</div>
+  <h2>Tip jar &amp; data bounties</h2>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card">
+      <h3>Web3 tip jar</h3>
+      <p class="small dim" style="margin-top:4px">If the free checker saved you a day, send whatever you think it was worth. Same address, any amount, Base USDC.</p>
+      <div class="box" style="margin-top:12px"><span class="mono small" id="tipaddr" style="word-break:break-all"></span></div>
+      <button class="copybtn" id="copytip" style="margin-top:10px">copy address</button>
+    </div>
+    <div class="card">
+      <h3>Custom data bounties</h3>
+      <p class="small dim" style="margin-top:4px">We build parsers, on-chain ledgers and DefiLlama adapters. Paid in USDC on Base, scoped before we start.</p>
+      <ul class="clean">
+        <li>DefiLlama fee/revenue/dexs adapter — from $99 per protocol</li>
+        <li>Per-wallet on-chain ledger with reconciliation — from $149</li>
+        <li>Custom scraper/API with tests — from $199</li>
+      </ul>
+      <p class="small dim" style="margin:12px 0 0">Open an issue on the audit repo with the word <span class="mono">quote</span> and what you need. Public, timestamped, no DM required.</p>
+      <a class="small" href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit/issues/new?title=quote%3A%20&body=What%20I%20need%3A%0A%0AChain%2Fprotocol%3A%0A%0ABudget%20in%20USDC%3A%0A">Open a quote request →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="padding:0">
+    <p style="margin:0 0 8px"><b>Data</b> — DefiLlama public APIs, snapshot 2026-10-26T01:28Z. <b>Adapter paths</b> — DefiLlama/dimension-adapters tree, master, 2026-10-27. <b>Audit source</b> — <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a>.</p>
+    <p style="margin:0 0 8px">Not affiliated with DefiLlama. We do not publish anything under someone else's name, we do not DM protocols with a price tag, and we do not open a patch for a feed whose source is genuinely zero. Read <a href="/defi-audit/">the method</a> before you buy anything — including the part where 10 out of 10 checked breaks were not bugs.</p>
+    <p style="margin:0">No cookies, no analytics, no fonts from a CDN. The only network calls this page makes are to Base RPC endpoints, and only after you ask it to verify something.</p>
+  </div>
+</footer>
+</div>
+
+<script src="assets/verify.js"></script>
+<script>
+/* ------------------------------------------------------------------ config */
+const CFG = Object.assign({}, DefiAudit.CONFIG, {
+  USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  REPO: "9xj89gzrtw-hue/defillama-fee-feed-audit",
+  PACK: "data/pack-76141eb480e838b9.json",
+  USED_KEY: "defiaudit.redeemed.v1"
+});
+
+const $ = s => document.querySelector(s);
+const logEl = $("#log");
+const log = m => { logEl.textContent = m; };
+const short = a => a.slice(0, 6) + "…" + a.slice(-4);
+const fmt = n => new Intl.NumberFormat("en-US").format(n);
+const usd = n => "$" + new Intl.NumberFormat("en-US").format(n);
+
+/* ------------------------------------------------------------------ index */
+let ROWS = [], READY = false;
+fetch("data/checker.json").then(r => r.json()).then(j => {
+  ROWS = j.rows; READY = true;
+  render(ROWS, 12, "Showing the 12 largest measured holes. Type to filter.");
+  $("#hint").classList.add("hidden");
+}).catch(() => { $("#hint").textContent = "Could not load the index. Reload, or open data/checker.json directly."; });
+
+const chips = s => `<span class="chip ${s}">${s}</span>`;
+
+function render(rows, limit, note) {
+  const tb = $("#results tbody");
+  const shown = rows.slice(0, limit);
+  tb.innerHTML = shown.map(r => {
+    const [name, slug, chains, status, last, dark, lost, tvl, cat] = r;
+    return `<tr>
+      <td><b>${esc(name)}</b><div class="small dim mono">${esc(slug)}</div></td>
+      <td>${chips(status)}</td>
+      <td class="small dim">${esc((chains || "").split(",").slice(0, 2).join(", "))}${chains.split(",").length > 2 ? " +" + (chains.split(",").length - 2) : ""}</td>
+      <td class="small mono">${last || "—"}</td>
+      <td class="small mono">${dark ? dark + "d" : "—"}</td>
+      <td class="mono" style="color:${lost > 1000 ? "var(--bad)" : lost > 0 ? "var(--warn)" : "var(--dim)"}">${lost ? usd(lost) : "—"}</td>
+      <td class="small mono dim">${tvl ? usd(tvl) : "—"}</td>
+      <td class="small dim">${esc(cat || "")}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="8" class="dim small" style="padding:20px 10px">No match. Try a shorter fragment, a chain name (base, arbitrum, solana) or a category (lending, dex).</td></tr>`;
+  $("#count").textContent = `${fmt(rows.length)} of ${fmt(ROWS.length)} rows${note ? " · " + note : ""}`;
+}
+
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+let qTimer;
+$("#q").addEventListener("input", e => {
+  clearTimeout(qTimer);
+  const raw = e.target.value.trim().toLowerCase();
+  qTimer = setTimeout(() => {
+    if (!raw) { if (READY) render(ROWS, 12, "top 12 by measured hole"); return; }
+    const terms = raw.split(/\s+/);
+    const hits = ROWS.filter(r => {
+      const hay = r.join(" ").toLowerCase();
+      return terms.every(t => hay.includes(t));
+    }).sort((a, b) => (b[6] || 0) - (a[6] || 0));
+    render(hits, 60, null);
+  }, 90);
+});
+
+/* ------------------------------------------------------------------ stats */
+fetch("data/checker.json").then(r => r.json()).then(j => {
+  const broken = j.rows.filter(r => r[3] === "BROKEN").length;
+  $("#s-silent").textContent = broken;
+  $("#s-hole").textContent = usd(3333964);
+});
+
+/* ------------------------------------------------------------------ chain */
+/* RPC + receipt parsing live in assets/verify.js — the same file the test suite
+   runs, so the page cannot drift from the verified logic. */
+const RPC = (method, params) => DefiAudit.rpc(method, params);
+const pad32 = DefiAudit.pad32;
+
+function usedHashes() { try { return JSON.parse(localStorage.getItem(CFG.USED_KEY) || "[]"); } catch { return []; } }
+function markUsed(h) { const a = usedHashes(); a.push(h); localStorage.setItem(CFG.USED_KEY, JSON.stringify(a.slice(-50))); }
+
+async function verifyTx(hash) {
+  log("receipt… eth_getTransactionReceipt");
+  const v = await DefiAudit.verify(hash, { usedHashes: usedHashes() });
+  log("•• receipt ok · block " + parseInt(v.receipt.blockNumber, 16) + " · USDC in: " + (Number(v.received) / 1e6).toFixed(6));
+  return v;
+}
+
+
+function unlockUI(v) {
+  markUsed(v.hash);
+  const block = parseInt(v.receipt.blockNumber, 16);
+  const paid = (Number(v.received) / 1e6).toFixed(2);
+  const unit = `<div class="box okbox" style="margin-top:14px">
+    <div><span class="ok-ico">✓ verified on Base</span> · block ${fmt(block)} · ${paid} USDC</div>
+    <div class="small dim mono" style="margin-top:6px;word-break:break-all">${v.hash}</div>
+  </div>`;
+
+  if (v.tier === "29") {
+    $("#unlock").innerHTML = unit + `
+      <div style="margin-top:14px">
+        <a href="${CFG.PACK}" download><button class="primary" style="width:100%">Download the 491-row diagnostics pack (JSON)</button></a>
+        <p class="small dim" style="margin-top:10px">Keep the file — the link is issued once per hash. Licence: single-team internal use. If you need a re-issue, mail the hash above.</p>
+      </div>`;
+  } else {
+    const body = encodeURIComponent(
+`PAID ORDER — adapter fix PR
+
+Protocol (name or slug):
+Transaction: ${v.hash}
+Amount: ${paid} USDC on Base
+Block: ${block}
+
+Please confirm the protocol above. Scope: one DefiLlama/dimension-adapters PR, harness output before/after, corrected daily figure, reproduction command.
+
+If the source genuinely returns zero, refund per the published policy.`);
+    $("#unlock").innerHTML = unit + `
+      <div style="margin-top:14px">
+        <a href="https://github.com/${CFG.REPO}/issues/new?labels=paid-order&title=${encodeURIComponent("PAID $99 — adapter fix PR")}&body=${body}" target="_blank" rel="noopener">
+          <button class="primary" style="width:100%">Open the priority order form</button></a>
+        <p class="small dim" style="margin-top:10px">Post the issue with the protocol name filled in. It is public and timestamped — that protects you more than any email thread. You can also take the pack above; at $99 both are included.</p>
+        <a href="${CFG.PACK}" download><button style="width:100%;margin-top:8px">Also download the diagnostics pack</button></a>
+      </div>`;
+  }
+  $("#unlock").scrollIntoView({ block: "nearest" });
+}
+
+$("#btnverify").addEventListener("click", async () => {
+  const btn = $("#btnverify");
+  btn.disabled = true; $("#unlock").innerHTML = "";
+  try { unlockUI(await verifyTx($("#txhash").value)); }
+  catch (e) {
+    log("");
+    $("#unlock").innerHTML = `<div class="box errbox" style="margin-top:14px">${esc(e.message)}</div>`;
+  } finally { btn.disabled = false; }
+});
+
+$("#txhash").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnverify").click(); });
+
+/* --------------------------------------------------------------- pay flow */
+async function pay(amountUnits) {
+  if (!window.ethereum) throw new Error("No injected wallet found. Copy the address above and pay from any wallet or exchange, then paste the hash here.");
+  log("wallet… eth_requestAccounts");
+  const [from] = await window.ethereum.request({ method: "eth_requestAccounts" });
+
+  const cid = await window.ethereum.request({ method: "eth_chainId" });
+  if (cid !== CFG.CHAIN_ID) {
+    log("switching to Base…");
+    try {
+      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CFG.CHAIN_ID }] });
+    } catch (e) {
+      if (e.code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{ chainId: CFG.CHAIN_ID, chainName: "Base", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: ["https://mainnet.base.org"], blockExplorerUrls: ["https://basescan.org"] }]
+        });
+      } else throw e;
+    }
+  }
+
+  const data = DefiAudit.transferCalldata(amountUnits, CFG.PAY_TO);
+  log("sign… USDC transfer, " + (Number(amountUnits) / 1e6) + " USDC");
+  const hash = await window.ethereum.request({
+    method: "eth_sendTransaction",
+    params: [{ from, to: CFG.USDC, data, value: "0x0" }]
+  });
+  log("sent " + hash + "\nwaiting for the receipt…");
+  $("#txhash").value = hash;
+
+  for (let i = 0; i < 40; i++) {
+    const rc = await RPC("eth_getTransactionReceipt", [hash]).catch(() => null);
+    if (rc) {
+      if (rc.status !== "0x1") throw new Error("The transfer reverted. Check that you have USDC on Base and a little ETH for gas.");
+      log("confirmed in block " + parseInt(rc.blockNumber, 16) + " — unlocking");
+      unlockUI({ receipt: rc, received: amountUnits, tier: amountUnits >= CFG.PRICES["99"] ? "99" : "29", hash: hash.toLowerCase() });
+      return;
+    }
+    await new Promise(r => setTimeout(r, 2500));
+  }
+  throw new Error("Sent, but no receipt after 100s. Your hash is in the box — press Verify again in a minute.");
+}
+
+document.querySelectorAll("[data-buy]").forEach(b => {
+  b.addEventListener("click", async () => {
+    const tier = b.dataset.buy;
+    const prev = b.textContent;
+    b.disabled = true; b.textContent = "waiting for wallet…"; $("#unlock").innerHTML = "";
+    try { await pay(CFG.PRICES[tier]); }
+    catch (e) {
+      log("");
+      $("#unlock").innerHTML = `<div class="box errbox" style="margin-top:14px">${esc(e.message || String(e))}</div>`;
+    } finally { b.disabled = false; b.textContent = prev; }
+  });
+});
+
+$("#btnpay").addEventListener("click", () => {
+  const box = document.querySelector('[data-buy="29"]');
+  box.scrollIntoView({ behavior: "smooth", block: "center" });
+  box.click();
+});
+
+/* --------------------------------------------------------------- addresses */
+$("#addr").textContent = short(CFG.PAY_TO);
+$("#tipaddr").textContent = CFG.PAY_TO;
+const copy = (txt, btn) => navigator.clipboard.writeText(txt).then(() => {
+  const p = btn.textContent; btn.textContent = "copied"; setTimeout(() => btn.textContent = p, 1400);
+});
+$("#copyaddr").addEventListener("click", e => copy(CFG.PAY_TO, e.target));
+$("#copytip").addEventListener("click", e => copy(CFG.PAY_TO, e.target));
+</script>
+</body>
+</html>

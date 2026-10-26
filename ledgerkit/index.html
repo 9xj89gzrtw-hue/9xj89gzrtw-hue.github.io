@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ledgerkit — prove an on-chain ledger down to the wei, then pay for one</title>
+<meta name="description" content="Open-source Python engine that turns raw EVM logs into a per-wallet ledger and reconciles it against a second independent recount. Custom ledgers and contract audits from $149, paid in USDC on Base.">
+<style>
+:root{--bg:#07090d;--bg2:#0c1017;--card:#10151e;--line:#1d2532;--txt:#e6edf7;--dim:#8b98ab;--acc:#4ade80;--acc2:#38bdf8;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:800px;margin:0 auto;padding:0 22px}
+header{border-bottom:1px solid var(--line);padding:16px 0}
+header .wrap{display:flex;gap:18px;align-items:center}
+.logo{font:600 15px/1 var(--mono)}.logo b{color:var(--acc)}
+header a{color:var(--dim);font-size:14px}
+h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;letter-spacing:-1px;margin:44px 0 14px}
+h2{font-size:23px;letter-spacing:-.4px;margin:40px 0 10px}
+p{margin:0 0 14px;color:#c2cddd}
+.kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+code{font-family:var(--mono);font-size:.9em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
+pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid #151b25;vertical-align:top}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2);margin:18px 0}
+.warn{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
+.cta{display:inline-block;background:linear-gradient(180deg,#22c55e,#16a34a);color:#04140a;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
+.dim{color:var(--dim)}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;color:var(--dim);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo">ledger<b>kit</b></div>
+  <a href="/">← storefront</a>
+  <a href="/defi-audit/">fee-feed audit</a>
+  <a href="https://github.com/9xj89gzrtw-hue/ledgerkit">GitHub</a>
+</div></header>
+
+<div class="wrap">
+<div class="kicker">Open source · MIT</div>
+<h1>Turn raw EVM logs into a ledger, then prove the ledger is right</h1>
+<p>Every "give us a CSV of who earned what from our contracts" request looks trivial and is not. Escrow contracts take a fee at settlement. Cancelled bounties never pay. One transaction settles several claims. Public RPCs return the same log twice when a page is retried. NFT ownership is a last-transfer problem, not a sum. Each of those has produced a wrong CSV on a real board.</p>
+<p><code>ledgerkit</code> is the engine that got them right, and it ships the second computation that proves it.</p>
+
+<pre>fetch  -&gt;  build  -&gt;  verify
+logs       ledger     reconciliation</pre>
+
+<h2>Run it</h2>
+<pre>pip install eth-abi
+
+python -m ledgerkit fetch --chain arbitrum \
+    --address 0xdffe8a4a4103f968ffd61fd082d08c41dcf9b940 \
+    --from-block 0 --out logs.json
+
+python -m ledgerkit build --logs logs.json --fee-bps 250 \
+    --csv wallets.csv --summary summary.json
+
+python -m ledgerkit verify --logs logs.json --fee-bps 250 \
+    --expect-earned 3.726923002 --expect-paid 3.63374992695</pre>
+<p class="dim">Amounts are integer wei until the last step. <code>3.726923002</code> is exact to the last wei and never a float artefact.</p>
+
+<h2>What <code>verify</code> actually re-computes</h2>
+<table>
+<tr><th>check</th><th>how</th></tr>
+<tr><td><code>conservation</code></td><td>earned == paid_out + fees, wei-exact</td></tr>
+<tr><td><code>raw_recount_*</code></td><td>money columns re-derived by slicing raw <code>data</code> words with <code>int(hex,16)</code> — bypassing the ABI decoder entirely</td></tr>
+<tr><td><code>nft_balances</code></td><td>ERC-721 balances rebuilt from transfer deltas (mint +1, burn −1) and compared per holder, optionally against <code>balanceOf</code> on chain</td></tr>
+<tr><td><code>no_negative_values</code></td><td>any wallet paying out more than it earned fails the run</td></tr>
+<tr><td>duplicate <code>(tx, logIndex)</code></td><td>dropped — the most common source of double counting</td></tr>
+</table>
+<p>Any mismatch exits non-zero, so it drops straight into CI.</p>
+
+<h2>Why this is a paid service and not just a repo</h2>
+<p>The engine is free and always will be. What people pay for is the run: mapping an unfamiliar protocol's events, getting the fee and cancellation semantics right for <em>that</em> contract, and handing over a ledger plus a reconciliation report that survives a second opinion.</p>
+
+<div class="box warn">
+<p style="margin:0 0 8px"><b>What we will not do:</b> invent a number when the creation event falls outside the fetched range. The ledger reports the claim as unvalued and says why. A ledger that quietly guesses is worse than no ledger, because it looks finished.</p>
+</div>
+
+<h2>Pricing</h2>
+<table>
+<tr><th>Job</th><th>From</th><th>What you get</th></tr>
+<tr><td>Per-wallet ledger for one escrow/bounty contract</td><td>$149</td><td>CSV + summary JSON + verification report, <code>verify</code> passing on your data</td></tr>
+<tr><td>Ledger + custom event mapping (proxy, non-standard ABI)</td><td>$249</td><td>the above plus a mapping module and tests</td></tr>
+<tr><td>DefiLlama fee/revenue adapter</td><td>$99</td><td>patch + harness output + PR, see <a href="/defi-audit/">the fee-feed audit</a></td></tr>
+</table>
+<p>Paid in USDC on Base to <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code>. Scope agreed in a public GitHub issue first — public and timestamped protects both sides more than any email thread.</p>
+
+<a class="cta" href="https://github.com/9xj89gzrtw-hue/ledgerkit/issues/new?title=ledger%3A%20&body=Contract%20address%3A%0AChain%3A%0AWhat%20counts%20as%20earned%3A%0AWhat%20counts%20as%20paid%20out%3A%0ADeadline%3A">Open a scoping issue →</a>
+<a class="cta" href="https://github.com/9xj89gzrtw-hue/ledgerkit" style="background:#151b26;color:var(--txt);border:1px solid var(--line);margin-left:8px">Read the source</a>
+
+<footer>
+  MIT licensed. Repository: <a href="https://github.com/9xj89gzrtw-hue/ledgerkit">github.com/9xj89gzrtw-hue/ledgerkit</a>. Test suite runs in CI on every push.
+</footer>
+</div>
+</body>
+</html>

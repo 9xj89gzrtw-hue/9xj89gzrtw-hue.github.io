@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method — how the 411 silent DefiLlama fee feeds were measured</title>
+<meta name="description" content="Exact method, definitions, and the things this audit gets wrong on purpose: 10 of 10 hand-checked breaks were not adapter bugs. Reproduce every row with the commands below.">
+<style>
+:root{--bg:#07090d;--bg2:#0c1017;--card:#10151e;--line:#1d2532;--txt:#e6edf7;--dim:#8b98ab;--acc:#4ade80;--acc2:#38bdf8;--bad:#f87171;--warn:#fbbf24;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:780px;margin:0 auto;padding:0 22px}
+header{border-bottom:1px solid var(--line);padding:16px 0}
+header .wrap{display:flex;gap:18px;align-items:center}
+.logo{font:600 15px/1 var(--mono);color:var(--txt)}.logo b{color:var(--acc)}
+header a{color:var(--dim);font-size:14px}
+h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;letter-spacing:-1px;margin:44px 0 14px}
+h2{font-size:24px;letter-spacing:-.4px;margin:44px 0 10px}
+h3{font-size:17px;margin:26px 0 6px}
+p{margin:0 0 14px;color:#c2cddd}
+.kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+.dim{color:var(--dim)}
+code{font-family:var(--mono);font-size:.9em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
+pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2);margin:18px 0}
+.warn{border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.06)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid #151b25}
+.cta{display:inline-block;background:linear-gradient(180deg,#22c55e,#16a34a);color:#04140a;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
+footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;color:var(--dim);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="logo">defi<b>audit</b>.store</div>
+  <a href="/">← storefront</a>
+  <a href="/#check">free checker</a>
+  <a href="/ledgerkit/">ledgerkit</a>
+</div></header>
+
+<div class="wrap">
+<div class="kicker">Method</div>
+<h1>How 411 silent fee feeds were measured — and what that number is not</h1>
+<p class="lead">Everything here is computed from DefiLlama's own public API on 2026-10-26. The scripts are in the public repo. This page exists mostly to stop you from over-reading the headline.</p>
+
+<h2>1. Definitions, because "broken" is doing a lot of work</h2>
+<table>
+<tr><th>Term</th><th>Exact meaning</th></tr>
+<tr><td><b>fee listing</b></td><td>A protocol that appears in <code>api.llama.fi/overview/fees</code> at all. 3,069 of them.</td></tr>
+<tr><td><b>BROKEN</b></td><td>Non-zero fees on at least one day in the last 12 months, and exactly <code>0</code> on each of the last 7 days. 411 protocols.</td></tr>
+<tr><td><b>MISSING</b></td><td>At least $300,000 of Base TVL, and absent from both the fee overview and the DEX-volume overview. 80 protocols out of 908 Base listings. Bridges and CEXs excluded — their "fees" are not a product surface.</td></tr>
+<tr><td><b>lost / day</b></td><td>Mean daily fees over the 30 days before the feed stopped. Not extrapolated, not modelled.</td></tr>
+<tr><td><b>lost to date</b></td><td>That mean × days dark. An upper bound on "what the leaderboard never counted", not money anyone owed.</td></tr>
+</table>
+
+<h2>2. The part that makes the headline honest</h2>
+<div class="box warn">
+<p style="margin:0 0 10px"><b>Ten of the ten largest and most recent breaks were not adapter bugs.</b></p>
+<p style="margin:0 0 10px">We ran each adapter through its own harness and then hit its data source directly. In every case the source genuinely reported zero:</p>
+<ul style="margin:0 0 10px;padding-left:20px;color:#c2cddd">
+<li><b>USD AI</b> — no <code>FeePaid</code> event in two days at the contract, $266M TVL, zero fees collected. Nothing to fix.</li>
+<li><b>Theo Straddle Vaults</b> — <code>pricePerShare</code> unchanged for 96 hours. Nothing to fix.</li>
+</ul>
+<p style="margin:0">Mass-patching that list would have produced false claims against $266M protocols. So the audit ships two numbers: <b>$3,333,964/day</b> is the aggregate measured hole across all 411 rows, and <b>$23,735/day across 18 protocols</b> is the subset that broke recently on protocols that still hold TVL. Only the second one is a work queue. The first one is a headline, and we label it as one.</p>
+</div>
+
+<h2>3. Where the breaks actually are</h2>
+<p>The biggest dollar figures in the list belong to protocols that are probably dead. That is not a flaw in the measurement, it is what the data says — and it is why the free number and the work queue are different numbers.</p>
+<table>
+<tr><th>Protocol</th><th>Dark</th><th>Lost / day</th><th>TVL at last read</th><th>What it probably is</th></tr>
+<tr><td>Avalon USDa</td><td>352d</td><td>$559,748</td><td>$3</td><td>wound down — not a repair</td></tr>
+<tr><td>Lava</td><td>303d</td><td>$459,262</td><td>$0</td><td>wound down — not a repair</td></tr>
+<tr><td>Pyth Pro</td><td>47d</td><td>$291,779</td><td>$0</td><td>unknown — check the source</td></tr>
+<tr><td>USD AI</td><td>7d</td><td>$258,434</td><td>$266.2M</td><td><b>verified: source genuinely zero, do not patch</b></td></tr>
+<tr><td>Kaito Capital Launchpad</td><td>272d</td><td>$154,803</td><td>$0</td><td>wound down — not a repair</td></tr>
+</table>
+<p>The ranking that matters for work is the second one. The 18 recent breaks on protocols that still hold TVL account for <b>$23,735/day</b> between them, and every one of those rows ships with a reproduction command so you can check us before you spend a minute on it.</p>
+<p class="dim small">The pack sorts three ways — overall priority (money × live TVL × freshness), BROKEN by measured $/day, MISSING by TVL. A $1.6B protocol with no adapter and a $154k/day stale feed are not the same job and should not share one rank.</p>
+
+<h2>4. Reproduce any single row</h2>
+<p>Two commands per protocol, both in the pack. For example, DefiLlama's own summary endpoint:</p>
+<pre>curl -s 'https://api.llama.fi/summary/fees/wbtc?dataType=dailyFees' | jq '.total7d'</pre>
+<p>And the adapter harness, from a clone of <code>DefiLlama/dimension-adapters</code>:</p>
+<pre>npx ts-node --transpile-only cli/testAdapter.ts fees/wbtc</pre>
+<p>If the harness prints real numbers while the API shows zero, you have a publish-side or chain-mapping problem, not an adapter problem. If both print zero, check the source before you write anything. That single distinction is the difference between an audit and a slander.</p>
+
+<h2>5. Known limits</h2>
+<ul style="padding-left:20px;color:#c2cddd">
+<li><b>Slug matching.</b> 142 of 491 rows have an exact adapter file resolved against the dimension-adapters tree. The rest use a slug that does not match a file name — either the adapter is named differently or there is none. The pack says <code>null</code> rather than guessing.</li>
+<li><b>Diagnosis classes are heuristics</b> except the 6 rows marked <code>confidence: verified</code>. Every one carries the command to overturn it.</li>
+<li><b>Snapshot, not a feed.</b> One point in time, 2026-10-26. Feeds recover; a protocol that fixed itself yesterday is still listed here. Re-run the script before quoting a number to anyone.</li>
+<li><b>Base TVL floor of $300k</b> is arbitrary. It exists so the MISSING list is 80 rows instead of 400.</li>
+</ul>
+
+<h2>6. What we do not do</h2>
+<ul style="padding-left:20px;color:#c2cddd">
+<li>No cold DMs to protocol teams pairing a defect with a wallet address. That pattern reads as extortion, it gets accounts banned, and it is not how anyone gets paid in this ecosystem.</li>
+<li>No PR against a feed whose source legitimately returns zero.</li>
+<li>No claim of a partnership, endorsement or review by DefiLlama. None exists.</li>
+<li>No promise that a maintainer merges anything. We sell the patch and the proof, not the merge.</li>
+</ul>
+
+<a class="cta" href="/#check">Check your protocol free →</a>
+<a class="cta" href="/#products" style="background:#151b26;color:var(--txt);border:1px solid var(--line);margin-left:8px">See the pack</a>
+
+<footer>
+  Source: <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a> — scripts, raw CSVs, evidence log. Snapshot 2026-10-26T01:28Z.
+</footer>
+</div>
+</body>
+</html>
