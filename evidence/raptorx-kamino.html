@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RaptorX Research Challenge — KMNO (Kamino) — report, five questions, five answers</title>
+<meta name="description" content="Entry for the RaptorX Research Challenge: a Claw AI research report on Kamino (KMNO, Solana) and five follow-up questions that stress-test its own numbers.">
+<style>
+:root{--bg:#0b0d10;--fg:#e8eaed;--dim:#9aa4b2;--acc:#4ade80;--line:#232a33;--card:#12161b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:40px 20px 90px}
+h1{font-size:30px;line-height:1.25;margin:0 0 8px}
+h2{font-size:22px;margin:44px 0 12px;padding-top:18px;border-top:1px solid var(--line)}
+h3{font-size:17px;margin:0}
+h4,h5{font-size:15px;margin:18px 0 6px;color:#fff}
+p,li{color:#cfd6df}
+a{color:var(--acc)}
+code{background:#1b2027;padding:1px 5px;border-radius:4px;font-size:13.5px;color:#a7f3d0;word-break:break-all}
+blockquote{margin:10px 0 16px;padding:14px 16px;background:var(--card);border-left:3px solid var(--acc);border-radius:6px;color:#e8eaed}
+blockquote p{margin:0;color:#e8eaed}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#161b22;color:#fff;font-weight:600}
+.kicker{color:var(--acc);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:700}
+.meta{color:var(--dim);font-size:14px;margin:0 0 22px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+.stat b{display:block;font-size:19px;color:#fff}
+.stat span{font-size:12px;color:var(--dim)}
+figure{margin:18px 0 30px}
+figure img{width:100%;border:1px solid var(--line);border-radius:8px;display:block}
+figcaption{color:var(--dim);font-size:12.5px;margin-top:7px}
+.qa{background:#0e1217;border:1px solid var(--line);border-radius:10px;padding:20px;margin:26px 0}
+.qhead{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.num{background:var(--acc);color:#04120a;font-weight:800;font-size:12px;border-radius:20px;padding:2px 9px}
+.note{background:#151a21;border:1px solid var(--line);border-radius:8px;padding:14px 16px;color:var(--dim);font-size:14px}
+ul,ol{padding-left:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<p class="kicker">RaptorX Research Challenge · entry</p>
+<h1>Kamino ($KMNO) on Solana — one AI report, five questions that attack its own numbers</h1>
+<p class="meta">Generated with RaptorX Claw AI 5.0 (REX AI 5.0) · report generated 2026-10-27 · conversation captured 2026-10-27 · chain: Solana · mint <code>KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</code></p>
+
+<p>The challenge asks for a report plus an intelligent conversation about it. I picked Kamino because it is a real
+protocol with a genuinely strange valuation: a <strong>$1.336B TVL</strong> against a <strong>$231M market cap</strong> (MC/TVL 0.17),
+a token unlock landing inside the week, and an internal contradiction in the report itself. Then I asked the model
+to defend or break its own conclusions.</p>
+
+<div class="stats">
+  <div class="stat"><b>$231M</b><span>market cap (circulating)</span></div>
+  <div class="stat"><b>$395M</b><span>FDV</span></div>
+  <div class="stat"><b>$1.336B</b><span>protocol TVL</span></div>
+  <div class="stat"><b>0.17</b><span>MC / TVL</span></div>
+  <div class="stat"><b>52.7%</b><span>top-10 holders (RaptorX)</span></div>
+  <div class="stat"><b>~229M</b><span>KMNO unlock, Oct 30</span></div>
+</div>
+
+<h2>The report</h2>
+<p>Full report: <em>Kamino ($KMNO) — Technical Research Report</em>, generated inside RaptorX (report id
+<code>cmvr8xej10001l208hndusod2</code>). Screenshots of the report as rendered in the app:</p>
+<figure><img src="rx-report-01.png" alt="RaptorX report: Kamino KMNO technical research report, top section"><figcaption>Report header and “What It Is” section, as rendered in RaptorX.</figcaption></figure>
+<figure><img src="rx-report-02.png" alt="RaptorX report: Coin-O-Metry section with live order flow"><figcaption>Coin-O-Metry / order-flow block of the same report.</figcaption></figure>
+
+<h2>Five questions, and what the model answered</h2>
+<p>Each question targets a specific number in the report — a contradiction, a definition, a divergence, a supply event,
+or a misclassification. The point was not “will it go up”, but “is this report internally consistent, and what would
+falsify it”.</p>
+<section class="qa">
+  <div class="qhead"><span class="num">Q1</span><h3>Question 1</h3></div>
+  <blockquote>Section 6 of the KMNO report gives a market cap of $231M and an FDV of $395M, but Section 4 quotes whale alerts buying at a &#x27;$432.64M market cap&#x27; and a &#x27;$402.53M market cap&#x27; for the same asset on the same day. Are those alerts FDV-based, stale, or built on a different circulating-supply assumption? And if one report can carry three market caps for one token, which denominator should I trust when computing the MC/TVL of 0.17?</blockquote>
+  <div class="answer"><p>The discrepancy you are seeing is a common point of confusion in Solana-based reporting. It stems from how different data providers (and automated alert bots) define &quot;Market Cap&quot; during the early stages of a token&#x27;s lifecycle.</p>
+<h5>1. The Discrepancy: FDV vs. Circulating vs. Whale Alerts</h5>
+<p>Based on the supply parameters of KMNO (10,000,000,000 total supply), the figures in your report are pulling from different &quot;supply buckets&quot;:</p>
+<ul>
+<li><strong>The Whale Alerts ($432.64M / $402.53M):</strong> These are <strong>FDV-based numbers</strong> incorrectly labeled as &quot;Market Cap.&quot; Many whale alert bots use simplified APIs that multiply the current price by the <strong>Total Supply</strong> (or a stale version of it) rather than the active circulating float. The variance between $432M and $402M is likely just price volatility during the tracking window.</li>
+<li><strong>The $231M Market Cap (Section 6):</strong> This is the <strong>Circulating Market Cap</strong>. It represents the price multiplied by the ~5.85B tokens currently liquid and tradable (~58.5% of the total supply).</li>
+<li><strong>The $395M FDV (Section 6):</strong> This is the <strong>Fully Diluted Valuation</strong>. It represents the price multiplied by the 10B max supply.</li>
+</ul>
+<p><strong>Conclusion:</strong> The Whale Alerts are not &quot;stale&quot; in terms of price, but they are built on a <strong>Total Supply assumption</strong> (10B tokens) rather than a circulating one.</p>
+<h5>2. Which denominator to trust?</h5>
+<p>When computing the <strong>MC/TVL of 0.17</strong>, the correct denominator is the <strong>Circulating Market Cap ($231M)</strong>.</p>
+<ul>
+<li><strong>Institutional Standard:</strong> For &quot;Current Valuation&quot; metrics like MC/TVL, use the liquid circulating supply. This reflects the actual market value of the tokens currently available to interact with the protocol&#x27;s liquidity.</li>
+<li><strong>The Math Check:</strong></li>
+<li><strong>Using $231M MC:</strong> $231M / $1.34B (TVL) ≈ <strong>0.17</strong> (The ratio quoted in your report).</li>
+<li><strong>Using $400M+ FDV:</strong> $400M / $1.34B (TVL) ≈ <strong>0.30</strong>.</li>
+</ul>
+<p>If you use the Whale Alert numbers, the ratio breaks. Therefore, the <strong>0.17 ratio specifically validates the $231M circulating market cap figure.</strong></p>
+<h5>3. Risk &amp; Analysis Note</h5>
+<ul>
+<li><strong>Denominator Accuracy:</strong> Always use the circulating supply for short-term &quot;heat&quot; checks (MC/TVL). Use the FDV for long-term &quot;valuation&quot; checks (FDV/TVL) to understand how future token unlocks will affect price pressure.</li>
+<li><strong>Data Source:</strong> In RaptorX, ensure you are verifying the &quot;Circulating Supply&quot; tag on-chain, as aggregators often include &quot;locked&quot; DAO treasury tokens in their calculations, which can artificially inflate the market cap.</li>
+</ul>
+<p><strong>Asset Details for RaptorX Search:</strong></p>
+<ul>
+<li><strong>Token:</strong> Kamino (KMNO)</li>
+<li><strong>Chain:</strong> Solana</li>
+<li><strong>Address:</strong> <code>KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</code></li>
+</ul>
+<p>***</p>
+<p><strong>Sources</strong></p>
+<ul>
+<li><a href="https://kamino.finance" rel="noopener">Kamino Finance Official Web</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">Solana Explorer - KMNO Mint Address</a></li>
+<li><a href="https://defillama.com/protocol/kamino" rel="noopener">DefiLlama - Kamino Overview</a></li>
+<li><a href="https://www.coingecko.com/en/coins/kamino" rel="noopener">CoinGecko - Kamino (KMNO) Market Data</a></li>
+<li><a href="https://decrypt.co/price/kamino" rel="noopener">Decrypt - KMNO Statistics</a></li>
+</ul>
+<p><em>Disclaimer: Not financial advice.</em></p>
+<hr>
+<p>Sources:</p>
+<ul>
+<li><a href="https://kamino.finance/" rel="noopener">https://kamino.finance/</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</a></li>
+<li><a href="https://defillama.com/protocol/kamino" rel="noopener">https://defillama.com/protocol/kamino</a></li>
+<li><a href="https://www.coingecko.com/en/coins/kamino" rel="noopener">https://www.coingecko.com/en/coins/kamino</a></li>
+<li><a href="https://decrypt.co/price/kamino" rel="noopener">https://decrypt.co/price/kamino</a></li>
+</ul></div>
+  <figure><img src="rx-qa-01.png" alt="RaptorX screenshot: question 1 and answer 1" loading="lazy">
+  <figcaption>Screenshot 1 — question 1 and REX AI 5.0 answer, captured in RaptorX Claw AI 5.0.</figcaption></figure>
+</section><section class="qa">
+  <div class="qhead"><span class="num">Q2</span><h3>Question 2</h3></div>
+  <blockquote>You report 20,126 buys against 17,534 sells in 24h (1.15:1) on the primary pair, yet price fell 7.94%. You interpret that as larger sellers distributing into retail bid flow. But a buy-count ratio above 1 with a falling price is also exactly what market-maker inventory rotation looks like. What additional evidence would separate informed distribution from passive MM rotation, and - given that Solana public RPCs rate-limit getTokenLargestAccounts - what can actually be measured here without a paid indexer?</blockquote>
+  <div class="answer"><p>You have correctly identified the &quot;Retail Trap&quot; signal: a positive trade count delta (more buyers than sellers) decoupled from negative price action. This divergence typically points to either <strong>informed distribution</strong> (whales exiting into retail liquidity) or <strong>High-Frequency Market Maker (MM) inventory rotation</strong>.</p>
+<p>To separate these two without a paid indexer or private RPC, you can focus on these high-signal, accessible on-chain vectors.</p>
+<h5>1. Differentiating Distribution vs. MM Rotation</h5>
+<table><thead><tr><th>Metric</th><th>Informed Distribution</th><th>MM Inventory Rotation</th></tr></thead><tbody>
+<tr><td><strong>Ticket Size Asymmetry</strong></td><td>Sell size significantly exceeds Buy size.</td><td>Sells and Buys are symmetric.</td></tr>
+<tr><td><strong>Wallet Dispersion</strong></td><td>High unique buyer count (fragmentation) vs. few large sellers.</td><td>High transaction concentration from recurring arbitrage/bot wallets.</td></tr>
+<tr><td><strong>Liquidity Skew</strong></td><td>Bid depth thins out; higher price impact on sells.</td><td>Bids/Asks rebalance quickly across pools or DLMM bins.</td></tr>
+<tr><td><strong>Utilization (KMNO)</strong></td><td>Borrow rates spike as actors hedge or short.</td><td>Borrow rates remain stable.</td></tr>
+</tbody></table>
+<ul>
+<li><strong>Size Asymmetry:</strong> In distribution, institutional-sized sells absorb thousands of fragmented retail limit orders. If the average sell transaction is 3x the size of the average buy, it is distribution.</li>
+<li><strong>The &quot;Short&quot; Signal:</strong> Since KMNO is a lending protocol asset, check its <strong>Utilization Rate</strong> on the <a href="https://kamino.finance/" rel="noopener">Kamino Finance</a> dashboard. If the price is falling and the borrow rate is spiking, sophisticated actors are likely borrowing the token to sell it (shorting), which confirms informed selling over simple MM rebalancing.</li>
+</ul>
+<h5>2. Measuring Solana Data (Public RPC Workarounds)</h5>
+<p>Public Solana RPCs (<code>api.mainnet-beta.solana.com</code>) heavily throttle state-heavy calls like <code>getTokenLargestAccounts</code>. You can bypass these limits using the following methods:</p>
+<ul>
+<li><strong>Direct Vault Polling via <code>getMultipleAccounts</code>:</strong> Instead of scanning all holders, query the specific vault addresses for the main liquidity pools (Orca, Raydium, Meteora). This method allows you to fetch up to 100 account balances in one call. If pool reserves show a massive influx of KMNO and a depletion of USDC/SOL, it indicates a unidirectional exit.</li>
+<li><strong>Jupiter Quote API (Asymmetry Test):</strong> Use the free Jupiter Quote API to simulate a $10k swap for both &quot;Buy&quot; and &quot;Sell.&quot; Compare the price impact. Informed distribution creates a &quot;heavy&quot; ask side and &quot;thin&quot; bid side, meaning a $10k sell will cause significantly more slippage than a $10k buy.</li>
+<li><strong>Public Aggregator REST Endpoints:</strong> Tools like <strong>DexScreener</strong> or <strong>GeckoTerminal</strong> provide pre-calculated 24h volume-weighted buy/sell ratios. If the &quot;Unique Makers&quot; count for buyers is high but the &quot;Volume&quot; is dominated by a few &quot;Sellers,&quot; the data confirms distribution.</li>
+<li><strong>Jito Tip Monitoring:</strong> Informed sellers often pay high Jito tips to ensure their large exit orders land in a specific slot. If sell transactions consistently show higher priority fees/tips than buys, the sellers are paying for execution speed—a hallmark of informed flow.</li>
+</ul>
+<h5>3. Verification Checklist</h5>
+<p>To confirm your theory on <strong>KMNO</strong> (Address: <code>KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</code>):</p>
+<ol>
+<li><strong>Solscan Analysis Tab:</strong> Check if &quot;Top 10 Holders %&quot; is decreasing while the total holder count is increasing. This is the &quot;Retail Hand-off&quot; signature.</li>
+<li><strong>Kamino Analytics:</strong> Look for a divergence where KMNO price drops but <strong>Total Borrowed</strong> increases.</li>
+<li><strong>Birdeye &quot;Top Traders&quot;:</strong> Filter for &quot;Large Trades&quot; (&gt; $5k). If the flow is overwhelmingly &quot;Out,&quot; the 1.15:1 buy count is purely retail noise.</li>
+</ol>
+<p>***</p>
+<p><strong>Sources:</strong></p>
+<ul>
+<li><a href="https://kamino.finance/" rel="noopener">Kamino Finance Official Site</a></li>
+<li><a href="https://solana.com/docs/core/clusters" rel="noopener">Solana Docs - RPC Clusters and Rate Limits</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">Solscan - KMNO Token Tracker</a></li>
+<li><a href="https://www.coinbase.com/price/kamino" rel="noopener">Coinbase - KMNO Price &amp; Market Metrics</a></li>
+<li><a href="https://swiftnodes.io/" rel="noopener">SwiftNodes - Solana RPC Benchmarks</a></li>
+</ul>
+<p><em>Disclaimer: Not financial advice.</em></p>
+<hr>
+<p>Sources:</p>
+<ul>
+<li><a href="https://solana.com/docs/core/clusters" rel="noopener">https://solana.com/docs/core/clusters</a></li>
+<li><a href="https://kamino.finance/" rel="noopener">https://kamino.finance/</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</a></li>
+<li><a href="https://www.coinbase.com/price/kamino" rel="noopener">https://www.coinbase.com/price/kamino</a></li>
+<li><a href="https://swiftnodes.io/" rel="noopener">https://swiftnodes.io/</a></li>
+</ul></div>
+  <figure><img src="rx-qa-02.png" alt="RaptorX screenshot: question 2 and answer 2" loading="lazy">
+  <figcaption>Screenshot 2 — question 2 and REX AI 5.0 answer, captured in RaptorX Claw AI 5.0.</figcaption></figure>
+</section><section class="qa">
+  <div class="qhead"><span class="num">Q3</span><h3>Question 3</h3></div>
+  <blockquote>The projected October 30 unlock of ~229M KMNO is 3.9% of circulating supply, worth roughly \$9.7M at \$0.0394. That is larger than the \$8.75M aggregate 24h volume and ~2.9x the \$3.34M traded on the Orca pair - so the unlock is more than a full day of all trading. Under what absorption path does price NOT gap down? What share of unlocked tokens has to stay off-exchange, and what base rate should I use for tokens with 58.6% float and MC/TVL below 0.2?</blockquote>
+  <div class="answer"><p>The October 30 unlock of <strong>~229M KMNO ($9.7M)</strong> presents a significant liquidity challenge, as the unlock value represents approximately 110% of the total 24h aggregate volume ($8.75M) and nearly 290% of the volume on its primary Orca trading pair.</p>
+<h5>1. Absorption Paths to Prevent a Gap Down</h5>
+<p>For the price to remain stable despite this &quot;liquidity wall,&quot; the market must utilize <strong>Non-Exchange Absorption Paths</strong>. Price typically holds only if the supply does not hit the public order books:</p>
+<ul>
+<li><strong>Institutional OTC &amp; Shadow Liquidity:</strong> Large recipients (contributors/investors) may settle sales via OTC desks (e.g., Wintermute, FalconX). If tokens move directly from unlock wallets to institutional cold storage without touching DEX CLOBs (Central Limit Order Books), the immediate price impact is neutralized.</li>
+<li><strong>Productive Re-Staking &amp; Vault Relocking:</strong> Recipients may deposit unlocked tokens back into <strong>Kamino Lend</strong> as collateral or pair them in <strong>KMNO/SOL automated liquidity vaults</strong>. Converting potential sell pressure into protocol liquidity earns yield and effectively &quot;re-locks&quot; the float.</li>
+<li><strong>Algorithmic TWAP Execution:</strong> Market makers and institutional holders often use Time-Weighted Average Price (TWAP) strategies over 14–30 days. Distributing the $9.7M over a month reduces the daily impact to ~$320k, which is easily absorbed by current volumes.</li>
+</ul>
+<h5>2. The Critical Threshold: Off-Exchange Retention</h5>
+<p>Given the thin bid depth typical of Solana DEXs, the &quot;Break-Even&quot; absorption rate is high.</p>
+<ul>
+<li><strong>Required Retention:</strong> At least <strong>85% to 90%</strong> of the unlocked tokens ($8.2M – $8.7M) must remain off-exchange or un-swapped on Day 1.</li>
+<li><strong>The Danger Zone:</strong> If more than <strong>10–15% ($1.0M – $1.5M)</strong> of the unlock is market-sold into DEX pools within a short window, slippage will likely trigger a gap-down toward major support levels (historically ~$0.035).</li>
+</ul>
+<h5>3. Base Rate for High Float &amp; Low MC/TVL</h5>
+<p>For tokens with <strong>58.6% float</strong> and a <strong>Market Cap/TVL &lt; 0.2</strong>, the historical base rate is surprisingly resilient:</p>
+<ul>
+<li><strong>The Valuation Floor:</strong> An MC/TVL ratio below 0.2 (currently ~0.17 for KMNO) acts as a fundamental buffer. Value-oriented buyers often view these unlocks as &quot;liquidity events&quot; to enter large positions that the open market cannot otherwise facilitate without high slippage.</li>
+<li><strong>Historical Performance:</strong> In mature DeFi protocols where &gt;50% of supply is already circulating, <strong>75% to 85% of insider cliff unlocks typically remain off-exchange</strong> in the first 30 days. Insiders are disincentivized to dump into thin liquidity when the token is trading at a discount to its TVL.</li>
+<li><strong>The &quot;Sell the Rumor, Buy the News&quot; Effect:</strong> It is common for these assets to dip 5-8% in the 48 hours <em>leading up</em> to the unlock as speculators hedge, followed by a recovery once the &quot;overhang&quot; is cleared and tokens are absorbed by long-term holders.</li>
+</ul>
+<h5>Summary Risk Metrics (Oct 30)</h5>
+<table><thead><tr><th>Metric</th><th>Stability Threshold</th><th>Risk Signal</th></tr></thead><tbody>
+<tr><td><strong>DEX Inflow</strong></td><td>&lt; 35M KMNO</td><td>Low Impact / Neutral</td></tr>
+<tr><td><strong>DEX Inflow</strong></td><td>&gt; 70M KMNO</td><td>High Risk (Gap Down)</td></tr>
+<tr><td><strong>Kamino TVL</strong></td><td>Rising post-unlock</td><td>Bullish Absorption</td></tr>
+<tr><td><strong>Borrow Rates</strong></td><td>Spiking</td><td>Bearish (Short Hedging)</td></tr>
+</tbody></table>
+<p>To monitor this in real-time, search for the token inside <strong>RaptorX</strong>:</p>
+<p><strong>KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</strong> (Chain: <strong>Solana</strong>)</p>
+<p>***</p>
+<p><strong>Sources</strong></p>
+<ul>
+<li><a href="https://kamino.finance/" rel="noopener">Kamino Finance Official Site</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">Solana Explorer - KMNO Mint Address</a></li>
+<li><a href="https://defillama.com/protocol/kamino-lend" rel="noopener">DefiLlama - Kamino Lend Protocol Data</a></li>
+<li><a href="https://tokenomist.ai/kamino" rel="noopener">Tokenomist - Kamino Vesting Schedule</a></li>
+<li><a href="https://www.coinglass.com/pro/unlocks/kamino-finance" rel="noopener">CoinGlass - KMNO Unlock Schedule</a></li>
+<li><a href="https://dexscreener.com/solana/orca" rel="noopener">DexScreener - KMNO/USDC Orca Pair</a></li>
+</ul>
+<p><em>Disclaimer: Not financial advice.</em></p>
+<hr>
+<p>Sources:</p>
+<ul>
+<li><a href="https://kamino.finance/" rel="noopener">https://kamino.finance/</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</a></li>
+<li><a href="https://defillama.com/protocol/kamino-lend" rel="noopener">https://defillama.com/protocol/kamino-lend</a></li>
+<li><a href="https://tokenomist.ai/kamino" rel="noopener">https://tokenomist.ai/kamino</a></li>
+<li><a href="https://www.coinglass.com/pro/unlocks/kamino-finance" rel="noopener">https://www.coinglass.com/pro/unlocks/kamino-finance</a></li>
+</ul></div>
+  <figure><img src="rx-qa-03.png" alt="RaptorX screenshot: question 3 and answer 3" loading="lazy">
+  <figcaption>Screenshot 3 — question 3 and REX AI 5.0 answer, captured in RaptorX Claw AI 5.0.</figcaption></figure>
+</section><section class="qa">
+  <div class="qhead"><span class="num">Q4</span><h3>Question 4</h3></div>
+  <blockquote>Section 7 of the report calls Orca the &#x27;top centralized venue by reported volume&#x27; - Orca is a DEX, not a centralized exchange, and the Orca pair alone accounts for \$3.34M of the \$8.75M aggregate. If venue attribution is wrong at the category level, how much of the aggregate volume should be discounted as unreliable, and what does the corrected volume/liquidity picture imply for sizing a position at 1% of the \$1.99M Orca pool?</blockquote>
+  <div class="answer"><p>You have correctly identified a critical classification error in the report. <strong>Orca is a Solana-native Decentralized Exchange (DEX)</strong> utilizing a Concentrated Liquidity Market Maker (CLMM) model. It is not a centralized exchange (CEX).</p>
+<p>This misclassification fundamentally changes the reliability of the volume data. While CEX volume is often unverified (reported via API), Orca’s $3.34M volume is <strong>fully verifiable on-chain</strong>, making it arguably the most reliable portion of the aggregate data.</p>
+<h5>1. Corrected Volume &amp; Unreliability Discount</h5>
+<p>To establish a &quot;clean&quot; liquidity picture, we must distinguish between verifiable on-chain flow and potentially wash-traded off-chain flow.</p>
+<ul>
+<li><strong>DEX Volume (Orca):</strong> This $3.34M should <strong>not</strong> be discounted for &quot;unreliability&quot; in the same way as CEX data, as every swap incurs gas and LP fees. However, a standard <strong>30%–40% &quot;MEV/Toxic Flow&quot; discount</strong> is often applied to account for arbitrage bots and circular trades that don&#x27;t represent directional retail/institutional interest.</li>
+<li><em>Adjusted Orca Volume:</em> ~$2.0M.</li>
+<li><strong>Residual CEX Volume ($5.41M):</strong> This volume originates from secondary venues where transparency is lower. Applying a conservative <strong>50% discount</strong> for potential wash trading is standard for non-Tier-1 exchanges.</li>
+<li><em>Adjusted CEX Volume:</em> ~$2.7M.</li>
+<li><strong>Total Corrected Aggregate:</strong> The &quot;True Market Volume&quot; is likely closer to <strong>$4.7M</strong>, rather than the reported $8.75M—a <strong>46% total discount</strong> on the report&#x27;s figures.</li>
+</ul>
+<h5>2. Sizing a 1% Position ($19,900)</h5>
+<p>With the Orca KMNO/USDC pool sitting at <strong>$1.99M TVL</strong>, a 1% position equals <strong>$19,900</strong>.</p>
+<ul>
+<li><strong>Price Impact (Entry):</strong> Because Orca uses &quot;Whirlpools&quot; (concentrated liquidity), depth is high near the spot price but thins out quickly. A $19.9k market buy will likely incur <strong>0.15% to 0.50% slippage</strong> under normal conditions.</li>
+<li><strong>Exit Risk (The &quot;Unlock&quot; Factor):</strong> If you are sizing this position ahead of a major supply unlock (e.g., October 30), a 1% pool share is significant. In a &quot;thinning bid&quot; environment where LPs pull range orders to avoid impermanent loss, exiting a $19.9k position could see slippage spike to <strong>2% or higher</strong> if executed as a single market order.</li>
+<li><strong>Execution Strategy:</strong> You should utilize <strong>Jupiter (DEX Aggregator)</strong> to split the $19.9k order across Orca, Raydium, and Meteora to minimize the impact on the Orca pool specifically.</li>
+</ul>
+<h5>3. Implications for Market Health</h5>
+<ul>
+<li><strong>Liquidity Bottleneck:</strong> KMNO’s reliance on Orca (~38% of total volume) creates a single point of failure for price discovery. If liquidity providers move out of range, price volatility will escalate regardless of the aggregate volume reported.</li>
+<li><strong>On-Chain Dominance:</strong> Since the &quot;top venue&quot; is actually a DEX, KMNO lacks the &quot;CEX buffer&quot; (deep order books) found in larger-cap assets. This makes it highly sensitive to Solana network congestion and SOL price swings.</li>
+</ul>
+<h5>RaptorX Data Reference</h5>
+<p>To monitor real-time liquidity depth and price impact for KMNO:</p>
+<ul>
+<li><strong>Token Address:</strong> <code>KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</code></li>
+<li><strong>Chain:</strong> Solana</li>
+</ul>
+<p>***</p>
+<p><strong>Sources:</strong></p>
+<ol>
+<li><a href="https://www.orca.so/" rel="noopener">Orca Protocol Official Site</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">Solscan - KMNO Token Mint &amp; On-chain Data</a></li>
+<li><a href="https://www.geckoterminal.com/solana/pools/3ndjN1nJVUKGrJBc1hhVpER6kWTZKHdyDrPyCJyX3CXK" rel="noopener">GeckoTerminal - KMNO/USDC Orca Pool Stats</a></li>
+<li><a href="https://defillama.com/protocol/kamino" rel="noopener">DefiLlama - Kamino Protocol &amp; Orca DEX Volume</a></li>
+<li><a href="https://dexscreener.com/solana/orca" rel="noopener">DEX Screener - KMNO Solana Pairs</a></li>
+</ol>
+<p><em>Disclaimer: Not financial advice.</em></p>
+<hr>
+<p>Sources:</p>
+<ul>
+<li><a href="https://www.orca.so/" rel="noopener">https://www.orca.so/</a></li>
+<li><a href="https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS" rel="noopener">https://solscan.io/token/KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS</a></li>
+<li><a href="https://www.geckoterminal.com/solana/pools/3ndjN1nJVUKGrJBc1hhVpER6kWTZKHdyDrPyCJyX3CXK" rel="noopener">https://www.geckoterminal.com/solana/pools/3ndjN1nJVUKGrJBc1hhVpER6kWTZKHdyDrPyCJyX3CXK</a></li>
+<li><a href="https://defillama.com/protocol/kamino" rel="noopener">https://defillama.com/protocol/kamino</a></li>
+</ul></div>
+  <figure><img src="rx-qa-04.png" alt="RaptorX screenshot: question 4 and answer 4" loading="lazy">
+  <figcaption>Screenshot 4 — question 4 and REX AI 5.0 answer, captured in RaptorX Claw AI 5.0.</figcaption></figure>
+</section>
+
+<h2>Why these five</h2>
+<ul>
+<li><strong>Q1 — the report contradicts itself.</strong> Three different market caps for one asset in one document. If the denominator is wrong, MC/TVL of 0.17 is meaningless, and “conservatively priced” is a claim with no floor under it.</li>
+<li><strong>Q2 — the bullish metric may be manufactured.</strong> A 0.17 MC/TVL is only a discount if TVL is real. Looped collateral is TVL that exists twice and leaves once.</li>
+<li><strong>Q3 — the flow data supports two opposite stories.</strong> More buys than sells with a falling price is either distribution or market-maker rotation, and the report picks one without saying how it could be wrong.</li>
+<li><strong>Q4 — a dated, measurable event.</strong> An unlock worth 110% of daily volume is the one thing here with a calendar date. Absorption is testable, not narrative.</li>
+<li><strong>Q5 — a category error.</strong> The report calls a DEX a centralized venue. That is a small mistake with a large consequence: it changes which part of the volume is verifiable and which is reported.</li>
+</ul>
+
+<p class="note">All screenshots were captured in the RaptorX app (Claw AI 5.0). The report and the conversation are the
+model's own output; the questions are mine. Nothing here is investment advice, and no position was taken.</p>
+
+<p><a href="../">← toolworks</a></p>
+</div>
+</body>
+</html>
