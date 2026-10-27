@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Holler — logo system</title>
+<link rel="icon" href="favicon/favicon.svg" type="image/svg+xml">
+<style>
+  :root{
+    --azure:#0a9bff; --magenta:#ff2bd6; --yellow:#ffd60a; --green:#39ff6a;
+    --ink:#070b14; --ink2:#0d1322; --line:#1c2436; --muted:#8b93a7; --paper:#fff;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--ink);color:#eef1f8;font-family:var(--font);line-height:1.55;
+       -webkit-font-smoothing:antialiased}
+  a{color:var(--azure)}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+  header.hero{padding:74px 0 64px;background:
+    radial-gradient(900px 460px at 82% -10%, rgba(255,43,214,.28), transparent 62%),
+    radial-gradient(760px 420px at 0% 110%, rgba(10,155,255,.22), transparent 62%), var(--ink);
+    border-bottom:1px solid var(--line)}
+  .hero img{width:min(560px,92vw);display:block}
+  .hero p{max-width:60ch;color:#b9c1d4;font-size:17px}
+  h1{font-size:13px;letter-spacing:2.6px;text-transform:uppercase;color:var(--yellow);
+     font-weight:700;margin:0 0 26px}
+  h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.6px;margin:0 0 10px}
+  h3{font-size:16px;letter-spacing:.2px;margin:0 0 8px}
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  .sub{color:#9aa3b8;max-width:62ch;margin:0 0 30px;font-size:15.5px}
+  .grid{display:grid;gap:20px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:860px){.g3,.g2{grid-template-columns:1fr}}
+  .card{background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h4{margin:0 0 4px;font-size:14px;letter-spacing:.4px;text-transform:uppercase;color:#9aa3b8}
+  .card small{color:var(--muted)}
+  .stack{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:18px 0 8px}
+  .lightbox{background:#fff;border-radius:16px;padding:26px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#c7cfe0}
+  /* browser tab mock */
+  .browser{background:#202124;border-radius:12px 12px 8px 8px;padding:10px 10px 0;border:1px solid #333}
+  .tabs{display:flex;gap:6px;align-items:flex-end}
+  .tab{background:#35363a;border-radius:8px 8px 0 0;padding:9px 14px;display:flex;gap:9px;
+       align-items:center;font-size:12.5px;color:#e8eaed;max-width:220px}
+  .tab img{width:16px;height:16px}
+  .tab .x{opacity:.5;font-size:13px}
+  .omni{background:#202124;padding:8px 0 12px;display:flex;gap:8px;align-items:center}
+  .pill{flex:1;background:#292a2d;border-radius:12px;padding:7px 12px;font-size:12px;color:#9aa0a6}
+  /* app header mock */
+  .appbar{background:#0b0f19;border-radius:14px;padding:14px 18px;display:flex;
+          align-items:center;justify-content:space-between;border:1px solid #1b2233}
+  .appbar .nav{display:flex;gap:18px;font-size:13px;color:#9aa3b8}
+  /* avatars */
+  .avatar{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;overflow:hidden}
+  /* merch */
+  .tote{width:200px;height:240px;background:#f3f0e9;border-radius:6px;position:relative;
+        display:grid;place-items:center;box-shadow:inset 0 0 0 1px #e2ded3}
+  .tote:before{content:"";position:absolute;top:-26px;left:44px;width:112px;height:60px;
+        border:12px solid #e6e1d5;border-bottom:0;border-radius:70px 70px 0 0}
+  .tote img{width:120px}
+  /* phone */
+  .phone{width:210px;height:400px;border-radius:30px;background:#000;padding:9px;border:1px solid #2a3242}
+  .screen{height:100%;border-radius:24px;background:
+     radial-gradient(300px 200px at 70% 10%, rgba(255,43,214,.35), transparent 60%), #10141f;
+     padding:18px;display:flex;flex-direction:column;gap:16px}
+  .appicon{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#cfd6e6}
+  .appicon img{width:56px;height:56px;border-radius:14px}
+  /* swatches */
+  .sw{border-radius:12px;padding:16px;border:1px solid var(--line);font-size:12px}
+  .sw b{display:block;font-size:13px;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{color:#9aa3b8;font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#111827;padding:2px 6px;border-radius:5px}
+  footer{padding:48px 0 70px;color:var(--muted);font-size:13px}
+  .note{border-left:3px solid var(--yellow);padding:2px 0 2px 16px;color:#c3cade;margin:22px 0}
+  .dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;font-size:13px}
+  .dl a{display:block;background:#0f1526;border:1px solid var(--line);border-radius:8px;padding:9px 12px;
+        text-decoration:none;color:#dfe5f2}
+  .dl a:hover{border-color:#3b4a66}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Holler — logo system</h1>
+    <img src="svg/A-lockup-reversed.svg" alt="Holler primary lockup">
+    <p style="margin-top:28px">A primary lockup and a standalone mark for a consumer app about
+    internet fan culture. Arena energy, chunky letterforms, a neon edge that survives a 16&nbsp;px
+    favicon and a busy stream behind it. Everything on this page is drawn as vector paths —
+    no fonts, no stock, no templates.</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Acceptance sizes</h2>
+    <p class="sub">The brief's two hard tests: the mark has to read at 16&nbsp;px, the lockup at
+    160&nbsp;px wide. Shown on white and on the product's near-black.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h4>Light surface</h4>
+        <div class="stack" style="align-items:flex-end">
+          <img src="svg/A-mark-color.svg" width="16" height="16" alt="mark 16">
+          <img src="svg/A-mark-mono.svg" width="32" height="32" alt="mark 32">
+          <img src="svg/A-mark-color.svg" width="48" height="48" alt="mark 48">
+          <img src="svg/A-lockup-mono.svg" width="160" alt="lockup 160">
+        </div>
+        <div class="lightbox" style="margin-top:18px;padding:18px">
+          <img src="svg/A-mark-mono.svg" width="16" alt="16 on white">
+          <img src="svg/A-mark-mono.svg" width="32" alt="32 on white">
+          <img src="svg/A-lockup-mono.svg" width="160" alt="lockup on white">
+        </div>
+      </div>
+      <div class="card">
+        <h4>Dark surface</h4>
+        <div class="stack" style="align-items:flex-end">
+          <img src="svg/A-mark-reversed.svg" width="16" height="16" alt="mark 16 rev">
+          <img src="svg/A-mark-reversed.svg" width="32" height="32" alt="mark 32 rev">
+          <img src="svg/A-mark-reversed.svg" width="48" height="48" alt="mark 48 rev">
+          <img src="svg/A-lockup-reversed.svg" width="160" alt="lockup 160 rev">
+        </div>
+        <div class="note">The 16&nbsp;px test is why the mark is a filled tile with a knocked-out
+        counter shape: at that size only mass and one strong cut survive.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Three concepts</h2>
+    <p class="sub">One recommendation and two alternates, each with a full variant set.
+    A is the primary; B and C exist to show the range the mark could take.</p>
+    <div class="grid g3">
+      <div class="card">
+        <h4>Concept A — H tile</h4>
+        <img src="svg/A-lockup-color.svg" style="width:100%;margin:14px 0" alt="A lockup">
+        <small>Geometric. A sheared H inside a gradient tile — the crossbar is the shout.</small>
+      </div>
+      <div class="card">
+        <h4>Concept B — Shout bubble</h4>
+        <img src="svg/B-lockup-color.svg" style="width:100%;margin:14px 0" alt="B lockup">
+        <small>Mascot. An open mouth with two teeth: the app is literally a place to yell.</small>
+      </div>
+      <div class="card">
+        <h4>Concept C — Echo H</h4>
+        <img src="svg/C-lockup-color.svg" style="width:100%;margin:14px 0" alt="C lockup">
+        <small>Web3 modern. Gradient monogram with radiating echo arcs.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>In the wild</h2>
+    <p class="sub">The places the brief actually names: browser tab, app header, social avatar,
+    merch, and a small placement over video.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h4>Browser tab</h4>
+        <div class="browser" style="margin-top:14px">
+          <div class="tabs">
+            <div class="tab"><img src="favicon/favicon.svg" alt=""><span>Holler</span><span class="x">×</span></div>
+            <div class="tab" style="opacity:.6;max-width:170px"><span>Analytics</span></div>
+            <div class="tab" style="opacity:.4;max-width:150px"><span>Docs</span></div>
+          </div>
+          <div class="omni"><div class="pill">holler.app/feed</div></div>
+        </div>
+        <h4 style="margin-top:26px">App header</h4>
+        <div class="appbar" style="margin-top:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <img src="svg/A-mark-color.svg" width="32" alt="">
+            <img src="svg/A-wordmark-reversed.svg" height="22" alt="Holler">
+          </div>
+          <div class="nav"><span>Rooms</span><span>Clips</span><span>Me</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Avatars &amp; phone icon</h4>
+        <div class="stack" style="margin-top:16px;align-items:flex-start;gap:26px">
+          <div class="avatar" style="background:#101725"><img src="svg/A-mark-color.svg" width="88" alt=""></div>
+          <div class="avatar" style="background:#ff2bd6"><img src="svg/A-mark-reversed.svg" width="76" alt=""></div>
+          <div class="avatar" style="background:#e9edf6"><img src="svg/A-mark-mono.svg" width="88" alt=""></div>
+          <div class="avatar" style="background:#0a9bff"><img src="svg/A-mark-reversed.svg" width="88" alt=""></div>
+          <div class="phone"><div class="screen">
+            <div class="appicon"><img src="favicon/icon-192.svg" alt=""><span>Holler</span></div>
+            <div style="margin-top:auto;font-size:11px;color:#7d8698">Home screen, 56&nbsp;px icon</div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card">
+        <h4>Merch</h4>
+        <div style="display:flex;gap:26px;align-items:center;margin-top:26px;flex-wrap:wrap">
+          <div><div class="tote"><img src="svg/A-lockup-mono.svg" alt=""></div>
+          <small style="display:block;margin-top:14px">Single-colour print, 1 ink</small></div>
+          <div><div class="tote" style="background:#070b14;box-shadow:none"><img src="svg/A-lockup-reversed.svg" alt=""></div>
+          <small style="display:block;margin-top:14px">Reversed on black</small></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>Over busy video</h4>
+        <div style="position:relative;border-radius:12px;overflow:hidden;margin-top:14px;height:240px">
+          <img src="assets/video-still.svg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" alt="">
+          <div style="position:absolute;left:20px;top:20px;display:flex;align-items:center;gap:12px">
+            <img src="svg/A-mark-color.svg" width="40" alt="">
+            <img src="svg/A-lockup-reversed.svg" width="130" alt="">
+          </div>
+          <div style="position:absolute;right:18px;bottom:16px;font-size:11px;color:#fff;
+               background:rgba(0,0,0,.55);padding:5px 9px;border-radius:6px">synthetic busy frame</div>
+        </div>
+        <small style="display:block;margin-top:12px">The mark keeps its silhouette because the tile
+        owns a solid shape; the wordmark carries a 1-unit light outline in reversed use.</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Colour</h2>
+    <p class="sub">Kept from the current palette, rebalanced so azure→magenta carries the brand and
+    yellow is an accent, never a base. No red: the record-dot problem is designed out.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      <div class="sw" style="background:#0a9bff;color:#04121f"><b>Azure</b>#0A9BFF</div>
+      <div class="sw" style="background:#ff2bd6;color:#26071f"><b>Magenta</b>#FF2BD6</div>
+      <div class="sw" style="background:#ffd60a;color:#231a00"><b>Yellow</b>#FFD60A</div>
+      <div class="sw" style="background:#39ff6a;color:#04180a"><b>Green</b>#39FF6A</div>
+      <div class="sw" style="background:#070b14;color:#e8ecf6"><b>Ink</b>#070B14</div>
+      <div class="sw" style="background:#fff;color:#0b1020"><b>Paper</b>#FFFFFF</div>
+    </div>
+    <div class="grid g2" style="margin-top:22px">
+      <div class="card"><h4>Clear space</h4>
+        <p style="margin:8px 0 0;color:#b9c1d4;font-size:14px">Minimum clear space on all four sides
+        equals the height of the H crossbar (in the lockup: one stem width). Nothing enters that
+        box — no type, no edge of a card, no other logo.</p></div>
+      <div class="card"><h4>Minimum sizes</h4>
+        <p style="margin:8px 0 0;color:#b9c1d4;font-size:14px">Mark: <b>16&nbsp;px</b> digital,
+        <b>10&nbsp;mm</b> print. Lockup: <b>160&nbsp;px</b> wide digital, <b>35&nbsp;mm</b> print.
+        Below 160&nbsp;px the wordmark drops and only the mark is used.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Rationale</h2>
+    <div class="grid g2">
+      <div>
+        <p style="color:#c3cade">“Holler” is a verb about volume, and the audience is a crowd —
+        so the system is built on one idea: <b>a shape that occupies space</b>. The mark is a
+        solid tile with a single strong cut, not a thin line drawing, because a line mark
+        disappears in a tab strip and dies in a 16&nbsp;px favicon.</p>
+        <p style="color:#c3cade">The letterforms are custom geometry: 54-unit stems on a 200-unit
+        cap height, near-square counters, 8-unit corners. That is deliberately heavier than a
+        normal grotesque — it reads as painted-on-a-wall rather than set-in-a-deck. The H is
+        sheared 6° so it leans into the room without becoming a full italic.</p>
+        <p style="color:#c3cade">The crossbar in yellow is the shout. It is the only element that
+        breaks the tile's grid, and it is the one thing you still see when everything else is
+        scaled away.</p>
+      </div>
+      <div>
+        <p style="color:#c3cade"><b>Why no red record dot.</b> The reference used one; it reads as
+        camera-on and alarms people who leave the tab open. Nothing in this system is red, and
+        nothing is a bare circle — the tile is the container, so the mark never reads as a
+        status light.</p>
+        <p style="color:#c3cade"><b>Why B and C still ship.</b> B is the mascot route: an open
+        mouth is the most literal reading of “holler” and it gives the brand a face for social.
+        C is the growth route: the echo arcs give motion for a product that is about reacting in
+        real time. Both are complete variant sets, so the choice is a strategy call, not a
+        redraw.</p>
+        <div class="note">Type: no font is used anywhere in the marks. Text on this page is the
+        system UI font stack (<code>-apple-system, Helvetica Neue, Arial</code>) and is not part
+        of the logo artwork.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Files</h2>
+    <p class="sub">Editable SVG source, transparent PNGs at 512 / 1024 / 2048, favicon and app
+    icons, the evidence sheet, and the busy-frame test image.</p>
+    <div class="dl" id="dl">
+      <a href="sheet.png">sheet.png — evidence sheet</a>
+      <a href="svg/A-lockup-color.svg">A lockup (colour)</a>
+      <a href="svg/A-lockup-mono.svg">A lockup (single colour)</a>
+      <a href="svg/A-lockup-reversed.svg">A lockup (reversed)</a>
+      <a href="svg/A-mark-color.svg">A mark (colour)</a>
+      <a href="svg/A-mark-mono.svg">A mark (single colour)</a>
+      <a href="svg/A-mark-reversed.svg">A mark (reversed)</a>
+      <a href="png/2048/A-lockup.png">A lockup 2048 PNG</a>
+      <a href="png/1024/A-mark.png">A mark 1024 PNG</a>
+      <a href="favicon/favicon.svg">favicon.svg</a>
+      <a href="favicon/icon-192.svg">icon 192</a>
+      <a href="favicon/icon-512.svg">icon 512</a>
+      <a href="holler-brand-kit.zip">full kit (.zip)</a>
+    </div>
+    <p style="margin-top:26px"><a href="https://github.com/9xj89gzrtw-hue/9xj89gzrtw-hue.github.io">source repository</a>
+    · built for the Holler logo-system brief on Taskmarket</p>
+  </div>
+</section>
+
+<footer><div class="wrap">Original work. No stock, no tracing, no templates. Artwork © the author,
+released to the requester on award.</div></footer>
+</body>
+</html>

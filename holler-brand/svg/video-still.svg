@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<defs><filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+<feGaussianBlur stdDeviation="90"/></filter></defs>
+<rect width="1600" height="900" fill="#101322"/>
+<circle cx="12%" cy="18%" r="340" fill="#0a9bff" opacity="0.75" filter="url(#soft)"/><circle cx="58%" cy="8%" r="300" fill="#ff2bd6" opacity="0.65" filter="url(#soft)"/><circle cx="78%" cy="46%" r="420" fill="#ffd60a" opacity="0.55" filter="url(#soft)"/><circle cx="30%" cy="62%" r="380" fill="#39ff6a" opacity="0.5" filter="url(#soft)"/><circle cx="45%" cy="30%" r="260" fill="#ff5a1f" opacity="0.6" filter="url(#soft)"/><circle cx="88%" cy="78%" r="320" fill="#0a9bff" opacity="0.55" filter="url(#soft)"/><circle cx="5%" cy="80%" r="280" fill="#ff2bd6" opacity="0.5" filter="url(#soft)"/>
+<rect x="0" y="620" width="96" height="90" rx="10" fill="#ffffff" opacity="0.1"/><rect x="130" y="586" width="96" height="116" rx="10" fill="#ffffff" opacity="0.17"/><rect x="260" y="552" width="96" height="142" rx="10" fill="#ffffff" opacity="0.24000000000000002"/><rect x="390" y="518" width="96" height="168" rx="10" fill="#ffffff" opacity="0.1"/><rect x="520" y="484" width="96" height="90" rx="10" fill="#ffffff" opacity="0.17"/><rect x="650" y="620" width="96" height="116" rx="10" fill="#ffffff" opacity="0.24000000000000002"/><rect x="780" y="586" width="96" height="142" rx="10" fill="#ffffff" opacity="0.1"/><rect x="910" y="552" width="96" height="168" rx="10" fill="#ffffff" opacity="0.17"/><rect x="1040" y="518" width="96" height="90" rx="10" fill="#ffffff" opacity="0.24000000000000002"/><rect x="1170" y="484" width="96" height="116" rx="10" fill="#ffffff" opacity="0.1"/><rect x="1300" y="620" width="96" height="142" rx="10" fill="#ffffff" opacity="0.17"/><rect x="1430" y="586" width="96" height="168" rx="10" fill="#ffffff" opacity="0.24000000000000002"/><rect x="1560" y="552" width="96" height="90" rx="10" fill="#ffffff" opacity="0.1"/>
+<g font-family="Helvetica Neue, Arial, sans-serif" fill="#ffffff">
+  <rect x="60" y="60" width="148" height="52" rx="26" fill="#ff2b4a"/>
+  <circle cx="92" cy="86" r="9" fill="#fff"/>
+  <text x="112" y="94" font-size="26" font-weight="700">LIVE</text>
+  <text x="60" y="180" font-size="60" font-weight="800" opacity="0.92">GRAND FINAL</text>
+  <text x="60" y="236" font-size="30" opacity="0.65">2 431 908 watching</text>
+</g>
+</svg>
