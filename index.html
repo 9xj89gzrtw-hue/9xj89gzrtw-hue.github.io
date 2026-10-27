@@ -14,11 +14,16 @@
 <link rel="stylesheet" href="assets/site.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%234ade80'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='17' font-weight='700' text-anchor='middle' fill='%23041008'%3Et%3C/text%3E%3C/svg%3E">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"ItemList","name":"toolworks digital goods","itemListElement":[
- {"@type":"Product","position":1,"name":"Solana & Base Token Holder Forensics Kit","description":"Python CLI that rebuilds token holders, liquidity pools and early buyers from raw chain data and writes a self-contained HTML report.","offers":{"@type":"Offer","price":"19","priceCurrency":"USDC","availability":"https://schema.org/InStock","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
- {"@type":"Product","position":2,"name":"x402 & Base USDC Paywall Boilerplate","description":"Zero-backend digital storefront: verify a Base USDC payment on-chain from a static page, then unlock the download. 18 tests against a real mainnet transaction.","offers":{"@type":"Offer","price":"29","priceCurrency":"USDC","availability":"https://schema.org/InStock","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
- {"@type":"Product","position":3,"name":"Crypto Alert & Bounty Sniper Bot Template","description":"Python bot template that watches public sources, scores new items against JSON rules, dedupes them in sqlite and pushes to Telegram and Discord.","offers":{"@type":"Offer","price":"25","priceCurrency":"USDC","availability":"https://schema.org/InStock","url":"https://9xj89gzrtw-hue.github.io/#buy"}}
-]}
+{"@context":"https://schema.org","@type":"ItemList","name":"toolworks digital goods",
+ "itemListElement":[
+  {"@type":"Product","position":1,"name":"Solana & Base Token Holder Forensics Kit","offers":{"@type":"Offer","price":"19","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":2,"name":"x402 & Base USDC Paywall Boilerplate","offers":{"@type":"Offer","price":"29","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":3,"name":"Crypto Alert & Bounty Sniper Bot Template","offers":{"@type":"Offer","price":"25","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":4,"name":"Telegram Crypto Shop Bot (aiogram 3)","offers":{"@type":"Offer","price":"29","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":5,"name":"Universal Scraper Pro (Cloudflare Bypass)","offers":{"@type":"Offer","price":"39","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":6,"name":"10 Premium Landing UI Components & SVG Kit","offers":{"@type":"Offer","price":"25","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}},
+  {"@type":"Product","position":7,"name":"Crypto Bounty Hunter & Onchain Analytics","offers":{"@type":"Offer","price":"49","priceCurrency":"USDC","url":"https://9xj89gzrtw-hue.github.io/#buy"}}
+ ]}
 </script>
 </head>
 <body>
@@ -55,7 +60,7 @@
     <div class="stat"><b>MIT</b><span>Lite versions, no strings</span></div>
   </div>
 
-  <h2 id="products">The three products</h2>
+  <h2 id="products">Featured Code & Digital Goods</h2>
   <p class="dim small">Prices are flat, one-time, in USDC on Base. The Lite version of each is free and public on GitHub — buy the Pro pack only if the extra commands save you a day.</p>
 
   <div class="grid">
@@ -114,6 +119,83 @@
       <div class="actions">
         <a class="btn" href="https://github.com/9xj89gzrtw-hue/alertbot-lite" target="_blank" rel="noopener">Free Lite</a>
         <button class="btn primary" data-buy="alertbot">Buy Pro · $25</button>
+      </div>
+    </article>
+
+  
+    <article class="card">
+      <div><span class="tag on">Python · aiogram 3</span><span class="tag">CryptoBot + Stars</span></div>
+      <h3>Telegram Crypto Shop Bot</h3>
+      <p class="dim small" style="margin:2px 0 10px">Automated digital goods storefront in Telegram. Instant delivery of files, licenses, or links upon payment.</p>
+      <div class="price"> <small>USDC</small></div>
+      <ul class="ticks">
+        <li>Dual payment rails: CryptoBot (USDT/TON/BTC) + Telegram Stars (cards)</li>
+        <li>Instant automated digital goods delivery (ZIP files, PDF, keys)</li>
+        <li>SQLite database with order history and replay prevention</li>
+        <li>Admin panel (/admin) with revenue metrics and broadcast feature</li>
+        <li>Production-grade async architecture, launch in 5 minutes</li>
+        <li class="no">Lite: single product. Pro: full catalog, Stars + CryptoBot, admin panel</li>
+      </ul>
+      <div class="actions">
+        <a class="btn" href="https://github.com/9xj89gzrtw-hue/smart-tg-bot" target="_blank" rel="noopener">Free Lite</a>
+        <button class="btn primary" data-buy="tgbot">Buy Pro · </button>
+      </div>
+    </article>
+
+    <article class="card">
+      <div><span class="tag on">Python · Scraper</span><span class="tag">Anti-Detect · WAF</span></div>
+      <h3>Universal Scraper Pro</h3>
+      <p class="dim small" style="margin:2px 0 10px">High-speed resilient web scraper with Cloudflare and WAF bypass, proxy rotation, and clean exports.</p>
+      <div class="price"> <small>USDC</small></div>
+      <ul class="ticks">
+        <li>Emulates realistic browser TLS fingerprints (Sec-Ch-Ua, JA3/JA4)</li>
+        <li>Detects Cloudflare 503/403 challenge screens and applies backoff</li>
+        <li>Smart SOCKS5/HTTP/Tor proxy pool with auto-eviction of dead IPs</li>
+        <li>Direct export to native Excel (.xlsx) and UTF-8 BOM CSV</li>
+        <li>Real-time Telegram channel alerts on new items or price drops</li>
+        <li class="no">Lite: basic scraper. Pro: Cloudflare bypass, proxy pool, Excel, Telegram</li>
+      </ul>
+      <div class="actions">
+        <a class="btn" href="https://github.com/9xj89gzrtw-hue/python-parser-demo" target="_blank" rel="noopener">Free Lite</a>
+        <button class="btn primary" data-buy="scraper">Buy Pro · </button>
+      </div>
+    </article>
+
+    <article class="card">
+      <div><span class="tag on">HTML5 · CSS3 · ES6</span><span class="tag">Zero Dependencies</span></div>
+      <h3>10 Landing UI Components & SVG Kit</h3>
+      <p class="dim small" style="margin:2px 0 10px">Handcrafted interactive UI components & procedural SVG generators built for Web3 and SaaS landing pages.</p>
+      <div class="price"> <small>USDC</small></div>
+      <ul class="ticks">
+        <li>Roman Numeral 3D Tilt Card with golden guilloche watermark</li>
+        <li>Dark Neo-Brutalist Crypto Checkout widget with instant copy</li>
+        <li>Infinite glowing ticker marquee with SVG sparkline charts</li>
+        <li>Interactive developer terminal with syntax typing simulation</li>
+        <li>Procedural Python SVG generator (svg_generator.py)</li>
+        <li class="no">Lite: 2 cards. Pro: 10 full components, gallery.html, procedural SVG scripts</li>
+      </ul>
+      <div class="actions">
+        <a class="btn" href="holler-brand/" target="_blank" rel="noopener">Live Preview</a>
+        <button class="btn primary" data-buy="uikit">Buy Pro · </button>
+      </div>
+    </article>
+
+    <article class="card">
+      <div><span class="tag on">Python · On-Chain</span><span class="tag">Base · Solana · Arbitrum</span></div>
+      <h3>Crypto Bounty Hunter & Analytics</h3>
+      <p class="dim small" style="margin:2px 0 10px">Find direct crypto-paying bounties on GitHub and Solana without KYC, and verify sponsor payouts on-chain.</p>
+      <div class="price"> <small>USDC</small></div>
+      <ul class="ticks">
+        <li>GitHub scanner for direct USDC/SOL/ETH bounties, hard-bans KYC platforms</li>
+        <li>Gibwork Solana bounty scanner with wallet-header auth protocol</li>
+        <li>On-chain USDC payout tracker walking transfer logs across EVM RPCs</li>
+        <li>LedgerKit reconciliation engine validating balances down to the wei</li>
+        <li>Visual payout graph renderer showing fund flows to winners</li>
+        <li class="no">Lite: ledgerkit CLI. Pro: bounty hunter, Gibwork scanner, payout graph</li>
+      </ul>
+      <div class="actions">
+        <a class="btn" href="ledgerkit/" target="_blank" rel="noopener">LedgerKit</a>
+        <button class="btn primary" data-buy="bounty">Buy Pro · </button>
       </div>
     </article>
 

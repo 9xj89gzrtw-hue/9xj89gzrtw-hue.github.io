@@ -17,8 +17,8 @@
       price: 19,
       units: 19000000n,
       archive: "packs/forensics-pro.zip.enc",
-      pass: "YqbcQ12xIpDDs3F2h15Hjgzo",
-      sha256: "b571e6383c81050a2d4a878d304b6951de08d2a0c54375e68e07fc5fcf23b8cd",
+      pass: "fphJyUcCH-p3WLIwjWqpsA4g",
+      sha256: "10a4578ea508fea9cc48c4dfef3fc6f5c41c6c9ea98c59c7e91fd32531aedb4a",
       bytes: 98080
     },
     paywall: {
@@ -27,9 +27,9 @@
       price: 29,
       units: 29000000n,
       archive: "packs/paywall-pro.zip.enc",
-      pass: "EMpKa1IekpvO42Pp8VJOML-0",
-      sha256: "b2972ac8ac9bf3cb0782b5ed990309a511dafc1a90236b009c1fdbfc8ed4810b",
-      bytes: 45520
+      pass: "FdYTJP-RyH7TAoQ3v6AoyC34",
+      sha256: "72ba75855a70336e9f160f503a285529f59630f67116faf2423f79de11adb719",
+      bytes: 45424
     },
     alertbot: {
       id: "alertbot",
@@ -37,9 +37,49 @@
       price: 25,
       units: 25000000n,
       archive: "packs/alertbot-pro.zip.enc",
-      pass: "rgF0dfbm7aU_W426IOnP_hyM",
-      sha256: "07934dd76358840d8d7aea7f9b0f25bef1474fef68e574c3f8f995cd3668d7b4",
+      pass: "d7872TOUCHbUSt33h7CZt405",
+      sha256: "45f24794acbe6379c0707919e467d7b83322b74f4b276fd03df313e5d090c886",
       bytes: 73760
+    },
+    tgbot: {
+      id: "tgbot",
+      name: "Telegram Crypto Shop Bot (aiogram 3) \u2014 Pro",
+      price: 29,
+      units: 29000000n,
+      archive: "packs/tg-crypto-shop-pro.zip.enc",
+      pass: "e2OniydOiQ7AkjYlofpYGPUO",
+      sha256: "27c8c74da11b9f9060627c3b539ab544209fd44ac309a000677581e8170f769e",
+      bytes: 10752
+    },
+    scraper: {
+      id: "scraper",
+      name: "Universal Scraper Pro (Cloudflare Bypass) \u2014 Pro",
+      price: 39,
+      units: 39000000n,
+      archive: "packs/universal-scraper-pro.zip.enc",
+      pass: "s4gWMmxCNqTjcLNvBKw8wXY3",
+      sha256: "905c95e934985dfca784fca4460cc51c8a0072a77b5270f1b986eb1469d7e668",
+      bytes: 7952
+    },
+    uikit: {
+      id: "uikit",
+      name: "10 Premium Landing UI Components & SVG Kit \u2014 Pro",
+      price: 25,
+      units: 25000000n,
+      archive: "packs/landing-ui-svg-kit-pro.zip.enc",
+      pass: "iZodrJbK5HJjVs6myWeEIz8R",
+      sha256: "b0e82c95722050e334c1d947cf7acdb6b37a5a3b6a4d2f0526cd4575aba311f4",
+      bytes: 9904
+    },
+    bounty: {
+      id: "bounty",
+      name: "Crypto Bounty Hunter & Onchain Analytics \u2014 Pro",
+      price: 49,
+      units: 49000000n,
+      archive: "packs/crypto-bounty-hunter-pro.zip.enc",
+      pass: "_T_jo84FOczAXHsneL71Wzbe",
+      sha256: "01c72020ce1f317d80eea88b33fa78ce3529488412bf469ea77952d6dbf3fe2d",
+      bytes: 348992
     }
   };
   /* CATALOG:END */
