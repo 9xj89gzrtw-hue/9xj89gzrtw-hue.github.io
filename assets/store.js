@@ -18,7 +18,7 @@
       units: 19000000n,
       archive: "packs/forensics-pro.zip.enc",
       pass: "fphJyUcCH-p3WLIwjWqpsA4g",
-      sha256: "10a4578ea508fea9cc48c4dfef3fc6f5c41c6c9ea98c59c7e91fd32531aedb4a",
+      sha256: "cee75499ccb73e5a69e69b634028ee9b4ef8e4f3744b6eb3e2d0eb0fefa7b92b",
       bytes: 98080
     },
     paywall: {
@@ -28,8 +28,8 @@
       units: 29000000n,
       archive: "packs/paywall-pro.zip.enc",
       pass: "FdYTJP-RyH7TAoQ3v6AoyC34",
-      sha256: "72ba75855a70336e9f160f503a285529f59630f67116faf2423f79de11adb719",
-      bytes: 45424
+      sha256: "ae5e86707786a82cc0a89d6f35766e2d148477441ee23f649a3a772bbccbc0cd",
+      bytes: 2505088
     },
     alertbot: {
       id: "alertbot",
@@ -38,7 +38,7 @@
       units: 25000000n,
       archive: "packs/alertbot-pro.zip.enc",
       pass: "d7872TOUCHbUSt33h7CZt405",
-      sha256: "45f24794acbe6379c0707919e467d7b83322b74f4b276fd03df313e5d090c886",
+      sha256: "31a0aca8a90200bb8b9685c02bc828e9d9adbfac4802d3da7e38bab873fdb330",
       bytes: 73760
     },
     tgbot: {
@@ -48,8 +48,8 @@
       units: 29000000n,
       archive: "packs/tg-crypto-shop-pro.zip.enc",
       pass: "e2OniydOiQ7AkjYlofpYGPUO",
-      sha256: "27c8c74da11b9f9060627c3b539ab544209fd44ac309a000677581e8170f769e",
-      bytes: 10752
+      sha256: "4e3993b7a10ddae05f3702608c2e85db8990e9565f13af87285627696aeefb36",
+      bytes: 13488
     },
     scraper: {
       id: "scraper",
@@ -58,7 +58,7 @@
       units: 39000000n,
       archive: "packs/universal-scraper-pro.zip.enc",
       pass: "s4gWMmxCNqTjcLNvBKw8wXY3",
-      sha256: "905c95e934985dfca784fca4460cc51c8a0072a77b5270f1b986eb1469d7e668",
+      sha256: "d4d75174f2a79f47de67e99bd52a91561f9f0a21b22dd9c13ccad6ac6b5451d7",
       bytes: 7952
     },
     uikit: {
@@ -68,7 +68,7 @@
       units: 25000000n,
       archive: "packs/landing-ui-svg-kit-pro.zip.enc",
       pass: "iZodrJbK5HJjVs6myWeEIz8R",
-      sha256: "b0e82c95722050e334c1d947cf7acdb6b37a5a3b6a4d2f0526cd4575aba311f4",
+      sha256: "1bddef2a9afe58a8dc0640969aa0f89188cbcd508456921c94a9cc7dbbd11aef",
       bytes: 9904
     },
     bounty: {
@@ -78,7 +78,7 @@
       units: 49000000n,
       archive: "packs/crypto-bounty-hunter-pro.zip.enc",
       pass: "_T_jo84FOczAXHsneL71Wzbe",
-      sha256: "01c72020ce1f317d80eea88b33fa78ce3529488412bf469ea77952d6dbf3fe2d",
+      sha256: "989721d2aac204de31700250885b6b795ca680cf79b29c3d422094ad3636543b",
       bytes: 348992
     }
   };

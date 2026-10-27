@@ -24,7 +24,7 @@ PACKS = ROOT / "packs"
 MONEY4_PRODUCTS = Path("/Users/evgenijdanilov/gemini/money4/products")
 MONEYMAKER_PRODUCTS = Path("/Users/evgenijdanilov/moneymaker/work/products")
 
-EXCLUDE_DIRS = {".git", "__pycache__", ".cache", "packs", "node_modules", "work",
+EXCLUDE_DIRS = {".git", "__pycache__", ".cache", "packs", "node_modules", "work", ".venv", "deliverables",
                 "holler-brand", "shots"}
 EXCLUDE_FILES = {"config.json", "alertbot.sqlite", "pack-secrets.json", ".DS_Store"}
 
