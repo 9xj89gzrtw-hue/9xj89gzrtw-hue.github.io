@@ -234,6 +234,26 @@ body {
   border-color: rgba(56, 189, 248, 0.35);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(56, 189, 248, 0.12);
 }
+.card-cover-wrapper {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.3);
+  max-height: 260px;
+}
+.card-cover-img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.card-item:hover .card-cover-img {
+  transform: scale(1.03);
+}
 .card-item.featured-enterprise {
   border-color: rgba(192, 132, 252, 0.35);
   background: linear-gradient(180deg, rgba(30, 11, 46, 0.85), rgba(11, 15, 22, 0.95));
