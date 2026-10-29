@@ -1,2132 +1,483 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Toolworks &amp; DevStore — Премиум IT-решения, боты и софт с автовыдачей 24/7</title>
-<meta name="description" content="Витрина цифровых товаров понятная даже ребенку: готовые Telegram-боты, VLESS VPN под ключ, AI-оптимизаторы токенов, скрипты арбитража, буст CS2 и паки промптов. Оплата в рублях через FunPay (СБП), в USDT/Stars через @Shop010_bot, на Plati.Market (Digiseller) или USDC on Base.">
-<link rel="canonical" href="https://9xj89gzrtw-hue.github.io/">
+<title>DefiLlama Fee-Feed Audit — 411 protocols reporting $0 fees, and the fix</title>
+<meta name="description" content="Independent audit of 3,069 DefiLlama fee listings: 411 protocols whose fee feed died, 80 Base protocols with no fee adapter, $3,333,964/day of fee flow invisible in the data. Search your protocol free. Full diagnostics $29, adapter fix PR $99, paid in USDC on Base.">
+<meta property="og:title" content="411 DeFi protocols silently report $0 fees on DefiLlama">
+<meta property="og:description" content="Search your protocol free. Full 491-row diagnostics pack $29, ready-to-merge adapter fix $99 — paid in USDC on Base, verified on-chain.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Toolworks &amp; DevStore — Премиум IT-решения с автовыдачей 24/7">
-<meta property="og:description" content="Готовые комбайны, Telegram боты, AI промпты и VPN под ключ. Мгновенная доставка файлов сразу после оплаты. Понятно даже ребенку!">
-<meta property="og:url" content="https://9xj89gzrtw-hue.github.io/">
-<link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2338bdf8'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='17' font-weight='700' text-anchor='middle' fill='%23041008'%3E⚡%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#07090d; --bg2:#0c1017; --card:#10151e; --line:#1d2532;
+  --txt:#e6edf7; --dim:#8b98ab; --acc:#4ade80; --acc2:#38bdf8;
+  --warn:#fbbf24; --bad:#f87171; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--acc2);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(7,9,13,.82);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:20px;height:60px}
+.logo{font:600 15px/1 var(--mono);letter-spacing:.5px;color:var(--txt)}
+.logo b{color:var(--acc)}
+.nav a{color:var(--dim);font-size:14px}
+.nav .spacer{flex:1}
+.badge{font:600 11px/1 var(--mono);padding:5px 8px;border:1px solid var(--line);border-radius:6px;color:var(--dim)}
+h1{font-size:clamp(30px,5vw,50px);line-height:1.08;letter-spacing:-1.5px;margin:0 0 18px;font-weight:700}
+h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.6px;margin:0 0 10px;font-weight:650}
+h3{font-size:17px;margin:0 0 8px}
+p.lead{font-size:18px;color:#c2cddd;max-width:760px}
+.hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+.kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:16px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:34px 0 0}
+.stat{background:var(--bg2);padding:18px 20px}
+.stat .n{font:700 26px/1.15 var(--mono);letter-spacing:-1px}
+.stat .l{font-size:12.5px;color:var(--dim);margin-top:6px}
+.stat .n.red{color:var(--bad)} .stat .n.green{color:var(--acc)} .stat .n.blue{color:var(--acc2)}
+section{padding:58px 0;border-bottom:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+#q{width:100%;padding:15px 16px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:16px;font-family:var(--mono)}
+#q:focus{outline:none;border-color:var(--acc2)}
+table{width:100%;border-collapse:collapse;font-size:14px;margin-top:16px}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid #151b25;vertical-align:top}
+tr:hover td{background:#0d1219}
+.chip{display:inline-block;font:700 10.5px/1 var(--mono);padding:4px 7px;border-radius:5px;letter-spacing:.4px}
+.chip.BROKEN{background:rgba(248,113,113,.14);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
+.chip.MISSING{background:rgba(251,191,36,.13);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
+.chip.ok{background:rgba(74,222,128,.12);color:var(--acc);border:1px solid rgba(74,222,128,.3)}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.small{font-size:13px}
+button{font:600 15px/1 inherit;cursor:pointer;border-radius:9px;padding:13px 18px;border:1px solid var(--line);background:#151b26;color:var(--txt);transition:.15s}
+button:hover{border-color:#2c394d;background:#1a2230}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.primary{background:linear-gradient(180deg,#22c55e,#16a34a);border-color:#16a34a;color:#04140a;font-weight:700}
+button.primary:hover{filter:brightness(1.08)}
+button.ghost{background:transparent}
+.price{font:700 34px/1 var(--mono);letter-spacing:-1.5px}
+.price small{font-size:14px;color:var(--dim);font-weight:500;letter-spacing:0}
+ul.clean{list-style:none;padding:0;margin:14px 0 0}
+ul.clean li{padding:7px 0 7px 22px;position:relative;font-size:14.4px;color:#c2cddd}
+ul.clean li:before{content:"";position:absolute;left:0;top:14px;width:7px;height:7px;border-radius:2px;background:var(--acc)}
+ul.clean li.no:before{background:#334155}
+ul.clean li.no{color:var(--dim)}
+input[type=text]{width:100%;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:13.5px}
+input[type=text]:focus{outline:none;border-color:var(--acc2)}
+pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
+code{font-family:var(--mono);font-size:.92em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
+#log{font:12.5px/1.7 var(--mono);white-space:pre-wrap;margin-top:12px;color:var(--dim);min-height:20px}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2)}
+.warnbox{border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.06)}
+.okbox{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
+.errbox{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07)}
+footer{padding:44px 0 60px;color:var(--dim);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #151b25;font-size:13.5px}
+.hidden{display:none}
+.copybtn{padding:6px 10px;font-size:12px;font-family:var(--mono)}
+details{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg2);margin-top:14px}
+summary{cursor:pointer;font-weight:600;font-size:14.5px}
+.ok-ico{color:var(--acc);font-weight:700}
+.tag{font:600 11px/1 var(--mono);color:var(--dim);border:1px solid var(--line);padding:4px 7px;border-radius:5px}
+</style>
 </head>
 <body>
 
 <header>
-  <div class="wrap">
-    <div class="logo">⚡ tool<b>works</b> &amp; dev<b>store</b></div>
-    <div class="store-header-status">
-      <span class="pulse-dot"></span> 24/7 Live Online · Автовыдача
-    </div>
-    <nav>
-      <a href="#catalog">Каталог (40)</a>
-      <a href="https://funpay.com/users/21982357/" target="_blank" rel="noopener">FunPay (danilaonly)</a>
-      <a href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">Plati.Market (1481449)</a>
-      <a href="https://t.me/Shop010_bot" target="_blank" rel="noopener">@Shop010_bot</a>
-      <a href="#buy-usdc">Base USDC Paywall</a>
-      <a href="#guarantee">Гарантии</a>
-    </nav>
-  </div>
+ <div class="wrap nav">
+  <div class="logo">defi<b>audit</b>.store</div>
+  <a href="#check">Free check</a>
+  <a href="#products">Pricing</a>
+  <a href="#verify">How it works</a>
+  <a href="/defi-audit/">Method</a>
+  <div class="spacer"></div>
+  <span class="badge" id="chainbadge">Base · USDC</span>
+ </div>
 </header>
 
-<main class="wrap">
+<div class="wrap">
+<div class="hero">
+  <div class="kicker">Independent audit · data snapshot 26 Oct 2026</div>
+  <h1>411 DeFi protocols are still reporting <span style="color:var(--bad)">$0.00</span> in fees on DefiLlama.</h1>
+  <p class="lead">We pulled every DefiLlama fee listing — 3,069 protocols — and compared it against its own history. 411 published fees in the last 12 months and exactly zero in the last 7 days. Another 80 Base protocols with real TVL have no fee page at all. Every row is reproducible from public APIs.</p>
 
-  <div style="margin-top: 40px; text-align: center;">
-    <p class="kicker">⚡ МГНОВЕННАЯ АВТОВЫДАЧА · 100% ПРОВЕРЕННЫЙ КОД · ПОНЯТНО ДАЖЕ РЕБЕНКУ</p>
-    <h1 style="margin: 10px 0 16px;">IT-решения и программы, которые работают сразу,<br><span style="color: var(--neon-cyan);">вместо 20 часов настроек и мучений</span></h1>
-    <p class="lead" style="margin: 0 auto 28px; max-width: 840px;">
-      Готовые коробочные продукты с открытым кодом. Подробные инструкции со стрелочками, запуск в 1 клик. 
-      Оплата в <b>Рублях (FunPay / СБП)</b>, на <b>Plati.Market / Digiseller</b>, в <b>USDT / Telegram Stars (@Shop010_bot)</b> или <b>USDC on Base</b>.
-    </p>
+  <div class="stats">
+    <div class="stat"><div class="n red" id="s-silent">411</div><div class="l">silent fee feeds</div></div>
+    <div class="stat"><div class="n blue" id="s-base">80</div><div class="l">Base protocols, no fee adapter</div></div>
+    <div class="stat"><div class="n" id="s-hole">$3,333,964</div><div class="l">measured fee flow hidden per day</div></div>
+    <div class="stat"><div class="n green" id="s-scan">3,069</div><div class="l">fee listings audited</div></div>
+  </div>
 
-    <div class="statrow" style="justify-content: center;">
-      <div class="stat"><b>40</b><span>товаров на витрине</span></div>
-      <div class="stat"><b>⚡ 0 сек</b><span>автовыдача файлов</span></div>
-      <div class="stat"><b>100%</b><span>понятно каждому</span></div>
-      <div class="stat"><b>100%</b><span>чистый открытый код</span></div>
-      <div class="stat"><b>4 способа</b><span>СБП / Plati / Stars / Crypto</span></div>
+  <div class="box warnbox" style="margin-top:22px">
+    <strong>Read this before you panic about a number above.</strong>
+    <div class="small" style="margin-top:6px;color:#c2cddd">
+      A silent feed is not automatically a broken adapter. Of the ten largest and most recent breaks we hand-checked, <b>ten</b> returned <code>0.00</code> because the data source itself was zero — the adapter was right. The $3.33M/day figure is the <em>measured</em> aggregate across all 411 rows, including feeds that are years stale and protocols that stopped charging. The actionable subset — recent breaks on protocols that still hold TVL — is <b id="s-live">$23,735/day</b> across <b id="s-liven">18</b> protocols. That is the number we sell you a fix for, and every row ships with the command to verify it yourself.
+    </div>
+  </div>
+</div>
+
+<section id="check">
+  <div class="kicker">Free · no signup</div>
+  <h2>Check your protocol</h2>
+  <p class="dim" style="margin-top:0;max-width:720px">Type a protocol name or a chain. Free tier shows the status, the last day the feed published, and the measured $/day that went missing. The root-cause class, the exact adapter file, the reproduction commands and the priority score are in the paid pack.</p>
+
+  <input id="q" type="text" placeholder="Search 491 protocols — e.g. wbtc, rain, impermax, base, lending…" autocomplete="off" spellcheck="false">
+  <div class="row small dim" style="margin-top:10px">
+    <span id="count"></span>
+    <span class="tag">BROKEN = published fees, now zero for 7+ days</span>
+    <span class="tag">MISSING = Base TVL ≥ $300k, no fee adapter</span>
+  </div>
+  <div style="overflow-x:auto">
+  <table id="results"><thead><tr>
+    <th>Protocol</th><th>Status</th><th>Chain</th><th>Last published</th><th>Dark</th><th>Lost / day</th><th>TVL</th><th></th>
+  </tr></thead><tbody></tbody></table>
+  </div>
+  <p class="small dim" id="hint">Start typing — results update as you type.</p>
+</section>
+
+<section id="products">
+  <div class="kicker">Direct purchase · USDC on Base · no account, no judge</div>
+  <h2>Two things you can buy</h2>
+  <p class="dim" style="margin-top:0">Payment goes straight to our address on Base. The page verifies the transfer on-chain through a public RPC and unlocks the file or the order form immediately. No platform in the middle, no approval queue.</p>
+
+  <div class="grid2" style="margin-top:24px">
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3>The full 491-row diagnostics pack</h3>
+        <span class="tag">instant</span>
+      </div>
+      <div class="price" style="margin:14px 0 4px">$29 <small>USDC on Base</small></div>
+      <p class="small dim" style="margin-top:0">One JSON file, 491 rows, generated 26 Oct 2026.</p>
+      <ul class="clean">
+        <li>Every protocol: status, chain, category, TVL, fees over 12 months</li>
+        <li>Last published day, days dark, $/day and $/to-date missing</li>
+        <li>Root-cause class per row — <span class="mono small">RECENT_BREAK_LIVE_TVL</span>, <span class="mono small">SOURCE_HOST_DEAD</span>, <span class="mono small">NO_FEE_ADAPTER</span>, <span class="mono small">POSSIBLY_WOUND_DOWN</span></li>
+        <li><b>142 exact adapter file paths</b> resolved against the DefiLlama/dimension-adapters tree</li>
+        <li>Two reproduction commands per row (harness + API)</li>
+        <li>Priority score 0–100, ranked so you work top-down</li>
+        <li>All 6 hand-verified rows flagged, with what we actually found</li>
+      </ul>
+      <button class="primary" style="width:100%;margin-top:18px" data-buy="29">Unlock the pack — $29 USDC</button>
+      <p class="small dim" style="margin:10px 0 0">Also available at $99 with a 30-minute call: <a href="#contact">email us</a>.</p>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3>Ready-to-merge adapter fix PR</h3>
+        <span class="tag">one protocol</span>
+      </div>
+      <div class="price" style="margin:14px 0 4px">$99 <small>USDC on Base</small></div>
+      <p class="small dim" style="margin-top:0">Pick one protocol from the list. We write the patch, prove it with real numbers, and open the PR.</p>
+      <ul class="clean">
+        <li>Harness run before and after, output pasted in the PR</li>
+        <li>PR opened in <span class="mono small">DefiLlama/dimension-adapters</span> with the failing behaviour, the corrected daily figure and the tx hashes or log counts that prove it</li>
+        <li>Reproduction command in the PR body — maintainers can check it in one step</li>
+        <li>Optional: an issue in your own repo with the same finding</li>
+        <li class="no">We do not promise a merge. Maintainer time is not ours to sell.</li>
+        <li class="no">We refuse the job if the source genuinely returns zero — you get the refund minus gas</li>
+      </ul>
+      <button class="primary" style="width:100%;margin-top:18px" data-buy="99">Order a fix — $99 USDC</button>
+      <p class="small dim" style="margin:10px 0 0">Refund policy: if we cannot reproduce the break, you are refunded in full within 72h.</p>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="kicker">On-chain verification</div>
+  <h2>Pay, paste the hash, get the thing</h2>
+  <div class="grid2" style="margin-top:22px">
+    <div>
+      <p class="small" style="color:#c2cddd">The page talks to Base directly: <code>eth_getTransactionReceipt</code> on <code>mainnet.base.org</code>. It checks four things and nothing else — the transaction succeeded, it contains a USDC <code>Transfer</code> into our address, the amount covers the price, and the hash has not already been redeemed on this browser.</p>
+      <div class="box" style="margin-top:14px">
+        <div class="kv"><span class="dim">Network</span><span class="mono">Base · chainId 8453</span></div>
+        <div class="kv"><span class="dim">Token</span><span class="mono">USDC · 0x833589…2913</span></div>
+        <div class="kv" style="border:0"><span class="dim">Pay to</span><span class="mono" style="display:flex;gap:8px;align-items:center">
+          <span id="addr">0x72Aa…4d1a</span><button class="copybtn" id="copyaddr">copy</button></span></div>
+      </div>
+      <p class="small dim" style="margin-top:12px">Send the exact amount from any wallet — MetaMask, Rabby, Coinbase Wallet, a hardware wallet, an exchange withdrawal. A $0.01 tip over the price is fine; the check is <code>≥</code>.</p>
+    </div>
+
+    <div class="card">
+      <h3>Already paid?</h3>
+      <p class="small dim" style="margin-top:0">Paste the Base transaction hash.</p>
+      <input type="text" id="txhash" placeholder="0x… (66 characters)" spellcheck="false" autocomplete="off">
+      <div class="row" style="margin-top:10px">
+        <button class="primary" id="btnverify">Verify &amp; unlock</button>
+        <button class="ghost" id="btnpay">Pay with wallet</button>
+      </div>
+      <div id="log">idle</div>
+      <div id="unlock"></div>
     </div>
   </div>
 
-  <!-- GUARANTEE BANNER -->
-  <div class="guarantee-bar">
-    <div class="guarantee-item">
-      <div class="guarantee-icon">⚡</div>
-      <div class="guarantee-text">
-        <b>Моментальная автовыдача</b>
-        <p>Ссылка на архив скачивается сразу в чат после нажатия кнопки «Оплатить».</p>
-      </div>
+  <details>
+    <summary>Why a static page and not a checkout with an account?</summary>
+    <div class="small dim" style="margin-top:10px">
+      Because an account is a database, a database is a login reset email, and a login reset email is a support burden we would have to price in. A static page plus an on-chain receipt is the whole system: the chain is the ledger, the receipt is the entitlement. The trade-off is honest: access is issued as a one-time link, so keep the file. If you lose it, mail the txhash and we re-issue it — that costs us nothing and costs you nothing.
     </div>
-    <div class="guarantee-item">
-      <div class="guarantee-icon">🛡️</div>
-      <div class="guarantee-text">
-        <b>Понятно даже ребенку</b>
-        <p>В каждом товаре есть инструкция со скриншотами и готовые файлы автозапуска.</p>
-      </div>
+  </details>
+  <details>
+    <summary>What if I send USDC on the wrong chain, or another token?</summary>
+    <div class="small dim" style="margin-top:10px">
+      The verifier only recognises native USDC on Base (<code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code>). USDC bridged from Ethereum, USDT, or anything sent on Arbitrum/Optimism/Ethereum will not unlock the page. In that case mail the hash and we will either bridge it back to you or unlock manually — but you will wait for a human, so please check the network selector before you hit send.
     </div>
-    <div class="guarantee-item">
-      <div class="guarantee-icon">🎁</div>
-      <div class="guarantee-text">
-        <b>Подарок за отзыв 5★</b>
-        <p>Напишите слово «БОНУС» в чат после отзыва — бот сразу выдаст секретный архив!</p>
-      </div>
+  </details>
+  <details>
+    <summary>Is the dataset not already public on GitHub?</summary>
+    <div class="small dim" style="margin-top:10px">
+      The raw CSVs are, at <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a> — and they will stay public, because the audit is worth more as a public record than as a secret. What you are buying is the layer on top: adapter paths resolved against the live DefiLlama tree, root-cause classes, priority ordering, reproduction commands, and the hand-verified rows. If that layer is not worth $29 to you, take the CSVs for free and use them; the store still works.
     </div>
-    <div class="guarantee-item">
-      <div class="guarantee-icon">💬</div>
-      <div class="guarantee-text">
-        <b>Живая поддержка автора</b>
-        <p>Помощь с запуском и ответами на вопросы в Telegram @Shop010_bot.</p>
-      </div>
+  </details>
+</section>
+
+<section id="contact">
+  <div class="kicker">Custom work</div>
+  <h2>Tip jar &amp; data bounties</h2>
+  <div class="grid2" style="margin-top:20px">
+    <div class="card">
+      <h3>Web3 tip jar</h3>
+      <p class="small dim" style="margin-top:4px">If the free checker saved you a day, send whatever you think it was worth. Same address, any amount, Base USDC.</p>
+      <div class="box" style="margin-top:12px"><span class="mono small" id="tipaddr" style="word-break:break-all"></span></div>
+      <button class="copybtn" id="copytip" style="margin-top:10px">copy address</button>
+    </div>
+    <div class="card">
+      <h3>Custom data bounties</h3>
+      <p class="small dim" style="margin-top:4px">We build parsers, on-chain ledgers and DefiLlama adapters. Paid in USDC on Base, scoped before we start.</p>
+      <ul class="clean">
+        <li>DefiLlama fee/revenue/dexs adapter — from $99 per protocol</li>
+        <li>Per-wallet on-chain ledger with reconciliation — from $149</li>
+        <li>Custom scraper/API with tests — from $199</li>
+      </ul>
+      <p class="small dim" style="margin:12px 0 0">Open an issue on the audit repo with the word <span class="mono">quote</span> and what you need. Public, timestamped, no DM required.</p>
+      <a class="small" href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit/issues/new?title=quote%3A%20&body=What%20I%20need%3A%0A%0AChain%2Fprotocol%3A%0A%0ABudget%20in%20USDC%3A%0A">Open a quote request →</a>
     </div>
   </div>
-
-  <!-- STORE CONTROLS: SEARCH & CATEGORY FILTERS -->
-  <section id="catalog" class="store-controls">
-    <div class="search-wrapper">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="store-search" placeholder="Поиск по названию, пользе или тегам (например: claude, vpn, бот, fps, cs2, арбитраж, stars)..." autocomplete="off">
-    </div>
-
-    <div class="cat-filters">
-      <button class="cat-btn active" data-cat="all">🔥 Все товары (<span id="count-all">34</span>)</button>
-      <button class="cat-btn" data-cat="enterprise">👑 Enterprise Софт</button>
-      <button class="cat-btn" data-cat="bots">🤖 Telegram Боты</button>
-      <button class="cat-btn" data-cat="ai">⚡ AI &amp; Claude Code</button>
-      <button class="cat-btn" data-cat="vpn">🛡️ VPN &amp; Безопасность</button>
-      <button class="cat-btn" data-cat="gaming">🎮 Steam &amp; CS2 Буст</button>
-      <button class="cat-btn" data-cat="web3">💎 Web3 &amp; Аналитика</button>
-      <button class="cat-btn" data-cat="services">🛠️ Услуги за 30 мин</button>
-    </div>
-
-    <div style="margin-top: 14px; font-size: 13px; color: var(--dim); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-      <span>Показано: <b id="visible-count" style="color: var(--neon-cyan);">34</b> предложения</span>
-      <span style="font-family: var(--mono); font-size: 12px;">Цены: от <b style="color: var(--neon-emerald);">1.14 ₽</b> до <b style="color: var(--neon-purple);">2 490 ₽</b></span>
-    </div>
-  </section>
-
-  <!-- MASTER PRODUCTS GRID -->
-  <div class="grid" id="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 22px;">
-
-      <article class="card-item featured-enterprise" data-cat="enterprise" data-search="магазин telegram shop bot ecommerce stars cryptobot админка товары 🛒 комбайн telegram-магазинов enterprise (web-админка + stars/crypto) готовый интернет-магазин внутри telegram с красивой панелью управления на сайте (как в ozon или wildberries, только внутри мессенджера). чтобы автоматически продавать любые цифровые товары (файлы, ключи, софт, гайды) и принимать оплату в рублях (карты рф) и криптовалюте без программистов.">
-        <div class="item-top">
-          <span class="badge-pill badge-enterprise">👑 ENTERPRISE КОМБАЙН</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190135" alt="🛒 Комбайн Telegram-магазинов Enterprise (Web-Админка + Stars/Crypto)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🛒 Комбайн Telegram-магазинов Enterprise (Web-Админка + Stars/Crypto)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1 990 ₽</span>
-          <span class="card-price-sub">/ 20 USDT · 500 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Готовый интернет-магазин внутри Telegram с красивой панелью управления на сайте (как в Ozon или Wildberries, только внутри мессенджера).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы автоматически продавать любые цифровые товары (файлы, ключи, софт, гайды) и принимать оплату в рублях (карты РФ) и криптовалюте без программистов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Исходный код бота на aiogram 3, 2) Красивая Web-панель управления на Vue.js, 3) Модуль приема Telegram Stars и CryptoBot, 4) Простая инструкция со скриншотами.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Нажмите одну кнопку в терминале: docker compose up -d. Магазин и панель управления откроются сами в браузере за 1 минуту.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Экономия более 60 000 рублей на заказе у веб-студии. Вы начинаете продажи в первый же день без ежемесячных платежей платформе.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт автоматического ежедневного бэкапа базы данных в секретный Telegram-канал.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657632" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327072" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-enterprise" data-cat="enterprise" data-search="vpn vless reality xray censorship bypass telegram bot shop подписки 🛡️ свой бизнес vpn под ключ: vless-reality сервер + бот продаж ваш личный надежный сервис быстрого интернета и vpn, который невозможно заблокировать провайдерам, плюс бот для продажи ключей. чтобы у вас, вашей семьи и ваших клиентов всегда на максимальной скорости открывались youtube в 4k, instagram, discord и любые сайты без сбоев.">
-        <div class="item-top">
-          <span class="badge-pill badge-enterprise">👑 СВОЙ БИЗНЕС VPN</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190134" alt="🛡️ Свой бизнес VPN под ключ: VLESS-Reality сервер + Бот продаж" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🛡️ Свой бизнес VPN под ключ: VLESS-Reality сервер + Бот продаж</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1 490 ₽</span>
-          <span class="card-price-sub">/ 15 USDT · 375 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Ваш личный надежный сервис быстрого интернета и VPN, который невозможно заблокировать провайдерам, плюс бот для продажи ключей.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы у вас, вашей семьи и ваших клиентов всегда на максимальной скорости открывались YouTube в 4K, Instagram, Discord и любые сайты без сбоев.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Скрипт мгновенной установки сервера VLESS-Reality, 2) Telegram-бот продажи подписок, 3) Готовые инструкции и QR-коды для iPhone, Android, ПК и Mac.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Вставьте одну команду на чистом сервере Ubuntu — через 3 минуты самый быстрый и безопасный VPN в мире готов к работе.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Готовый бизнес: сервер стоит всего 100-150 ₽ в месяц, а подписки можно продавать десяткам клиентов по 150-300 ₽ в месяц.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Чеклист проверенных зарубежных серверов от $1 в месяц с оплатой обычными российскими картами МИР.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657628" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327070" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-enterprise" data-cat="enterprise" data-search="ai router cursor claude windsurf tokens save proxy llm ⚡ корпоративный ai-роутер и оптимизатор токенов (cursor/claude) умная программа-фильтр для редакторов кода с ии (cursor, windsurf, claude code), которая запоминает ответы и не платит за них дважды. чтобы платить за запросы к нейросетям в 3-4 раза меньше денег (экономия до 75% расходов на токены каждый день).">
-        <div class="item-top">
-          <span class="badge-pill badge-enterprise">👑 ЭКОНОМИЯ НА ИИ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190136" alt="⚡ Корпоративный AI-роутер и оптимизатор токенов (Cursor/Claude)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Корпоративный AI-роутер и оптимизатор токенов (Cursor/Claude)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">2 490 ₽</span>
-          <span class="card-price-sub">/ 25 USDT · 625 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Умная программа-фильтр для редакторов кода с ИИ (Cursor, Windsurf, Claude Code), которая запоминает ответы и не платит за них дважды.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы платить за запросы к нейросетям в 3-4 раза меньше денег (экономия до 75% расходов на токены каждый день).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Готовая программа локального прокси, 2) Модуль умной семантической памяти, 3) Сжатие системных промптов, 4) Инструкция подключения в 2 клика.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите python main.py и укажите адрес http://localhost:8080 в настройках Cursor или Claude Code.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Если вы тратите на искусственный интеллект $100 в месяц, роутер сбережет вам $70-$75 каждый месяц, окупаясь за пару недель.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Пак из 50 протестированных системных правил (.cursorrules) под Python, Next.js и FastAPI.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657621" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327074" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-enterprise" data-cat="enterprise" data-search="arbitrage dexi scanner solana base uniswap raydium web3 trading 📈 сканер межбиржевого dex арбитража и пулов (base / solana) программа-радар, которая каждую секунду сравнивает цены на криптобиржах и находит монеты, которые в одном месте стоят дешевле, а в другом дороже. чтобы мгновенно находить выгодные ценовые разницы (связки) и получать звуковые сигналы и алерты в telegram на телефон.">
-        <div class="item-top">
-          <span class="badge-pill badge-enterprise">👑 АРБИТРАЖ РАДАР</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190141" alt="📈 Сканер межбиржевого DEX арбитража и пулов (Base / Solana)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">📈 Сканер межбиржевого DEX арбитража и пулов (Base / Solana)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1 790 ₽</span>
-          <span class="card-price-sub">/ 18 USDT · 450 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Программа-радар, которая каждую секунду сравнивает цены на криптобиржах и находит монеты, которые в одном месте стоят дешевле, а в другом дороже.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы мгновенно находить выгодные ценовые разницы (связки) и получать звуковые сигналы и алерты в Telegram на телефон.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Скоростной сканер сетей Solana и Base, 2) Расчет чистой прибыли с вычетом газа и комиссий, 3) Уведомления в Telegram.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите команду: python scanner.py --network base — на экране сразу побегут найденные связки с расчетом прибыли.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Работает 24/7 без усталости, заменяя команду из трех живых трейдеров-аналитиков.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Калькулятор доходности пулов ликвидности с защитой от непостоянных потерь (Impermanent Loss).</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657624" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327111" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="ai" data-search="chatgpt prompts cursor gpt-4o ai cheat-sheet ⚡ мега-пак 120+ боевых промптов для chatgpt, gpt-4o и cursor сборник проверенных супер-команд для нейросети, после которых chatgpt перестает выдавать глупости и решает задачи идеально. чтобы нейросеть с первой попытки писала чистый код, статьи, решения задач или домашку без ошибок и долгих правок.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190125" alt="⚡ Мега-пак 120+ боевых промптов для ChatGPT, GPT-4o и Cursor" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Мега-пак 120+ боевых промптов для ChatGPT, GPT-4o и Cursor</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.22 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Сборник проверенных супер-команд для нейросети, после которых ChatGPT перестает выдавать глупости и решает задачи идеально.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы нейросеть с первой попытки писала чистый код, статьи, решения задач или домашку без ошибок и долгих правок.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Удобная шпаргалка cheatsheet.html для открытия в любом браузере, 2) Готовые команды с копированием в 1 клик, 3) Конфиги .cursorrules.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Откройте файл в браузере, кликните по нужной команде — она скопируется сама, вставьте в ChatGPT. Готово!</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Всего за 1 рубль вы получаете опыт сотен часов работы профессиональных инженеров с нейросетями.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Исходный код Telegram-бота для поиска нужного промпта прямо в мессенджере.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643351" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="ai" data-search="claude sonnet prompts system prompts anthropic ai ⚡ мега-пак 100+ системных промптов для claude 3.5 sonnet специальные системные роли (главный архитектор, старший программист), которые заставляют claude 3.5 писать безупречный код. качество программного кода и логики ответов claude вырастает в 3-5 раз без лишней «воды».">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190126" alt="⚡ Мега-пак 100+ системных промптов для Claude 3.5 Sonnet" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Мега-пак 100+ системных промптов для Claude 3.5 Sonnet</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.20 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Специальные системные роли (Главный Архитектор, Старший Программист), которые заставляют Claude 3.5 писать безупречный код.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Качество программного кода и логики ответов Claude вырастает в 3-5 раз без лишней «воды».</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) 100+ готовых ролей и шаблонов, 2) Сценарии для сложных многошаговых диалогов, 3) Примеры создания сайтов в Claude Artifacts.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Вставьте текст роли в поле System Prompt в Claude или Cursor — модель сразу начнет отвечать как ведущий эксперт.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Вы превращаете обычный чат с ИИ в персонального Senior-разработчика за символический 1 рубль.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Гайд по генерации интерактивных мини-игр и приложений прямо в окне Claude.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643350" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327055" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="ai" data-search="claude bypass region not supported anthropic vpn fix ⚡ гайд: обход ошибки region not supported в claude ai & api простая пошаговая инструкция с картинками, как открыть лучшую в мире нейросеть claude 3.5 из россии без блокировок и бана аккаунта. сайт claude.ai пишет «ваша страна не поддерживается»? после этой инструкции сайт сразу откроется и будет работать стабильно.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190129" alt="⚡ Гайд: Обход ошибки Region Not Supported в Claude AI & API" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Гайд: Обход ошибки Region Not Supported в Claude AI & API</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.14 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Простая пошаговая инструкция с картинками, как открыть лучшую в мире нейросеть Claude 3.5 из России без блокировок и бана аккаунта.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Сайт claude.ai пишет «Ваша страна не поддерживается»? После этой инструкции сайт сразу откроется и будет работать стабильно.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Инструкция из 4 простых шагов со стрелочками, 2) Список проверенных чистых провайдеров, 3) Программа проверки соединения.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Повторите 4 действия по скриншотам — доступ к Claude откроется ровно за 3 минуты.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Бесплатный и вечный доступ к самой умной нейросети 2026 года без покупки чужих сомнительных аккаунтов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт мониторинга доступности серверов Anthropic с уведомлением в Telegram.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643353" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327063" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="ai" data-search="gemini bypass google account ineligible fix free ⚡ гайд: обход ошибки account is ineligible в google gemini инструкция, как бесплатно включить самый мощный google gemini advanced с огромной памятью на 2 миллиона токенов. чтобы нейросеть могла прочитать целиком толстую книгу, огромный код или видео и ответить на любые вопросы без ограничений.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190142" alt="⚡ Гайд: Обход ошибки Account is ineligible в Google Gemini" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Гайд: Обход ошибки Account is ineligible в Google Gemini</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.16 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Инструкция, как бесплатно включить самый мощный Google Gemini Advanced с огромной памятью на 2 миллиона токенов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы нейросеть могла прочитать целиком толстую книгу, огромный код или видео и ответить на любые вопросы без ограничений.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Пошаговый алгоритм регистрации чистого профиля Google, 2) Метод обхода платежного профиля без зарубежных карт, 3) Чеклист настроек.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Следуйте инструкции с картинками — активация занимает 5 минут с любого компьютера.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Вы получаете премиальные возможности ИИ от Google стоимостью $20/мес совершенно бесплатно.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Пак промптов для быстрого анализа огромных PDF-файлов и архивов книг.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643352" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327114" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="gaming" data-search="cs2 fps boost autoexec counter strike cfg steam ⚡ cs2 fps boost: конфиг киберспортсменов + оптимизация сети волшебный файл настроек для counter-strike 2, который убирает лаги, фризы и делает картинку плавной и четкой. добавляет +40-70 кадров в секунду, убирает задержку мышки, пули регистрируются точно в цель (идеальный sub-tick).">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190130" alt="⚡ CS2 FPS Boost: Конфиг киберспортсменов + Оптимизация сети" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ CS2 FPS Boost: Конфиг киберспортсменов + Оптимизация сети</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.21 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Волшебный файл настроек для Counter-Strike 2, который убирает лаги, фризы и делает картинку плавной и четкой.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Добавляет +40-70 кадров в секунду, убирает задержку мышки, пули регистрируются точно в цель (идеальный Sub-Tick).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Файл autoexec.cfg с лучшими настройками сети и графики, 2) Параметры запуска Steam, 3) Инструкция «куда скопировать за 30 секунд».</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Скопируйте файл в папку csgo/cfg и вставьте одну строчку в параметры запуска Steam. Всё настроится само!</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Настройки как у чемпионов мира на мейджорах без риска бана (100% легально, стандартная консоль Valve).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт быстрой очистки кэша шейдеров DirectX перед каткой в 1 клик.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657490" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327065" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="gaming" data-search="minecraft fps boost papermc sodium server config ⚡ minecraft fps boost: оптимизация клиента + конфиг papermc готовый набор оптимизаций для minecraft, чтобы игра летала даже на старом или слабом ноутбуке без просадок fps. картинка становится плавной, пропадают подвисания при прогрузке мира и взрывах динамита, fps вырастает в 2-3 раза.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190131" alt="⚡ Minecraft FPS Boost: Оптимизация клиента + Конфиг PaperMC" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Minecraft FPS Boost: Оптимизация клиента + Конфиг PaperMC</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.22 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Готовый набор оптимизаций для Minecraft, чтобы игра летала даже на старом или слабом ноутбуке без просадок FPS.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Картинка становится плавной, пропадают подвисания при прогрузке мира и взрывах динамита, FPS вырастает в 2-3 раза.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Настроенная папка модов Sodium/Lithium, 2) Оптимизированные конфиги paper.yml для серверов, 3) Флаги запуска Java.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Просто перенесите файлы из архива в папку mods — игра сразу станет работать в разы быстрее.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Вам не нужно часами искать моды и разбираться в крашах — всё уже собрано, проверено и настроено.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт авто-перезапуска сервера при падении и ежедневного авто-бэкапа мира.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657485" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327067" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="gaming" data-search="steam profile design showcase boost cleaner ⚡ steam: пак оформления профиля + скрипт очистки кэша красивые анимированные витрины и невидимые символы для steam + программа для очистки гигабайтов мусора. сделать свой профиль стильным и авторитетным, как у топ-игроков, а также заставить клиент steam открываться без тормозов.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190133" alt="⚡ Steam: Пак оформления профиля + Скрипт очистки кэша" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Steam: Пак оформления профиля + Скрипт очистки кэша</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.16 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Красивые анимированные витрины и невидимые символы для Steam + программа для очистки гигабайтов мусора.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Сделать свой профиль стильным и авторитетным, как у топ-игроков, а также заставить клиент Steam открываться без тормозов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Шаблоны анимированных витрин иллюстраций, 2) Невидимые шрифты для никнейма, 3) Программа глубокой очистки кэша Steam.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите steam_cleaner.py — очистит накопившийся мусор за 5 секунд. Скопируйте шаблоны в витрину профиля.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Красивый профиль повышает доверие при обменах и в играх, а клиент Steam перестает подвисать.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Чеклист безопасной смены региона Steam на Казахстан без риска получения красной таблички (КТ).</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80657476" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327069" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="gaming" data-search="discord voice fix goodbye dpi steam banners ⚡ пак оформления discord & steam + утилиты обхода блокировок готовая программа для моментального восстановления голосовых каналов discord и крутые картинки для серверов. чтобы снова нормально разговаривать с друзьями в голосовых комнатах discord без лагов, бесконечных подключений и задержек.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190146" alt="⚡ Пак оформления Discord & Steam + Утилиты обхода блокировок" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Пак оформления Discord & Steam + Утилиты обхода блокировок</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.17 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Готовая программа для моментального восстановления голосовых каналов Discord и крутые картинки для серверов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы снова нормально разговаривать с друзьями в голосовых комнатах Discord без лагов, бесконечных подключений и задержек.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Файл запуска discord_fix.bat (запуск в 1 клик), 2) Пак аватаров, баннеров и разделителей каналов, 3) Правила для сервера.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Нажмите правой кнопкой мыши на файл discord_fix.bat и выберите «Запуск от имени администратора». Голос заработает мгновенно!</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Мгновенное решение проблемы со связью в играх без платных подписок и сложных манипуляций.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Шаблон настроенных правил и авто-ролей для вашего Discord-сервера.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654453" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327120" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-magnet" data-cat="bots" data-search="telegram gifts stars fragment tracker python ton ⚡ таблица + скрипт отслеживания подарков tg (gifts) и курса stars удобная таблица и программа-радар, которая отслеживает лимитированные подарки в telegram и выгодный курс звезд stars. чтобы первыми успевать покупать редкие подарки, которые потом растут в цене, и не переплачивать за telegram stars.">
-        <div class="item-top">
-          <span class="badge-pill badge-magnet">⭐ 1 РУБЛЬ · ТЕСТ-ДРАЙВ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190144" alt="⚡ Таблица + Скрипт отслеживания Подарков TG (Gifts) и курса Stars" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Таблица + Скрипт отслеживания Подарков TG (Gifts) и курса Stars</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">1.20 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Удобная таблица и программа-радар, которая отслеживает лимитированные подарки в Telegram и выгодный курс звезд Stars.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы первыми успевать покупать редкие подарки, которые потом растут в цене, и не переплачивать за Telegram Stars.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Интерактивная Excel таблица с формулами, 2) Python-скрипт мониторинга тиражей подарков, 3) Калькулятор вывода на кошелек TON.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите python tg_gifts_tracker.py — скрипт сам начнет проверять наличие редких подарков и сообщать об изменениях.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Помогает экономить деньги при покупке Stars и зарабатывать на коллекционных подарках Telegram.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Список ботов и сервисов с самым выгодным курсом покупки Telegram Stars.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654443" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327116" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="telegram shop aiogram cryptobot stars bot ecommerce 🤖 готовый telegram магазин цифровых товаров (cryptobot + stars) полностью настроенный бот-магазин для telegram, который сам принимает деньги и сразу отправляет товар покупателю. чтобы продавать товары 24 часа в сутки, даже когда вы спите: бот сам примет оплату картой или криптой и скинет файл.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🔥 ТОП ПРОДАЖ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190138" alt="🤖 Готовый Telegram Магазин цифровых товаров (CryptoBot + Stars)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🤖 Готовый Telegram Магазин цифровых товаров (CryptoBot + Stars)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">179 ₽</span>
-          <span class="card-price-sub">/ 4 USDT · 100 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Полностью настроенный бот-магазин для Telegram, который сам принимает деньги и сразу отправляет товар покупателю.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы продавать товары 24 часа в сутки, даже когда вы спите: бот сам примет оплату картой или криптой и скинет файл.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Исходный код бота на Python aiogram 3, 2) Прием Telegram Stars и CryptoBot, 3) Админ-панель со статистикой и рассылкой, 4) База SQLite.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Вставьте токен вашего бота в файл .env и запустите python bot.py. Бот уже готов торговать!</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Готовый коммерческий магазин за 179 ₽ вместо 15 000 ₽ у фрилансеров.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Инструкция по бесплатному размещению бота на сервере, чтобы он работал вечно без включенного ПК.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643327" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327076" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="chatgpt tg bot telegram stars deepseek claude monetization ✨ свой chatgpt / claude / deepseek в tg с оплатой telegram stars готовый telegram-бот с искусственным интеллектом, где пользователи платят звездами stars за общение с нейросетью. запустить свой прибыльный сервис с ии в telegram и зарабатывать на платных подписках и генерациях текста и картинок.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⭐️ ХИТ 2026</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190148" alt="✨ Свой ChatGPT / Claude / DeepSeek в TG с оплатой Telegram Stars" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">✨ Свой ChatGPT / Claude / DeepSeek в TG с оплатой Telegram Stars</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">119 ₽</span>
-          <span class="card-price-sub">/ 3 USDT · 75 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Готовый Telegram-бот с искусственным интеллектом, где пользователи платят звездами Stars за общение с нейросетью.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Запустить свой прибыльный сервис с ИИ в Telegram и зарабатывать на платных подписках и генерациях текста и картинок.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Поддержка GPT-4o, Claude 3.5 и DeepSeek V3, 2) Модуль платных тарифов за Stars, 3) Память диалогов, 4) Реферальная программа.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Укажите ваши API-ключи в config.py и запустите бота. Прием звезд подключен автоматически.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Готовый бизнес по монетизации нейросетей в Telegram под ключ.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Набор из 10 готовых системных личностей (психолог, юрист, программист, таролог).</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80647561" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327122" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="parser scraping telegram telethon cloudflare bypass excel ⚡ универсальный парсер telegram каналов и сайтов (python) программа для автоматического сбора постов, цен, товаров и контактов с любых сайтов и каналов telegram в файл excel. чтобы не копировать данные вручную часами: программа сама соберет тысячи строк за пару минут и сохранит в аккуратную таблицу.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190149" alt="⚡ Универсальный Парсер Telegram каналов и сайтов (Python)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Универсальный Парсер Telegram каналов и сайтов (Python)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">155 ₽</span>
-          <span class="card-price-sub">/ 3 USDT · 80 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Программа для автоматического сбора постов, цен, товаров и контактов с любых сайтов и каналов Telegram в файл Excel.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы не копировать данные вручную часами: программа сама соберет тысячи строк за пару минут и сохранит в аккуратную таблицу.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Парсер Telegram каналов и чатов с защитой от бана, 2) Веб-парсер сайтов с обходом защиты Cloudflare, 3) Экспорт в Excel (.xlsx).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите python scraper.py, введите ссылку — готовая таблица с данными появится в папке data/export.xlsx.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Экономит десятки часов рутинного труда каждую неделю.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт фильтрации собранных пользователей по активности за последнюю неделю.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643328" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327124" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="funpay bot auto-raise auto-delivery seller daemon telegram 🤖 готовый бот автопродаж и автоподнятия funpay + telegram уведомления автоматический помощник для продавца на funpay, который держит вечный онлайн, поднимает лоты и выдает товары покупателям. чтобы продавать товары на funpay круглые сутки, занимать первые строчки в разделах и не сидеть у компьютера в ожидании клиентов.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🤖 БОТ-ПРОДАВЕЦ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190150" alt="🤖 Готовый Бот Автопродаж и Автоподнятия FunPay + Telegram уведомления" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🤖 Готовый Бот Автопродаж и Автоподнятия FunPay + Telegram уведомления</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">143 ₽</span>
-          <span class="card-price-sub">/ 3 USDT · 90 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Автоматический помощник для продавца на FunPay, который держит вечный онлайн, поднимает лоты и выдает товары покупателям.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы продавать товары на FunPay круглые сутки, занимать первые строчки в разделах и не сидеть у компьютера в ожидании клиентов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Демон автоподнятия всех категорий каждые 4 часа, 2) Модуль автовыдачи ссылок и архивов сразу после оплаты, 3) Алерты в Telegram.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Вставьте секретный ключ золотой сессии golden_key в creds.json и запустите python funpay_daemon.py.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Ваш магазин работает 24/7. Покупатель оплачивает — бот мгновенно отдает товар и просит отзыв 5 звезд.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Модуль автоматической допродажи сопутствующих товаров (апсейл) прямо в чате заказа.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80647562" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327125" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="autoposting cloner telegram channels telethon repost ⚡ автопостинг & клонер каналов telegram (python скрипт) скрипт, который автоматически копирует новые посты из чужих каналов в ваш канал, заменяя чужие ссылки на ваши. чтобы вести сетку каналов на полном автопилоте без необходимости писать посты вручную каждый день.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190151" alt="⚡ Автопостинг & Клонер каналов Telegram (Python скрипт)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Автопостинг & Клонер каналов Telegram (Python скрипт)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">107 ₽</span>
-          <span class="card-price-sub">/ 3 USDT · 70 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Скрипт, который автоматически копирует новые посты из чужих каналов в ваш канал, заменяя чужие ссылки на ваши.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы вести сетку каналов на полном автопилоте без необходимости писать посты вручную каждый день.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Скрипт мгновенного перехвата постов, 2) Авто-удаление чужих водяных знаков и рекламных ссылок, 3) Постинг по расписанию.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Укажите ID каналов-доноров и токен вашего канала в config.json — посты начнут выходить автоматически.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Позволяет вести 5-10 каналов одновременно одному человеку без затрат на копирайтеров.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Интеграция с GPT для автоматического уникального пересказа текста постов перед публикацией.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654582" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327128" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="bots" data-search="discord bot moderation slash commands tickets roles ⚡ discord бот-модератор: автовыдача ролей, логирование и тикеты бот-охранник и администратор для сервера discord, который следит за порядком, выдает роли новичкам и открывает тикеты. чтобы на вашем сервере был идеальный порядок: защита от спама, авто-роли по кнопкам и удобная служба поддержки.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190153" alt="⚡ Discord бот-модератор: автовыдача ролей, логирование и тикеты" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Discord бот-модератор: автовыдача ролей, логирование и тикеты</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">116 ₽</span>
-          <span class="card-price-sub">/ 3 USDT · 75 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Бот-охранник и администратор для сервера Discord, который следит за порядком, выдает роли новичкам и открывает тикеты.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы на вашем сервере был идеальный порядок: защита от спама, авто-роли по кнопкам и удобная служба поддержки.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Исходный код бота на discord.py со слэш-командами, 2) Тикет-система тикетов, 3) Журнал аудита действий участников.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Укажите токен бота в файле .env и запустите python bot.py. На сервере появятся интерактивные кнопки.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Профессиональное оформление сервера как у крупных игровых и IT-проектов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Готовый шаблон красивых Embed-карточек с правилами и навигацией по серверу.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643354" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327132" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="ai" data-search="claude code mcp skills cursor windsurf subagents prompts ☘️ 500+ ai skills & mcp серверов для claude code, cursor и windsurf огромная библиотека готовых навыков и подключений для claude code и cursor, обучающая ии профессиональной разработке. чтобы claude и cursor могли сами подключаться к базам данных, тестировать программы, искать баги и писать полноценный софт.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">☘️ ХИТ ОКТЯБРЯ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190140" alt="☘️ 500+ AI Skills & MCP Серверов для Claude Code, Cursor и Windsurf" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">☘️ 500+ AI Skills & MCP Серверов для Claude Code, Cursor и Windsurf</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">83 ₽</span>
-          <span class="card-price-sub">/ 2 USDT · 50 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Огромная библиотека готовых навыков и подключений для Claude Code и Cursor, обучающая ИИ профессиональной разработке.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы Claude и Cursor могли сами подключаться к базам данных, тестировать программы, искать баги и писать полноценный софт.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) 500+ файлов навыков SKILL.md по 6 направлениям, 2) Конфигурации mcpServers (Postgres, GitHub, Puppeteer, Браузер).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Скопируйте нужные навыки в папку ~/.claude/skills/ — нейросеть сразу научится новым трюкам.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Превращает ИИ-помощника в полноценную слаженную команду инженеров.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Шпаргалка горячих клавиш и скрытых команд запуска Claude Code CLI.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80647558" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327078" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="ai" data-search="claude code subagents multi-agent frontend backend qa 🤖 claude code subagents: frontend • backend • qa • reviewer команда из 4 специализированных виртуальных агентов, где каждый отвечает за свою часть работы: верстка, сервер, тесты и проверка. один ии часто путается в больших проектах. команда субагентов делает проект без ошибок за счет взаимного контроля.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🤖 Claude Code Subagents: Frontend • Backend • QA • Reviewer</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">90 ₽</span>
-          <span class="card-price-sub">/ 2 USDT · 55 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Команда из 4 специализированных виртуальных агентов, где каждый отвечает за свою часть работы: верстка, сервер, тесты и проверка.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Один ИИ часто путается в больших проектах. Команда субагентов делает проект без ошибок за счет взаимного контроля.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) 4 настроенных промпта субагентов, 2) Правила передачи задач между ними, 3) Шаблоны запуска через консоль.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Подключите файл конфигурации согласно простой инструкции из архива.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Сложные приложения создаются в 2-3 раза быстрее с автоматическим тестированием каждого шага.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Набор тестов для автоматической валидации качества кода после каждого субагента.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654579" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="ai" data-search="claude code hooks git hooks pytest lint guardrails 🪝 claude code hooks: format • pytest • lint • guardrails автоматические сторожевые скрипты, которые запрещают ии портить форматирование кода, удалять тесты или сливать пароли. чтобы быть уверенным, что нейросеть случайно не сломает рабочий проект и не закоммитит секретные ключи в открытый доступ.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🪝 Claude Code Hooks: Format • Pytest • Lint • Guardrails</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">67 ₽</span>
-          <span class="card-price-sub">/ 2 USDT · 45 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Автоматические сторожевые скрипты, которые запрещают ИИ портить форматирование кода, удалять тесты или сливать пароли.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы быть уверенным, что нейросеть случайно не сломает рабочий проект и не закоммитит секретные ключи в открытый доступ.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Хуки проверки тестов перед сохранением, 2) Авто-форматирование кода, 3) Блокировщик записи в важные файлы (.env).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Поместите файлы хуков в папку .claude/hooks/ — они начнут защищать проект автоматически.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Полная безопасность и защита от случайных ошибок нейросети.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт быстрого сканирования всего репозитория на случайную утечку паролей.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654577" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="ai" data-search="claude code commands slash commands cli shortcuts ⌨️ claude code custom commands: review • bugfix • commit быстрые короткие команды в консоли (слэш-команды), заменяющие длинные объяснения для claude code. вместо того чтобы печатать длинный текст, вы просто пишете /review или /bugfix — и ии сразу делает именно то, что нужно.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">⌨️ Claude Code Custom Commands: Review • Bugfix • Commit</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">56 ₽</span>
-          <span class="card-price-sub">/ 1.5 USDT · 35 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Быстрые короткие команды в консоли (слэш-команды), заменяющие длинные объяснения для Claude Code.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Вместо того чтобы печатать длинный текст, вы просто пишете /review или /bugfix — и ИИ сразу делает именно то, что нужно.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Набор команд /review, /bugfix, /commit, 2) Инструкция добавления своих собственных команд за 1 минуту.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Скопируйте файл commands.json в корень вашего рабочего каталога.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Ускоряет ежедневную работу за компьютером в несколько раз.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Чит-лист с полезными горячими клавишами и алиасами для терминала.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654576" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="ai" data-search="chatgpt bypass errors fix openai access denied unblock 🔓 обход 40 сценариев блокировок chatgpt & openai: скрипт + гайд понятная энциклопедия решений для 40 самых частых ошибок chatgpt (cloudflare 1020, something went wrong, access denied). чтобы навсегда забыть про белый экран, бесконечную загрузку и невозможность войти в свой аккаунт chatgpt.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🔓 Обход 40 сценариев блокировок ChatGPT & OpenAI: Скрипт + Гайд</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">23 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Понятная энциклопедия решений для 40 самых частых ошибок ChatGPT (Cloudflare 1020, Something went wrong, Access Denied).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы навсегда забыть про белый экран, бесконечную загрузку и невозможность войти в свой аккаунт ChatGPT.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Интерактивный навигатор по ошибкам, 2) Скрипт проверки пинга и смены DNS на быстрый, 3) Чеклист настроек браузера.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Откройте страницу в браузере, кликните на текст вашей ошибки — сразу увидите 1-минутное решение со скриншотом.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Экономит нервы и время, когда ChatGPT срочно нужен для работы или учебы.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Список расширений Chrome, которые гарантированно не вызывают блокировок OpenAI.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654596" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="vpn" data-search="vpn vless xray reality setup privacy bypass rkn 🛡️ настройка своего vless / xray vpn сервера за 5 минут: гайд + скрипт простая инструкция и скрипт для запуска своего быстрого приватного vpn на собственном сервере за копейки. публичные бесплатные vpn тормозят, крадут пароли и постоянно блокируются. свой личный vpn работает всегда и летает на скорости 1 гбит/с.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🛡️ БЕЗОПАСНОСТЬ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190154" alt="🛡️ Настройка своего VLESS / Xray VPN сервера за 5 минут: Гайд + Скрипт" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🛡️ Настройка своего VLESS / Xray VPN сервера за 5 минут: Гайд + Скрипт</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">35 ₽</span>
-          <span class="card-price-sub">/ 1 USDT · 25 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Простая инструкция и скрипт для запуска своего быстрого приватного VPN на собственном сервере за копейки.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Публичные бесплатные VPN тормозят, крадут пароли и постоянно блокируются. Свой личный VPN работает всегда и летает на скорости 1 Гбит/с.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Команда авто-установки Xray Core, 2) Автоматическая генерация QR-кода для телефона, 3) Список бесплатных приложений.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Подключитесь к серверу, вставьте 1 строчку текста — через 2 минуты на экране появится QR-код для телефона. Навели камеру — VPN включился!</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Личный VPN для всей семьи за 100 рублей в месяц вместо дорогих коммерческих подписок по 500-1000 ₽.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Инструкция, как подключить до 10 устройств (компьютеры, смарт-ТВ, планшеты) к одному серверу.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654599" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327134" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="vpn" data-search="devops hosting docker systemd telegram bot 24-7 🚀 хостинг тг-бота на сервере 24/7: systemd, docker, автоперезапуск готовые файлы-запускатели для сервера, чтобы ваш telegram-бот работал круглые сутки и сам оживал, если сервер перезагрузился. чтобы бот не выключался, когда вы закрываете ноутбук или выключаете домашний компьютер.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🚀 ДЛЯ СЕРВЕРА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190155" alt="🚀 Хостинг ТГ-бота на сервере 24/7: Systemd, Docker, Автоперезапуск" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🚀 Хостинг ТГ-бота на сервере 24/7: Systemd, Docker, Автоперезапуск</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">54 ₽</span>
-          <span class="card-price-sub">/ 1.5 USDT · 35 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Готовые файлы-запускатели для сервера, чтобы ваш Telegram-бот работал круглые сутки и сам оживал, если сервер перезагрузился.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы бот не выключался, когда вы закрываете ноутбук или выключаете домашний компьютер.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Готовый файл службы systemd, 2) Конфигурации Docker и Docker Compose, 3) Скрипт оповещения о перезагрузках в Telegram.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Замените имя папки на вашу в файле службы и введите команду запуска из инструкции.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Профессиональный деплой бота на сервере без необходимости учить системное администрирование.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Скрипт автоматической отправки сообщения в Telegram, если на сервере заканчивается свободное место.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654590" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327138" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="vpn" data-search="telegram errors fix aiogram floodwait getupdates debugging 🔧 скорая помощь telegram-ботам: гайд по исправлению ошибок сборник готовых решений для 25 самых частых фатальных ошибок при создании ботов на python (aiogram / telebot). бот упал с ошибкой conflict: terminated by other getupdates или floodwait? гайд показывает, как исправить это в 2 строчки.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🔧 СКОРАЯ ПОМОЩЬ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190156" alt="🔧 Скорая помощь Telegram-ботам: Гайд по исправлению ошибок" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🔧 Скорая помощь Telegram-ботам: Гайд по исправлению ошибок</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">47 ₽</span>
-          <span class="card-price-sub">/ 1.5 USDT · 30 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Сборник готовых решений для 25 самых частых фатальных ошибок при создании ботов на Python (aiogram / telebot).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Бот упал с ошибкой Conflict: terminated by other getUpdates или FloodWait? Гайд показывает, как исправить это в 2 строчки.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Каталог из 25 разобранных ошибок с готовым правильным кодом, 2) Модуль защиты от спам-атак на бота.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Найдите текст вашей ошибки в оглавлении — скопируйте исправленный фрагмент кода в ваш проект.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Спасает от многочасового гугления и мучений при отладке ботов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Готовый модуль троттлинга (ограничения спама от пользователей) для aiogram 3.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80654588" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327142" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="web3" data-search="web3 onchain graph forensics bounty scanner base solana 🔍 on-chain payout graph & crypto bounty scanner (python cli) инструмент визуализации, который рисует красивую интерактивную карту перемещения криптовалюты между кошельками. чтобы видеть, кто кому отправлял деньги, где осели выплаты и какие кошельки связаны между собой.">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">🔍 ОНЧЕЙН ГРАФ</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190158" alt="🔍 On-Chain Payout Graph & Crypto Bounty Scanner (Python CLI)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">🔍 On-Chain Payout Graph & Crypto Bounty Scanner (Python CLI)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">179 ₽</span>
-          <span class="card-price-sub">/ 4 USDT · 100 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Инструмент визуализации, который рисует красивую интерактивную карту перемещения криптовалюты между кошельками.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы видеть, кто кому отправлял деньги, где осели выплаты и какие кошельки связаны между собой.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Сканер блокчейнов Base, Solana и Arbitrum, 2) Генератор интерактивного HTML-графа с узлами и связями, 3) Модуль сверки балансов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Введите команду: python graph.py --tx-hash 0x... — в браузере откроется цветная карта переводов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Профессиональный инструмент ончейн-детектива и баунти-хантера на вашем ПК.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Каталог проверенных репозиториев GitHub с регулярными выплатами за решение задач в крипте.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80647575" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327145" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="web3" data-search="crypto analytics holders gini solana evm dex liquidity ⚡ скрипт крипто-аналитики кошельков и пулов (solana & evm) программа анализа токенов, которая показывает, кто держит монеты и не собираются ли создатели украсть деньги (rugpull). чтобы не терять деньги на скам-токенах и видеть реальные объемы покупок крупными инвесторами («китами»).">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190159" alt="⚡ Скрипт крипто-аналитики кошельков и пулов (Solana & EVM)" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ Скрипт крипто-аналитики кошельков и пулов (Solana & EVM)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">243 ₽</span>
-          <span class="card-price-sub">/ 5 USDT · 150 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Программа анализа токенов, которая показывает, кто держит монеты и не собираются ли создатели украсть деньги (Rugpull).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы не терять деньги на скам-токенах и видеть реальные объемы покупок крупными инвесторами («китами»).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Расчет концентрации токенов у топ-холдеров, 2) Проверка сожжена ли ликвидность, 3) Генерация отчета в PDF и HTML.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Запустите python holder_census.py --token <АДРЕС> — получите полный аудит токена за 10 секунд.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Защищает ваш капитал при инвестициях в новые токены на ранней стадии.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Список кошельков известных маркетмейкеров для отслеживания умных денег.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643339" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327149" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item " data-cat="web3" data-search="ui kit web3 frontend components html5 css3 svg tilt ⚡ 10 интерактивных web3/saas ui-компонентов & svg kit набор из 10 готовых потрясающе красивых темных карточек, графиков и виджетов оплаты для современных сайтов. сделать свой сайт дорогим, стильным и интерактивным (с 3d наклонами при наведении мышки и неоновыми эффектами).">
-        <div class="item-top">
-          <span class="badge-pill badge-hot">⚡ АВТОВЫДАЧА</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <div class="card-cover-wrapper">
-          <img src="https://digiseller.mycdn.ink/imgwebp.ashx?idp=11190160" alt="⚡ 10 интерактивных Web3/SaaS UI-компонентов & SVG Kit" class="card-cover-img" loading="lazy">
-        </div>
-        <h3 class="card-title">⚡ 10 интерактивных Web3/SaaS UI-компонентов & SVG Kit</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">121 ₽</span>
-          <span class="card-price-sub">/ 2.5 USDT · 60 ⭐️ Stars</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Набор из 10 готовых потрясающе красивых темных карточек, графиков и виджетов оплаты для современных сайтов.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Сделать свой сайт дорогим, стильным и интерактивным (с 3D наклонами при наведении мышки и неоновыми эффектами).</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) 3D Tilt карточки, 2) Бруталистский крипто-чекаут, 3) Бегущая строка котировок, 4) Чистый HTML/CSS/JS без тяжелых библиотек.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Откройте gallery.html в браузере или скопируйте нужный блок кода на ваш сайт на React, Vue или чистом HTML.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Экономит недели работы веб-дизайнера и верстальщика.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Коллекция анимированных SVG спиннеров загрузки и векторных крипто-иконок.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643337" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/itm/6327153" target="_blank" rel="noopener">
-            💳 Купить на Plati.Market (Мгновенно)
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-service" data-cat="services" data-search="service telegram bot custom order python development 🔥 сделаю telegram бота под ключ за 30 минут (магазины, ии, парсинг) я лично напишу работающего telegram-бота конкретно под вашу задачу, настрою оплату и запущу на сервере. если вам нужен бот с уникальными кнопками и функциями прямо сейчас, но нет времени учиться программированию.">
-        <div class="item-top">
-          <span class="badge-pill badge-service">🔥 УСЛУГА ЗА 30 МИН</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🔥 Сделаю Telegram бота под ключ за 30 минут (Магазины, ИИ, Парсинг)</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">456 ₽</span>
-          <span class="card-price-sub">/ Индивидуальный заказ</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Я лично напишу работающего Telegram-бота конкретно под вашу задачу, настрою оплату и запущу на сервере.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Если вам нужен бот с уникальными кнопками и функциями прямо сейчас, но нет времени учиться программированию.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Готовый бот на Python, 2) Подключение платежей (карты РФ, Stars, Крипта), 3) Размещение на сервере, 4) 14 дней гарантии.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Напишите в чат FunPay или Telegram ваше пожелание простыми словами — я сразу приступаю к разработке.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Быстрая разработка за 30 минут по честной цене без посредников.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Бесплатная техническая поддержка и мелкие правки в течение двух недель после сдачи.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643342" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-service" data-cat="services" data-search="service python script parser automation custom coding 🔥 напишу любой python скрипт / парсер сайтов и tg / автоматизация написание программы на заказ для решения любой вашей задачи: собрать данные с сайта, переслать файлы, автоматизировать рутину. чтобы избавиться от механической монотонной работы за компьютером и доверить ее быстрой программе.">
-        <div class="item-top">
-          <span class="badge-pill badge-service">🔥 УСЛУГА ЗА 30 МИН</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🔥 Напишу любой Python скрипт / Парсер сайтов и TG / Автоматизация</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">420 ₽</span>
-          <span class="card-price-sub">/ Индивидуальный заказ</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Написание программы на заказ для решения любой вашей задачи: собрать данные с сайта, переслать файлы, автоматизировать рутину.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы избавиться от механической монотонной работы за компьютером и доверить ее быстрой программе.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Полностью рабочий скрипт, 2) Запуск в 1 клик, 3) Понятная инструкция со стрелочками, 4) Проверка работы перед оплатой.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Опишите задачу в свободной форме — через 30-40 минут получаете готовый результат.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Решение вашей задачи здесь и сейчас без долгих ожиданий.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Видео-инструкция по запуску программы именно на вашем компьютере.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643343" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-service" data-cat="services" data-search="service code repair bugfix python javascript react help 🔥 помощь с кодом (python, js, ts, react, sql): исправлю баг срочно срочная помощь программиста: найду и исправлю ошибку в вашей программе, помогу запустить чужой проект или сдать домашку/лабу. если код выдает ошибку, программа не запускается, а дедлайн горит прямо сейчас.">
-        <div class="item-top">
-          <span class="badge-pill badge-service">🔥 УСЛУГА ЗА 20 МИН</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🔥 Помощь с кодом (Python, JS, TS, React, SQL): Исправлю баг срочно</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">348 ₽</span>
-          <span class="card-price-sub">/ Срочная помощь</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Срочная помощь программиста: найду и исправлю ошибку в вашей программе, помогу запустить чужой проект или сдать домашку/лабу.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Если код выдает ошибку, программа не запускается, а дедлайн горит прямо сейчас.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Исправленный и протестированный рабочий код, 2) Простое объяснение, почему возникала ошибка и как ее не допускать.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Скидывайте файл с ошибкой или ссылку на проект — нахожу и исправляю проблему за 15-20 минут.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Быстрое спасение от стресса и горящих сроков.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Бесплатная консультация по оптимизации и ускорению вашего приложения.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643346" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-
-      <article class="card-item featured-service" data-cat="services" data-search="service website landing mini app frontend web design 🔥 создам современный сайт / лендинг / telegram mini app за 1 час создание стильного, быстрого сайта или telegram mini app с современным дизайном, кнопками и формами заявок. чтобы презентовать свои услуги, продавать товары или запустить красивую страницу проекта в интернете.">
-        <div class="item-top">
-          <span class="badge-pill badge-service">🔥 УСЛУГА ЗА 1 ЧАС</span>
-          <span style="font-size: 11px; color: var(--neon-emerald); font-family: var(--mono); font-weight: 700;">⚡ Мгновенно 24/7</span>
-        </div>
-        
-        <h3 class="card-title">🔥 Создам современный сайт / Лендинг / Telegram Mini App за 1 час</h3>
-        
-        <div class="card-pricing">
-          <span class="card-price-main">588 ₽</span>
-          <span class="card-price-sub">/ Быстрый запуск</span>
-        </div>
-
-        <div class="card-specs">
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-cyan);">💡 Что это:</span>
-            <span class="spec-val" style="color: #f1f5f9; font-weight: 500;">Создание стильного, быстрого сайта или Telegram Mini App с современным дизайном, кнопками и формами заявок.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #f59e0b;">🎯 Зачем вам:</span>
-            <span class="spec-val">Чтобы презентовать свои услуги, продавать товары или запустить красивую страницу проекта в интернете.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-purple);">📦 В архиве:</span>
-            <span class="spec-val">1) Адаптивная верстка (идеально смотрится на телефонах и компьютерах), 2) Подключение к домену, 3) Бесплатный хостинг.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: var(--neon-emerald);">⚡ Запуск:</span>
-            <span class="spec-val">Напишите, о чем ваш проект — через 1 час сайт уже опубликован в интернете и доступен по ссылке.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #38bdf8;">💎 Ценность:</span>
-            <span class="spec-val">Полноценный стильный сайт всего за 588 ₽ вместо 20 000 ₽ у агентств.</span>
-          </div>
-          <div class="spec-row">
-            <span class="spec-label" style="color: #fb7185;">🎁 Подарок:</span>
-            <span class="spec-val">Настройка красивого превью со ссылкой и описанием при отправке сайта в Telegram и VK.</span>
-          </div>
-        </div>
-
-        <div class="card-btn-group">
-          <a class="btn-channel btn-funpay" href="https://funpay.com/lots/offer?id=80643344" target="_blank" rel="noopener">
-            🛒 Купить за Рубли (FunPay / СБП)
-          </a>
-          <a class="btn-channel btn-telegram" href="https://t.me/Shop010_bot" target="_blank" rel="noopener">
-            💬 Купить за USDT / Stars (@Shop010_bot)
-          </a>
-          <a class="btn-channel btn-digiseller" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-            💳 Оплатить на Plati.Market / Digiseller
-          </a>
-        </div>
-      </article>
-  </div>
-
-  <!-- BASE USDC ON-CHAIN PAYWALL EMBEDDED -->
-  <div class="hr"></div>
-
-  <section id="buy-usdc" style="margin-top: 40px;">
-    <span class="kicker">🪙 ON-CHAIN WEB3 CHECKOUT</span>
-    <h2>Оплата в USDC on Base (без посредников)</h2>
-    <p class="dim small">
-      Отправьте точную сумму в USDC на сети Base на указанный адрес и вставьте хэш транзакции. 
-      Страница самостоятельно проверит квитанцию через публичные RPC ноды Base и мгновенно откроет ссылку на архив и пароль AES-256.
-    </p>
-
-    <div class="checkout" id="checkout">
-      <div class="tabs" role="tablist">
-        <button class="tab on" data-product="forensics" role="tab">Forensics Pro · $19</button>
-        <button class="tab" data-product="paywall" role="tab">Paywall Pro · $29</button>
-        <button class="tab" data-product="alertbot" role="tab">Alert Bot Pro · $25</button>
-        <button class="tab" data-product="tgbot" role="tab">TG Shop Pro · $29</button>
-        <button class="tab" data-product="scraper" role="tab">Scraper Pro · $39</button>
-      </div>
-
-      <div class="payrow">
-        <div class="field" style="flex:2 1 380px">
-          <label>USDC (Base) адрес получателя</label>
-          <div class="addr"><span id="payto">0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</span><button class="copybtn" id="copyaddr">copy</button></div>
-        </div>
-        <div class="field" style="flex:0 1 160px">
-          <label>Сумма к оплате</label>
-          <div class="addr"><span id="amount">19.00 USDC</span></div>
-        </div>
-      </div>
-
-      <div class="payrow" style="margin-top:16px">
-        <div class="field" style="flex:3 1 420px">
-          <label>Хэш подтвержденной транзакции (Tx Hash)</label>
-          <input type="text" id="txhash" placeholder="0x… 64 hex characters" autocomplete="off" spellcheck="false">
-        </div>
-        <button class="btn primary" id="btnverify" style="padding:12px 20px">Проверить и разблокировать</button>
-      </div>
-
-      <div class="result" id="result" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <!-- FAQ & GUARANTEE -->
-  <section id="guarantee" style="margin-top: 60px;">
-    <h2>Часто задаваемые вопросы (FAQ) — простыми словами</h2>
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 20px;">
-      <div class="box">
-        <h3>⚡ Что происходит сразу после нажатия кнопки «Оплатить»?</h3>
-        <p class="small dim">В ту же секунду наш автоматический робот отправляет ссылку на архив с файлами прямо в чат заказа на FunPay, в Telegram-бота или на странице Plati.Market. Ждать ни минуты не нужно — выдача происходит в режиме 24/7/365.</p>
-      </div>
-
-      <div class="box">
-        <h3>🎁 Как получить обещанный подарок за отзыв?</h3>
-        <p class="small dim">После того как вы получили товар, поставьте отзыв 5 звезд и напишите слово <b>«БОНУС»</b> в диалоге. Наш бот funpay_daemon сразу же пришлет вам секретный подарочный архив с полезными скриптами.</p>
-      </div>
-
-      <div class="box">
-        <h3>💻 Справлюсь ли я, если совсем не разбираюсь в программировании?</h3>
-        <p class="small dim">Да, на 100%! Для гайдов, промптов и конфигов достаточно просто открыть файл или скопировать его в указанную папку по картинке. Для ботов и серверов написаны готовые команды запуска — скопировал, нажал Enter, всё заработало.</p>
-      </div>
-
-      <div class="box">
-        <h3>🛡️ Почему это безопасно и не содержит вирусов?</h3>
-        <p class="small dim">Мы отдаем вам чистый, открытый исходный код (Open Source / Source Available) без скрытых модулей и обфускации. Вы или любой специалист можете открыть файлы в блокноте и убедиться в их абсолютной чистоте и безопасности.</p>
-      </div>
-    </div>
-  </section>
-
-</main>
+</section>
 
 <footer>
-  <div class="wrap">
-    <div>
-      <div class="logo" style="margin-bottom:8px">⚡ tool<b>works</b> &amp; dev<b>store</b></div>
-      <div class="small">Премиальные IT-продукты с мгновенной автовыдачей 24/7 · FunPay (danilaonly) · Plati.Market (1481449) · Telegram @Shop010_bot</div>
-    </div>
-    <div class="fnav">
-      <a href="#catalog">Каталог</a>
-      <a href="https://funpay.com/users/21982357/" target="_blank" rel="noopener">FunPay Профиль</a>
-      <a href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">Plati.Market Магазин</a>
-      <a href="https://t.me/Shop010_bot" target="_blank" rel="noopener">Telegram @Shop010_bot</a>
-      <a href="https://github.com/9xj89gzrtw-hue" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://dev.to/9xj89gzrtwhue" target="_blank" rel="noopener">Dev.to Статьи</a>
-    </div>
+  <div class="wrap" style="padding:0">
+    <p style="margin:0 0 8px"><b>Data</b> — DefiLlama public APIs, snapshot 2026-10-26T01:28Z. <b>Adapter paths</b> — DefiLlama/dimension-adapters tree, master, 2026-10-27. <b>Audit source</b> — <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a>.</p>
+    <p style="margin:0 0 8px">Not affiliated with DefiLlama. We do not publish anything under someone else's name, we do not DM protocols with a price tag, and we do not open a patch for a feed whose source is genuinely zero. Read <a href="/defi-audit/">the method</a> before you buy anything — including the part where 10 out of 10 checked breaks were not bugs.</p>
+    <p style="margin:0">No cookies, no analytics, no fonts from a CDN. The only network calls this page makes are to Base RPC endpoints, and only after you ask it to verify something.</p>
   </div>
 </footer>
+</div>
 
 <script src="assets/verify.js"></script>
-<script src="assets/store.js"></script>
-
 <script>
-// Interactive Client-Side Search & Category Filter
-document.addEventListener("DOMContentLoaded", function() {
-  const searchInput = document.getElementById("store-search");
-  const catButtons = document.querySelectorAll(".cat-btn");
-  const cards = document.querySelectorAll(".card-item");
-  const visibleCount = document.getElementById("visible-count");
-  let activeCat = "all";
+/* ------------------------------------------------------------------ config */
+const CFG = Object.assign({}, DefiAudit.CONFIG, {
+  USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  REPO: "9xj89gzrtw-hue/defillama-fee-feed-audit",
+  PACK: "data/pack-76141eb480e838b9.json",
+  USED_KEY: "defiaudit.redeemed.v1"
+});
 
-  function filterCards() {
-    const query = (searchInput.value || "").trim().toLowerCase();
-    let count = 0;
+const $ = s => document.querySelector(s);
+const logEl = $("#log");
+const log = m => { logEl.textContent = m; };
+const short = a => a.slice(0, 6) + "…" + a.slice(-4);
+const fmt = n => new Intl.NumberFormat("en-US").format(n);
+const usd = n => "$" + new Intl.NumberFormat("en-US").format(n);
 
-    cards.forEach(card => {
-      const cardCat = card.getAttribute("data-cat");
-      const cardSearch = (card.getAttribute("data-search") || "").toLowerCase();
-      const catMatch = (activeCat === "all" || cardCat === activeCat);
-      const searchMatch = (!query || cardSearch.includes(query));
+/* ------------------------------------------------------------------ index */
+let ROWS = [], READY = false;
+fetch("data/checker.json").then(r => r.json()).then(j => {
+  ROWS = j.rows; READY = true;
+  render(ROWS, 12, "Showing the 12 largest measured holes. Type to filter.");
+  $("#hint").classList.add("hidden");
+}).catch(() => { $("#hint").textContent = "Could not load the index. Reload, or open data/checker.json directly."; });
 
-      if (catMatch && searchMatch) {
-        card.style.display = "flex";
-        count++;
-      } else {
-        card.style.display = "none";
-      }
-    });
+const chips = s => `<span class="chip ${s}">${s}</span>`;
 
-    if (visibleCount) {
-      visibleCount.textContent = count;
+function render(rows, limit, note) {
+  const tb = $("#results tbody");
+  const shown = rows.slice(0, limit);
+  tb.innerHTML = shown.map(r => {
+    const [name, slug, chains, status, last, dark, lost, tvl, cat] = r;
+    return `<tr>
+      <td><b>${esc(name)}</b><div class="small dim mono">${esc(slug)}</div></td>
+      <td>${chips(status)}</td>
+      <td class="small dim">${esc((chains || "").split(",").slice(0, 2).join(", "))}${chains.split(",").length > 2 ? " +" + (chains.split(",").length - 2) : ""}</td>
+      <td class="small mono">${last || "—"}</td>
+      <td class="small mono">${dark ? dark + "d" : "—"}</td>
+      <td class="mono" style="color:${lost > 1000 ? "var(--bad)" : lost > 0 ? "var(--warn)" : "var(--dim)"}">${lost ? usd(lost) : "—"}</td>
+      <td class="small mono dim">${tvl ? usd(tvl) : "—"}</td>
+      <td class="small dim">${esc(cat || "")}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="8" class="dim small" style="padding:20px 10px">No match. Try a shorter fragment, a chain name (base, arbitrum, solana) or a category (lending, dex).</td></tr>`;
+  $("#count").textContent = `${fmt(rows.length)} of ${fmt(ROWS.length)} rows${note ? " · " + note : ""}`;
+}
+
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+let qTimer;
+$("#q").addEventListener("input", e => {
+  clearTimeout(qTimer);
+  const raw = e.target.value.trim().toLowerCase();
+  qTimer = setTimeout(() => {
+    if (!raw) { if (READY) render(ROWS, 12, "top 12 by measured hole"); return; }
+    const terms = raw.split(/\s+/);
+    const hits = ROWS.filter(r => {
+      const hay = r.join(" ").toLowerCase();
+      return terms.every(t => hay.includes(t));
+    }).sort((a, b) => (b[6] || 0) - (a[6] || 0));
+    render(hits, 60, null);
+  }, 90);
+});
+
+/* ------------------------------------------------------------------ stats */
+fetch("data/checker.json").then(r => r.json()).then(j => {
+  const broken = j.rows.filter(r => r[3] === "BROKEN").length;
+  $("#s-silent").textContent = broken;
+  $("#s-hole").textContent = usd(3333964);
+});
+
+/* ------------------------------------------------------------------ chain */
+/* RPC + receipt parsing live in assets/verify.js — the same file the test suite
+   runs, so the page cannot drift from the verified logic. */
+const RPC = (method, params) => DefiAudit.rpc(method, params);
+const pad32 = DefiAudit.pad32;
+
+function usedHashes() { try { return JSON.parse(localStorage.getItem(CFG.USED_KEY) || "[]"); } catch { return []; } }
+function markUsed(h) { const a = usedHashes(); a.push(h); localStorage.setItem(CFG.USED_KEY, JSON.stringify(a.slice(-50))); }
+
+async function verifyTx(hash) {
+  log("receipt… eth_getTransactionReceipt");
+  const v = await DefiAudit.verify(hash, { usedHashes: usedHashes() });
+  log("•• receipt ok · block " + parseInt(v.receipt.blockNumber, 16) + " · USDC in: " + (Number(v.received) / 1e6).toFixed(6));
+  return v;
+}
+
+
+function unlockUI(v) {
+  markUsed(v.hash);
+  const block = parseInt(v.receipt.blockNumber, 16);
+  const paid = (Number(v.received) / 1e6).toFixed(2);
+  const unit = `<div class="box okbox" style="margin-top:14px">
+    <div><span class="ok-ico">✓ verified on Base</span> · block ${fmt(block)} · ${paid} USDC</div>
+    <div class="small dim mono" style="margin-top:6px;word-break:break-all">${v.hash}</div>
+  </div>`;
+
+  if (v.tier === "29") {
+    $("#unlock").innerHTML = unit + `
+      <div style="margin-top:14px">
+        <a href="${CFG.PACK}" download><button class="primary" style="width:100%">Download the 491-row diagnostics pack (JSON)</button></a>
+        <p class="small dim" style="margin-top:10px">Keep the file — the link is issued once per hash. Licence: single-team internal use. If you need a re-issue, mail the hash above.</p>
+      </div>`;
+  } else {
+    const body = encodeURIComponent(
+`PAID ORDER — adapter fix PR
+
+Protocol (name or slug):
+Transaction: ${v.hash}
+Amount: ${paid} USDC on Base
+Block: ${block}
+
+Please confirm the protocol above. Scope: one DefiLlama/dimension-adapters PR, harness output before/after, corrected daily figure, reproduction command.
+
+If the source genuinely returns zero, refund per the published policy.`);
+    $("#unlock").innerHTML = unit + `
+      <div style="margin-top:14px">
+        <a href="https://github.com/${CFG.REPO}/issues/new?labels=paid-order&title=${encodeURIComponent("PAID $99 — adapter fix PR")}&body=${body}" target="_blank" rel="noopener">
+          <button class="primary" style="width:100%">Open the priority order form</button></a>
+        <p class="small dim" style="margin-top:10px">Post the issue with the protocol name filled in. It is public and timestamped — that protects you more than any email thread. You can also take the pack above; at $99 both are included.</p>
+        <a href="${CFG.PACK}" download><button style="width:100%;margin-top:8px">Also download the diagnostics pack</button></a>
+      </div>`;
+  }
+  $("#unlock").scrollIntoView({ block: "nearest" });
+}
+
+$("#btnverify").addEventListener("click", async () => {
+  const btn = $("#btnverify");
+  btn.disabled = true; $("#unlock").innerHTML = "";
+  try { unlockUI(await verifyTx($("#txhash").value)); }
+  catch (e) {
+    log("");
+    $("#unlock").innerHTML = `<div class="box errbox" style="margin-top:14px">${esc(e.message)}</div>`;
+  } finally { btn.disabled = false; }
+});
+
+$("#txhash").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnverify").click(); });
+
+/* --------------------------------------------------------------- pay flow */
+async function pay(amountUnits) {
+  if (!window.ethereum) throw new Error("No injected wallet found. Copy the address above and pay from any wallet or exchange, then paste the hash here.");
+  log("wallet… eth_requestAccounts");
+  const [from] = await window.ethereum.request({ method: "eth_requestAccounts" });
+
+  const cid = await window.ethereum.request({ method: "eth_chainId" });
+  if (cid !== CFG.CHAIN_ID) {
+    log("switching to Base…");
+    try {
+      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CFG.CHAIN_ID }] });
+    } catch (e) {
+      if (e.code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{ chainId: CFG.CHAIN_ID, chainName: "Base", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: ["https://mainnet.base.org"], blockExplorerUrls: ["https://basescan.org"] }]
+        });
+      } else throw e;
     }
   }
 
-  searchInput.addEventListener("input", filterCards);
+  const data = DefiAudit.transferCalldata(amountUnits, CFG.PAY_TO);
+  log("sign… USDC transfer, " + (Number(amountUnits) / 1e6) + " USDC");
+  const hash = await window.ethereum.request({
+    method: "eth_sendTransaction",
+    params: [{ from, to: CFG.USDC, data, value: "0x0" }]
+  });
+  log("sent " + hash + "\nwaiting for the receipt…");
+  $("#txhash").value = hash;
 
-  catButtons.forEach(btn => {
-    btn.addEventListener("click", function() {
-      catButtons.forEach(b => b.classList.remove("active"));
-      this.classList.add("active");
-      activeCat = this.getAttribute("data-cat");
-      filterCards();
-    });
+  for (let i = 0; i < 40; i++) {
+    const rc = await RPC("eth_getTransactionReceipt", [hash]).catch(() => null);
+    if (rc) {
+      if (rc.status !== "0x1") throw new Error("The transfer reverted. Check that you have USDC on Base and a little ETH for gas.");
+      log("confirmed in block " + parseInt(rc.blockNumber, 16) + " — unlocking");
+      unlockUI({ receipt: rc, received: amountUnits, tier: amountUnits >= CFG.PRICES["99"] ? "99" : "29", hash: hash.toLowerCase() });
+      return;
+    }
+    await new Promise(r => setTimeout(r, 2500));
+  }
+  throw new Error("Sent, but no receipt after 100s. Your hash is in the box — press Verify again in a minute.");
+}
+
+document.querySelectorAll("[data-buy]").forEach(b => {
+  b.addEventListener("click", async () => {
+    const tier = b.dataset.buy;
+    const prev = b.textContent;
+    b.disabled = true; b.textContent = "waiting for wallet…"; $("#unlock").innerHTML = "";
+    try { await pay(CFG.PRICES[tier]); }
+    catch (e) {
+      log("");
+      $("#unlock").innerHTML = `<div class="box errbox" style="margin-top:14px">${esc(e.message || String(e))}</div>`;
+    } finally { b.disabled = false; b.textContent = prev; }
   });
 });
-</script>
 
+$("#btnpay").addEventListener("click", () => {
+  const box = document.querySelector('[data-buy="29"]');
+  box.scrollIntoView({ behavior: "smooth", block: "center" });
+  box.click();
+});
+
+/* --------------------------------------------------------------- addresses */
+$("#addr").textContent = short(CFG.PAY_TO);
+$("#tipaddr").textContent = CFG.PAY_TO;
+const copy = (txt, btn) => navigator.clipboard.writeText(txt).then(() => {
+  const p = btn.textContent; btn.textContent = "copied"; setTimeout(() => btn.textContent = p, 1400);
+});
+$("#copyaddr").addEventListener("click", e => copy(CFG.PAY_TO, e.target));
+$("#copytip").addEventListener("click", e => copy(CFG.PAY_TO, e.target));
+</script>
 </body>
 </html>
