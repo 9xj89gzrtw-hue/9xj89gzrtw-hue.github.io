@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archive Studio — локальный поиск по почте и документам</title>
+<meta name="description" content="Мгновенный поиск по архиву писем .eml/.mbox и документам .txt/.md/.csv/.json прямо в браузере. Файлы не покидают ваш компьютер.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Archive Studio — локальный поиск по почте и документам">
+<meta property="og:description" content="Поиск по 34 демо-документам, суммы, ИНН и реквизиты с цитатами. Файлы не уходят в сеть.">
+<meta property="og:url" content="https://9xj89gzrtw-hue.github.io/docsearch/">
+<meta name="theme-color" content="#1e4b3a">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h9l5 5v10.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 4v5h5"/><path d="M8.5 13.5h7"/><path d="M8.5 17h4.5"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Archive Studio</div>
+        <div class="brand-sub">Local document search</div>
+      </div>
+      <span class="pro-pill hidden" id="proPill">Pro</span>
+    </div>
+
+    <div class="side-label">Архив <span id="archiveCount">0 файлов</span></div>
+
+    <div class="drop" id="drop">
+      <p class="drop-title">Перетащите файлы сюда</p>
+      <p class="drop-hint">.eml, .mbox, .txt, .md, .csv, .json</p>
+      <div class="drop-actions">
+        <button class="mini-btn primary" id="pickBtn" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Выбрать
+        </button>
+        <button class="mini-btn" id="demoBtn" type="button">Демо-архив</button>
+      </div>
+      <input type="file" id="fileInput" multiple accept=".eml,.mbox,.txt,.md,.csv,.json" class="hidden">
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="stDocs">0</b><span>документов</span></div>
+      <div class="stat"><b id="stSize">0 KB</b><span>объём</span></div>
+    </div>
+
+    <div class="drop-actions index-actions" style="margin:0 0 14px">
+      <button class="mini-btn" id="saveIdx" type="button">Сохранить индекс</button>
+      <button class="mini-btn" id="loadIdx" type="button">Открыть</button>
+    </div>
+
+    <ul class="file-list" id="fileList"></ul>
+    <div class="empty-side" id="sideEmpty">Файлы обрабатываются в этом окне. Ни один байт не отправляется в сеть.</div>
+
+    <div class="side-foot">
+      <b>Приватно по умолчанию.</b><br>
+      Индекс живёт в памяти вкладки. Сохранение в браузере — только в Pro.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="search-wrap">
+        <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.2 4.2"/></svg>
+        <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Найти письмо, сумму, ИНН или пункт договора…">
+        <span class="kbd">⌘ K</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn quiet mobile-only" id="mobilePreviewBtn" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+          Документ
+        </button>
+        <button class="btn primary" id="proBtn" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7L12 3Z"/></svg>
+          Pro
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+      <section class="results-pane" id="resultsPane" aria-live="polite">
+        <div class="empty-state" id="emptyState">
+          <svg class="empty-mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="9" width="34" height="30" rx="3"/><path d="M7 17h34"/><path d="m13 24 5 4-5 4"/><path d="M23 32h12"/></svg>
+          <h1>Ответ уже есть в архиве</h1>
+          <p>Загрузите письма и документы — поиск построит индекс за долю секунды и покажет точную цитату со ссылкой на исходный файл.</p>
+          <div class="empty-actions">
+            <button class="btn primary" id="emptyDemo" type="button">Открыть демо-архив</button>
+            <button class="btn" id="emptyPick" type="button">Загрузить свои файлы</button>
+          </div>
+          <div class="suggest">
+            <h2>Что можно спросить</h2>
+            <div class="chips" id="chips">
+              <button class="chip" data-q="реквизиты СтройБетон">Реквизиты СтройБетон</button>
+              <button class="chip" data-q="ИНН ТехноСтрой">ИНН ТехноСтрой</button>
+              <button class="chip" data-q="сколько заплатили за бетон">Оплата бетона</button>
+              <button class="chip" data-q="пожарная безопасность Северный">Пожарная безопасность</button>
+              <button class="chip" data-q="срок сдачи Северный">Срок сдачи</button>
+              <button class="chip" data-q="аванс субподряд">Аванс субподряду</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultsBlock" class="hidden">
+          <div class="res-head">
+            <h2 class="res-title" id="resTitle">Результаты</h2>
+            <div class="res-meta" id="resMeta"></div>
+          </div>
+          <div class="filters" id="filters"></div>
+          <div id="resultList"></div>
+          <div class="pager" id="pager"></div>
+        </div>
+      </section>
+
+      <aside class="preview-pane" id="previewPane">
+        <div class="preview-empty" id="previewEmpty">
+          Выберите результат,<br>чтобы увидеть письмо целиком.
+        </div>
+        <div id="previewBody" class="hidden"></div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-bg" id="proModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="proTitle">
+    <button class="modal-close" id="proClose" type="button" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 id="proTitle">Archive Studio Pro</h2>
+    <p class="lead">Для рабочих архивов: договоры, переписка за годы, выгрузка реквизитов.</p>
+    <div class="price-line"><b>$15</b><span>USDC на Base · один платёж, без подписки</span></div>
+    <ul class="feature-list">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>До 10 000 писем и документов в одном индексе</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Сохранение индекса в IndexedDB — открыли и продолжили</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Экспорт реквизитов и договоров в CSV / Excel</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Справки по архиву через ваш собственный API-ключ</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Без лимита 25 файлов и без водяных знаков в выгрузке</li>
+    </ul>
+    <div class="pay-box">
+      <p class="pay-label">Адрес получателя · Base mainnet</p>
+      <div class="pay-addr" id="payAddr">0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</div>
+      <button class="copy-btn" id="copyAddr" type="button">Скопировать адрес</button>
+    </div>
+    <div class="field">
+      <label for="txHash">Хеш транзакции после оплаты</label>
+      <input id="txHash" placeholder="0x…" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn primary" id="verifyBtn" type="button">Проверить оплату и включить Pro</button>
+    <p class="status" id="payStatus"></p>
+    <p class="modal-note">Платёж проверяется по журналу Transfer контракта USDC на Base. Никакой регистрации: подтверждение хранится в этом браузере. Если вы уже платили ранее, введите тот же хеш.</p>
+  </div>
+</div>
+
+<div class="modal-bg" id="llmModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="llmTitle">
+    <button class="modal-close" id="llmClose" type="button" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 id="llmTitle">Справка по архиву</h2>
+    <p class="lead">Запрос уходит напрямую в выбранный вами OpenAI-совместимый API. Ключ хранится только в этой вкладке.</p>
+    <div class="field">
+      <label for="llmEndpoint">Endpoint</label>
+      <input id="llmEndpoint" value="https://api.openai.com/v1" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label for="llmKey">API key</label>
+      <input id="llmKey" type="password" placeholder="sk-…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="llmModel">Модель</label>
+      <input id="llmModel" value="gpt-4o-mini" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn primary" id="llmRun" type="button">Составить справку</button>
+    <p class="status" id="llmStatus"></p>
+    <div id="llmAnswer" class="preview-body hidden" style="margin-top:14px;border-top:1px solid var(--line);padding-top:14px"></div>
+  </div>
+</div>
+
+<script src="demo.js"></script>
+<script src="../assets/unlock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

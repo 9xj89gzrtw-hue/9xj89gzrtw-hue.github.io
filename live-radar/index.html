@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Radar — Polymarket и Fragment в одном окне</title>
+<meta name="description" content="Живой радар публичных рынков Polymarket: ликвидность, спред, движение за 24 часа и оценка SNIPE / FRESH+GREEN. Калькулятор комиссий и Telegram-уведомления.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Live Radar — Polymarket и Fragment в одном окне">
+<meta property="og:description" content="Топ-10 рынков бесплатно, полный стол и CSV в Pro. Живые данные Gamma API и TonAPI.">
+<meta property="og:url" content="https://9xj89gzrtw-hue.github.io/live-radar/">
+<meta name="theme-color" content="#1d3b5c">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-in">
+    <div class="logo">
+      <div class="logo-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M22 12h-3M12 22v-3M2 12h3"/></svg>
+      </div>
+      <div>Live Radar<small>Polymarket · Fragment</small></div>
+    </div>
+    <nav class="nav" aria-label="Разделы">
+      <button id="tabMarkets" class="on" type="button">Рынки</button>
+      <button id="tabGifts" type="button">Gift desk</button>
+    </nav>
+    <div class="header-right">
+      <span class="live"><i class="dot" id="liveDot"></i><span id="liveText">live</span></span>
+      <button class="btn primary" id="proBtn" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7L12 3Z"/></svg>
+        Pro
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <h1>Что двигается прямо сейчас</h1>
+      <p>Публичные рынки Polymarket, пересчитанные в понятный скор: ликвидность, спред, импульс и свежесть. Без регистрации и API-ключей.</p>
+    </div>
+    <div class="head-right">
+      <div class="updated" id="updated">подключение…</div>
+      <button class="btn" id="refreshBtn" type="button">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>
+        Обновить
+      </button>
+    </div>
+  </div>
+
+  <section class="kpis" id="kpis" aria-label="Сводка">
+    <div class="kpi"><span>Рынков в скане</span><b id="kMarkets">—</b><small>активных</small></div>
+    <div class="kpi acc"><span>SNIPE ≥ 70</span><b id="kSnipe">—</b><small>кандидатов</small></div>
+    <div class="kpi green"><span>FRESH + GREEN</span><b id="kFresh">—</b><small>новых и растущих</small></div>
+    <div class="kpi"><span>Медианный спред</span><b id="kSpread">—</b><small>¢</small></div>
+  </section>
+
+  <div id="marketsView">
+    <div class="layout">
+      <section class="panel">
+        <div class="toolbar">
+          <div class="search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.2 4.2"/></svg>
+            <input id="q" type="search" placeholder="Найти рынок: выборы, биткоин, Fed…" autocomplete="off" spellcheck="false">
+          </div>
+          <select id="cat" aria-label="Категория">
+            <option value="all">Все категории</option>
+            <option value="Politics">Politics</option>
+            <option value="Crypto">Crypto</option>
+            <option value="Sports">Sports</option>
+            <option value="Economy">Economy</option>
+            <option value="Tech">Tech</option>
+            <option value="Culture">Culture</option>
+            <option value="Other">Other</option>
+          </select>
+          <select id="sortBy" aria-label="Сортировка">
+            <option value="score">По скору</option>
+            <option value="volume">По объёму 24ч</option>
+            <option value="liquidity">По ликвидности</option>
+            <option value="spread">По спреду</option>
+            <option value="change">По движению</option>
+          </select>
+          <label class="score-filter">мин. скор <input id="minScore" type="range" min="0" max="100" value="0" step="5"><span id="minScoreVal">0</span></label>
+          <button class="btn ghost" id="exportCsv" type="button" title="Экспорт всех строк (Pro)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+            CSV
+          </button>
+        </div>
+        <div id="error" class="error hidden"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="rank-h">#</th><th>Рынок</th><th class="col-hide">Категория</th><th>Цена</th><th class="chg-h">24ч</th>
+                <th class="col-hide">Ликвидность</th><th class="col-hide">Спред</th><th>Скор</th><th>Сигнал</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="lockedWrap" class="locked-wrap hidden">
+          <div id="lockedRows" class="blurred"></div>
+          <div class="lock-cta">
+            <b>Ещё <span id="lockedCount">0</span> рынков ниже</b>
+            <p>Pro снимает размытие, включает CSV и Telegram-уведомления.</p>
+            <button class="btn primary" id="proInline" type="button">Открыть всё · $14</button>
+          </div>
+        </div>
+        <div id="tableMeta" style="padding:9px 12px;border-top:1px solid var(--line);font-size:10.5px;color:var(--faint)"></div>
+      </section>
+
+      <aside class="side">
+        <section class="panel">
+          <h3>Калькулятор сделки</h3>
+          <div class="calc-row"><label for="calcStake">Ставка, $</label><input id="calcStake" type="number" min="0" step="10" value="1000"></div>
+          <div class="calc-row"><label for="calcEntry">Вход, ¢</label><input id="calcEntry" type="number" min="0.1" max="99" step="0.1" value="42"></div>
+          <div class="calc-row"><label for="calcExit">Выход, ¢</label><input id="calcExit" type="number" min="0.1" max="99" step="0.1" value="55"></div>
+          <div class="calc-row"><label for="calcFee">Комиссия, %</label><input id="calcFee" type="number" min="0" max="20" step="0.1" value="2"></div>
+          <div class="calc-out">
+            <div class="calc-line"><span>Валовая прибыль</span><b id="calcGross">$0.00</b></div>
+            <div class="calc-line"><span>Комиссии</span><b id="calcFees">$0.00</b></div>
+            <div class="calc-line big"><span>На руки</span><b id="calcNet">$0.00</b></div>
+            <div class="calc-line"><span>ROI</span><b id="calcRoi">0.0%</b></div>
+          </div>
+          <p class="calc-note">Комиссия берётся с оборота на входе и выходе. Расчёт справочный, не инвестиционная рекомендация.</p>
+        </section>
+
+        <section class="panel">
+          <h3>TON / USD · live</h3>
+          <div class="ticker"><b id="tonPrice">—</b><span>за 1 TON</span></div>
+          <div class="ticker-sub" id="tonSource">публичный курс TonAPI</div>
+          <p class="calc-note" style="margin-top:10px">Gift desk считает стоимость подарка и комиссию маркетплейса. Цену лота вводите вручную — Fragment не отдаёт её кросс-доменным запросом.</p>
+        </section>
+
+        <section class="panel">
+          <h3>Быстрый доступ</h3>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <button class="btn" id="tgBtn" type="button" style="justify-content:flex-start">Telegram-уведомления</button>
+            <a class="btn" href="https://polymarket.com/markets" target="_blank" rel="noopener" style="justify-content:flex-start;text-decoration:none">Все рынки на Polymarket</a>
+            <a class="btn" href="https://fragment.com/gifts" target="_blank" rel="noopener" style="justify-content:flex-start;text-decoration:none">Подарки на Fragment</a>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div id="giftsView" class="hidden">
+    <div class="layout">
+      <section class="panel" style="padding:18px">
+        <h2 style="font-size:16px;margin:0 0 4px;letter-spacing:-.3px">Gift desk</h2>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 16px;max-width:640px">Каталог популярных коллекций Telegram Gifts и живой курс TON. Цену лота и референсный floor введите из Fragment — калькулятор посчитает скидку, комиссию и точку безубытка.</p>
+        <div class="gift-grid" id="giftGrid"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px">
+          <div class="field" style="margin:0"><label for="gAsk">Ask, TON</label><input id="gAsk" type="number" min="0" step="0.1" value="24"></div>
+          <div class="field" style="margin:0"><label for="gFloor">Floor, TON</label><input id="gFloor" type="number" min="0" step="0.1" value="31"></div>
+          <div class="field" style="margin:0"><label for="gQty">Количество</label><input id="gQty" type="number" min="1" step="1" value="1"></div>
+          <div class="field" style="margin:0"><label for="gFee">Комиссия, %</label><input id="gFee" type="number" min="0" max="30" step="0.5" value="5"></div>
+        </div>
+        <div class="calc-out" style="max-width:560px">
+          <div class="calc-line"><span>Стоимость лота</span><b id="gCost">$0.00</b></div>
+          <div class="calc-line"><span>Скидка к floor</span><b id="gDiscount">0.0%</b></div>
+          <div class="calc-line"><span>Комиссия при продаже</span><b id="gFeeOut">$0.00</b></div>
+          <div class="calc-line big"><span>Прибыль при выходе в floor</span><b id="gProfit">$0.00</b></div>
+          <div class="calc-line"><span>Максимальная ставка</span><b id="gMax">0.0 TON</b></div>
+        </div>
+        <p class="gift-note" style="margin-top:12px">Курс TON обновляется при загрузке. Ссылки ведут на публичные страницы Fragment; сделки совершаются там же.</p>
+      </section>
+      <aside class="side">
+        <section class="panel">
+          <h3>Как читать Gift desk</h3>
+          <p style="font-size:11.5px;color:var(--ink2);line-height:1.55;margin:0 0 8px">Скидка считается к floor: чем ниже ask относительно floor, тем больше запас на комиссию и время продажи.</p>
+          <p style="font-size:11.5px;color:var(--ink2);line-height:1.55;margin:0">Максимальная ставка — цена, при которой вы выходите в ноль после комиссии 5% и фиксированного буфера 3%.</p>
+        </section>
+        <section class="panel">
+          <h3>Pro в Gift desk</h3>
+          <p style="font-size:11.5px;color:var(--muted);margin:0 0 9px">Единый Pro открывает обе вкладки: полную таблицу рынков, CSV и Telegram-уведомления.</p>
+          <button class="btn primary" id="proBtnGift" type="button" style="width:100%;justify-content:center">Открыть Pro · $14</button>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>Данные: Polymarket Gamma API · TonAPI · обновление раз в 60 секунд</span>
+    <span>Скор — эвристика, не рекомендация.</span>
+    <a href="https://9xj89gzrtw-hue.github.io/">Другие инструменты</a>
+  </div>
+</main>
+
+<div class="modal-bg" id="proModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="proTitle">
+    <button class="modal-close" id="proClose" type="button" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 id="proTitle">Live Radar Pro</h2>
+    <p class="lead">Полный стол, выгрузка и уведомления. Один платёж, без подписки.</p>
+    <div class="price-line"><b>$14</b><span>USDC на Base</span></div>
+    <ul class="feature-list">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Все рынки без размытия и лимита топ-10</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>CSV со всеми полями и скором</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Генератор Telegram-уведомлений по фильтру</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Экспорт снимка для cron или webhook</li>
+    </ul>
+    <div class="pay-box">
+      <p class="pay-label">Адрес получателя · Base mainnet</p>
+      <div class="pay-addr" id="payAddr">0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</div>
+      <button class="copy-btn" id="copyAddr" type="button">Скопировать адрес</button>
+    </div>
+    <div class="field"><label for="txHash">Хеш транзакции</label><input id="txHash" placeholder="0x…" autocomplete="off" spellcheck="false"></div>
+    <button class="btn primary" id="verifyBtn" type="button" style="width:100%;justify-content:center">Проверить оплату</button>
+    <p class="status" id="payStatus"></p>
+    <p class="modal-note">Проверка идёт по журналу Transfer USDC на Base. Подтверждение хранится в этом браузере; регистрация не нужна.</p>
+  </div>
+</div>
+
+<div class="modal-bg" id="detailModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="detailQ" id="detailModal">
+    <button class="modal-close" id="detailClose" type="button" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <p class="detail-kicker" id="detailKicker">Polymarket · рынок</p>
+    <h2 class="detail-q" id="detailQ">…</h2>
+    <div class="detail-meta" id="detailMeta"></div>
+    <div id="detailOutcomes"></div>
+    <div style="display:flex;gap:7px;margin-top:14px">
+      <a class="btn primary" id="detailLink" href="#" target="_blank" rel="noopener" style="flex:1;justify-content:center;text-decoration:none">Открыть на Polymarket</a>
+      <button class="btn" id="detailCopy" type="button">Скопировать</button>
+    </div>
+    <p class="modal-note">Скор и сигналы — расчёт по публичным полям Gamma API, не гарантия доходности.</p>
+  </div>
+</div>
+
+<div class="modal-bg" id="tgModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tgTitle">
+    <button class="modal-close" id="tgClose" type="button" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+    </button>
+    <h2 id="tgTitle">Telegram-уведомления</h2>
+    <p class="lead">Соберите готовый вызов Bot API. Никакой сервер не нужен: токен и chat_id остаются у вас.</p>
+    <div class="field"><label for="tgToken">Bot token</label><input id="tgToken" placeholder="123456:ABC…" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label for="tgChat">Chat ID</label><input id="tgChat" placeholder="-100…" autocomplete="off" spellcheck="false"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="field"><label for="tgMin">Мин. скор</label><input id="tgMin" type="number" min="0" max="100" value="70"></div>
+      <div class="field"><label for="tgCat">Категория</label><select id="tgCat"><option value="all">Все</option><option>Politics</option><option>Crypto</option><option>Sports</option><option>Economy</option><option>Tech</option><option>Culture</option></select></div>
+    </div>
+    <div class="field"><label for="tgPreview">Тело запроса</label><textarea id="tgPreview" readonly></textarea></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn primary" id="tgSend" type="button" style="flex:1;justify-content:center">Отправить тест</button>
+      <button class="btn" id="tgDownload" type="button">Скачать JSON</button>
+    </div>
+    <p class="status" id="tgStatus"></p>
+    <p class="modal-note">Telegram Bot API принимает запросы с CORS. Если браузер блокирует — используйте скачанный JSON в cron, Make или n8n.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(10px);background:#1d1f21;color:#fff;font-size:12px;padding:9px 14px;border-radius:8px;opacity:0;pointer-events:none;transition:.2s;z-index:80"></div>
+
+<script src="../assets/unlock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
