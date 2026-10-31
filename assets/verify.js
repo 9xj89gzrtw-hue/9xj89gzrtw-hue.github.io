@@ -18,7 +18,7 @@
       "https://base.llamarpc.com",
       "https://1rpc.io/base"
     ],
-    PRICES: { "29": 29000000n, "99": 99000000n }
+    PRICES: { "9": 9000000n, "12": 12000000n, "29": 29000000n, "99": 99000000n }
   };
 
   const TRANSFER =
@@ -59,6 +59,43 @@
     return total;
   }
 
+  /** Load a receipt and make sure it is a successful Base transaction. */
+  async function loadReceipt(hash, o) {
+    const clean = String(hash || "").trim();
+    if (!HASH_RE.test(clean))
+      throw new Error("That is not a transaction hash — a Base hash is 0x followed by 64 hex characters.");
+    const h = clean.toLowerCase();
+    if (o && o.usedHashes && o.usedHashes.includes(h))
+      throw new Error("This hash was already redeemed in this browser. Re-open the download link, or mail us the hash for a re-issue.");
+
+    const receipt = await rpc("eth_getTransactionReceipt", [h], { rpcs: o && o.rpcs });
+    if (!receipt)
+      throw new Error("No receipt yet. The transaction is unknown or still pending — wait for a confirmation and retry.");
+    if (receipt.status !== "0x1")
+      throw new Error("That transaction reverted (status 0). Nothing was transferred, so nothing unlocks.");
+    return { receipt, hash: h };
+  }
+
+  /**
+   * Verify that a transaction paid at least `usd` USDC to our Base address.
+   * Used by the fixed-price tools ($9, $12) that have a single tier.
+   */
+  async function verifyAtLeast(hash, usd, opts) {
+    const o = opts || {};
+    const cfg = Object.assign({}, CONFIG, o.config || {});
+    const min = BigInt(Math.round(Number(usd) * 1e6));
+    if (!(min > 0n)) throw new Error("No price configured for that product.");
+    const { receipt, hash: h } = await loadReceipt(hash, o);
+    const received = sumUsdcIn(receipt, cfg.PAY_TO);
+    if (received === 0n)
+      throw new Error("No USDC transfer to " + cfg.PAY_TO.slice(0, 6) + "…" + cfg.PAY_TO.slice(-4) +
+        " in that transaction. If you paid from an exchange, the withdrawal hash is the exchange's — find the transfer it produced, or pay directly from a wallet.");
+    if (received < min)
+      throw new Error("This transaction carried " + Number(received) / 1e6 +
+        " USDC, and the price is " + Number(min) / 1e6 + " USDC. Send the difference and verify the second hash.");
+    return { receipt, received, hash: h };
+  }
+
   /**
    * Verify a Base tx hash and decide which tier it unlocks.
    * Returns {receipt, received, tier, hash} or throws an Error with a
@@ -67,19 +104,7 @@
   async function verify(hash, opts) {
     const o = opts || {};
     const cfg = Object.assign({}, CONFIG, o.config || {});
-    const clean = String(hash || "").trim();
-    if (!HASH_RE.test(clean))
-      throw new Error("That is not a transaction hash — a Base hash is 0x followed by 64 hex characters.");
-    const h = clean.toLowerCase();
-    if (o.usedHashes && o.usedHashes.includes(h))
-      throw new Error("This hash was already redeemed in this browser. Re-open the download link, or mail us the hash for a re-issue.");
-
-    const receipt = await rpc("eth_getTransactionReceipt", [h], { rpcs: o.rpcs });
-    if (!receipt)
-      throw new Error("No receipt yet. The transaction is unknown or still pending — wait for a confirmation and retry.");
-    if (receipt.status !== "0x1")
-      throw new Error("That transaction reverted (status 0). Nothing was transferred, so nothing unlocks.");
-
+    const { receipt, hash: h } = await loadReceipt(hash, o);
     const received = sumUsdcIn(receipt, cfg.PAY_TO);
     if (received === 0n)
       throw new Error("No USDC transfer to " + cfg.PAY_TO.slice(0, 6) + "…" + cfg.PAY_TO.slice(-4) +
@@ -100,5 +125,5 @@
     return "0xa9059cbb" + to.padStart(64, "0") + BigInt(amountUnits).toString(16).padStart(64, "0");
   }
 
-  return { CONFIG, verify, sumUsdcIn, transferCalldata, rpc, TRANSFER, pad32 };
+  return { CONFIG, verify, verifyAtLeast, loadReceipt, sumUsdcIn, transferCalldata, rpc, TRANSFER, pad32 };
 });

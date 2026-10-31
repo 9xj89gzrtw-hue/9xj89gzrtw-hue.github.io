@@ -70,6 +70,16 @@ const FIXTURE_TX = "0xd27af909788e20f66ac57e2e4f49c0c610fdbf5d6ff20066669076e770
     () => A.verify(FIXTURE_TX, { config: { PAY_TO: recipient, PRICES: { "29": amount + 1n, "99": amount + 2n } } }),
     /under the \$29 minimum/);
 
+  const atLeast = await A.verifyAtLeast(FIXTURE_TX, 0.01, {
+    config: { PAY_TO: recipient }
+  });
+  ok("verifyAtLeast() accepts a single-tier price below the amount", atLeast.received === amount, String(atLeast.received));
+
+  await throws("verifyAtLeast() rejects an amount below the price",
+    () => A.verifyAtLeast(FIXTURE_TX, 1, { config: { PAY_TO: recipient } }), /carried 0.02 USDC/);
+
+  await throws("verifyAtLeast() rejects a bad price", () => A.verifyAtLeast(FIXTURE_TX, 0), /No price configured/);
+
   await throws("unknown hash gives a clear message",
     () => A.verify("0x" + "b".repeat(64)), /No receipt yet|unknown or still pending/);
 

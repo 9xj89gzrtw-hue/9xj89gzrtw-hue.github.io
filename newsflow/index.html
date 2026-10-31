@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NewsFlow Studio — daily digests from RSS and Telegram sources</title>
+<meta name="description" content="Collect public RSS feeds and Telegram channels in your browser, remove duplicates and ads, and publish a daily digest to Telegram or VK. Free to start.">
+<link rel="canonical" href="https://9xj89gzrtw-hue.github.io/newsflow/">
+<meta property="og:title" content="NewsFlow Studio">
+<meta property="og:description" content="Turn public sources into a clean daily digest. Runs in the browser, no account needed.">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <rect x="3" y="3" width="18" height="18" rx="4.5"></rect>
+        <path d="M7.5 9h5M7.5 12.5h9M7.5 16h6"></path>
+      </svg>
+      NewsFlow Studio
+    </a>
+    <nav class="nav">
+      <a href="#app">Studio</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a class="nav-cta" href="#app">Start free</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="pulse"></span> Free plan, no account, no install</span>
+      <h1>Your sources, turned into one clean post.</h1>
+      <p class="lede">
+        NewsFlow reads public RSS feeds and Telegram channels, drops duplicates and promotional noise,
+        and writes a digest you can publish in Telegram or VK.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#app">Build today’s digest</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="hero-note small muted">Everything runs in this tab. Sources stay on your device.</p>
+    </div>
+  </section>
+
+  <section id="app" class="app-section">
+    <div class="wrap">
+      <div class="app-head">
+        <div>
+          <h2>Studio</h2>
+          <p class="small muted">Choose sources, collect, edit, publish.</p>
+        </div>
+        <div class="app-head-actions">
+          <span class="badge" id="quota-badge">5 of 5 posts left today</span>
+          <button class="btn btn-ghost btn-sm" type="button" id="btn-export" data-pro-only>Export plan</button>
+          <button class="btn btn-ghost btn-sm" type="button" id="btn-schedule" data-pro-only>Schedule</button>
+          <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="newsflow" data-price="12" data-name="NewsFlow Pro" data-sub="50 sources, scheduling, VK and Shorts, exports.">Pro</button>
+        </div>
+      </div>
+
+      <div class="studio card">
+        <div class="studio-bar">
+          <div class="source-list" id="source-chips" aria-label="Sources"></div>
+          <div class="studio-bar-right">
+            <button class="btn btn-primary btn-sm" type="button" id="btn-collect">Collect stories</button>
+          </div>
+        </div>
+
+        <div class="studio-body">
+          <div class="pane stories-pane">
+            <div class="pane-head">
+              <span class="pane-title">Stories</span>
+              <span class="small muted" id="story-count">—</span>
+              <select class="field field-xs" id="story-filter" aria-label="Filter stories">
+                <option value="all">All sources</option>
+              </select>
+            </div>
+            <ul class="story-list" id="stories"></ul>
+            <div class="pane-empty" id="stories-empty" hidden>
+              <p class="small" id="empty-text">No stories collected yet.</p>
+              <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('btn-collect').click()">Collect stories</button>
+            </div>
+          </div>
+
+          <div class="pane digest-pane">
+            <div class="pane-head">
+              <div class="tabs" role="tablist" aria-label="Output format">
+                <button class="tab" type="button" role="tab" aria-selected="true" data-format="telegram">Telegram</button>
+                <button class="tab" type="button" role="tab" aria-selected="false" data-format="vk">VK</button>
+                <button class="tab" type="button" role="tab" aria-selected="false" data-format="shorts">Shorts</button>
+              </div>
+              <span class="badge" id="format-limit">4 096 chars</span>
+            </div>
+            <textarea id="digest" class="digest-box" spellcheck="false" aria-label="Digest preview" placeholder="Your post appears here after the first collection."></textarea>
+            <div class="digest-foot">
+              <span class="small muted" id="char-count">0 / 4096</span>
+              <div class="digest-actions">
+                <button class="btn btn-ghost btn-sm" type="button" id="btn-improve">Rewrite with my key</button>
+                <button class="btn btn-ghost btn-sm" type="button" id="btn-download">Download .md</button>
+                <button class="btn btn-primary btn-sm" type="button" id="btn-copy">Copy post</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="studio-foot">
+          <span class="small" id="status-line"><span class="muted">Ready.</span></span>
+          <span class="small muted" id="filtered-line"></span>
+        </div>
+      </div>
+
+      <p class="tiny muted studio-legal">
+        Public pages only. NewsFlow does not log in to Telegram, does not join chats and does not message anyone.
+      </p>
+    </div>
+  </section>
+
+  <section id="how" class="section">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-no">01</span>
+          <h3>Add your sources</h3>
+          <p class="small muted">Paste an RSS address or a public channel like <code class="mono">t.me/s/example</code>. Three sources are already loaded.</p>
+        </div>
+        <div class="step">
+          <span class="step-no">02</span>
+          <h3>Collect and trim</h3>
+          <p class="small muted">The studio keeps the newest items, removes duplicate headlines and drops short promotional posts.</p>
+        </div>
+        <div class="step">
+          <span class="step-no">03</span>
+          <h3>Copy or schedule</h3>
+          <p class="small muted">Copy the finished post, download it, or let Pro send it to your channel through the Telegram Bot API.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section">
+    <div class="wrap">
+      <div class="price-head">
+        <h2>Pricing</h2>
+        <p class="small muted">Free covers a daily post. Pro removes the limits and keeps working on this device.</p>
+      </div>
+      <div class="price-grid">
+        <div class="price-card card">
+          <h3>Free</h3>
+          <p class="price">$0</p>
+          <p class="small muted">No account, no card.</p>
+          <ul class="price-list">
+            <li>Up to 5 sources</li>
+            <li>5 posts per day</li>
+            <li>Telegram, VK and Shorts formats</li>
+            <li>Duplicate and ad filtering</li>
+            <li>Copy and download</li>
+          </ul>
+          <a class="btn btn-ghost" href="#app">Open the studio</a>
+        </div>
+        <div class="price-card card price-card-pro">
+          <div class="price-card-top">
+            <h3>Pro</h3>
+            <span class="badge">One payment</span>
+          </div>
+          <p class="price">$12 <span class="small muted">in USDC on Base</span></p>
+          <p class="small muted">Unlocked in this browser, permanently.</p>
+          <ul class="price-list">
+            <li>Up to 50 sources per run</li>
+            <li>Unlimited posts</li>
+            <li>Scheduled sending to a Telegram channel</li>
+            <li>Content plan export to .xlsx and .csv</li>
+            <li>Batch collection with progress</li>
+          </ul>
+          <button class="btn btn-primary" type="button" data-unlock data-product="newsflow" data-price="12" data-name="NewsFlow Pro" data-sub="50 sources, scheduling, VK and Shorts, exports.">Unlock Pro</button>
+          <p class="tiny muted price-fine">Payment is checked against the Base blockchain in your browser. No email, no signup.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Questions</h2>
+      <div class="faq">
+        <details>
+          <summary>Where do the stories come from?</summary>
+          <p class="small muted">Only from sources you add: public RSS or Atom feeds and public Telegram channel previews at <code class="mono">t.me/s/…</code>. Nothing is scraped from private chats.</p>
+        </details>
+        <details>
+          <summary>Do I need an API key?</summary>
+          <p class="small muted">No. The digest is assembled from the feed text itself. If you want a rewritten post, you can add your own Groq or Gemini key in the rewrite dialog; it is stored in this browser and sent only to that provider.</p>
+        </details>
+        <details>
+          <summary>How is the payment verified?</summary>
+          <p class="small muted">The page asks a public Base RPC for the transaction receipt, finds the USDC transfer to our address and checks the amount. If it matches, Pro is stored in localStorage. Nothing is sent to a server of ours because there is no server.</p>
+        </details>
+        <details>
+          <summary>What happens if I clear my browser data?</summary>
+          <p class="small muted">The Pro flag is local, so clearing site data removes it. Keep the transaction hash: paste it again in the same dialog and it re-unlocks on that device.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>NewsFlow Studio</span>
+    <div class="links">
+      <a href="#app">Studio</a>
+      <a href="#pricing">Pricing</a>
+      <a href="../tg-chats/">Chat catalogue</a>
+      <a href="../">Other tools</a>
+    </div>
+  </div>
+</footer>
+
+<dialog id="source-dialog" class="dlg">
+  <form method="dialog" class="dlg-body" id="source-form">
+    <h3>Add a source</h3>
+    <p class="small muted">An RSS or Atom address, or a public Telegram channel preview.</p>
+    <label class="small dlg-label" for="source-url">Address</label>
+    <input class="field mono" id="source-url" placeholder="https://example.com/feed.xml or t.me/s/example" autocomplete="off">
+    <label class="small dlg-label" for="source-name">Name <span class="muted">(optional)</span></label>
+    <input class="field" id="source-name" placeholder="My feed" autocomplete="off">
+    <p class="small dlg-error" id="source-error" hidden></p>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+      <button class="btn btn-primary" value="add" type="submit">Add source</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="key-dialog" class="dlg">
+  <form method="dialog" class="dlg-body" id="key-form">
+    <h3>Rewrite with your key</h3>
+    <p class="small muted">The selected stories are sent to your provider once. The key stays in this browser.</p>
+    <label class="small dlg-label" for="key-provider">Provider</label>
+    <select class="field" id="key-provider">
+      <option value="groq">Groq — llama-3.3-70b-versatile</option>
+      <option value="gemini">Google Gemini — gemini-2.0-flash</option>
+    </select>
+    <label class="small dlg-label" for="key-value">API key</label>
+    <input class="field mono" id="key-value" type="password" autocomplete="off" placeholder="gsk_… or AIza…">
+    <p class="small dlg-error" id="key-error" hidden></p>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+      <button class="btn btn-ghost" value="forget" type="submit">Forget key</button>
+      <button class="btn btn-primary" value="run" type="submit">Rewrite post</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="schedule-dialog" class="dlg">
+  <form method="dialog" class="dlg-body" id="schedule-form">
+    <h3>Schedule sending</h3>
+    <p class="small muted">Pro sends the digest to your channel through the Telegram Bot API. The tab has to stay open; there is no server holding your token.</p>
+    <label class="small dlg-label" for="bot-token">Bot token</label>
+    <input class="field mono" id="bot-token" type="password" autocomplete="off" placeholder="123456:ABC…">
+    <label class="small dlg-label" for="chat-id">Channel or chat id</label>
+    <input class="field mono" id="chat-id" autocomplete="off" placeholder="@my_channel or -100…">
+    <label class="small dlg-label" for="send-time">Send every day at</label>
+    <input class="field" id="send-time" type="time" value="09:00">
+    <p class="small dlg-error" id="schedule-error" hidden></p>
+    <div class="dlg-foot">
+      <button class="btn btn-ghost" value="cancel" type="submit">Cancel</button>
+      <button class="btn btn-ghost" value="stop" type="submit">Stop schedule</button>
+      <button class="btn btn-primary" value="save" type="submit">Save schedule</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="export-dialog" class="dlg">
+  <form method="dialog" class="dlg-body">
+    <h3>Export the content plan</h3>
+    <p class="small muted">One row per selected story: date, format, title, source and link.</p>
+    <div class="export-row">
+      <button class="btn btn-ghost" type="button" id="btn-export-xlsx">Download .xlsx</button>
+      <button class="btn btn-ghost" type="button" id="btn-export-csv">Download .csv</button>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn btn-quiet" value="close" type="submit">Close</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="../assets/verify.js"></script>
+<script src="../assets/unlock.js"></script>
+<script src="../assets/xlsx.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

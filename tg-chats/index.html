@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TG Chat Validator — открытые чаты Telegram и проверка ссылок</title>
+<meta name="description" content="Каталог публичных групповых чатов Telegram с поиском по теме и городу, числом участников и датой проверки. Проверьте свои ссылки t.me в браузере.">
+<link rel="canonical" href="https://9xj89gzrtw-hue.github.io/tg-chats/">
+<meta property="og:title" content="TG Chat Validator">
+<meta property="og:description" content="Открытые чаты Telegram: поиск, фильтры и проверка ссылок прямо в браузере.">
+<meta property="og:type" content="website">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/base.css">
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+        <path d="M4.5 5.5h15v11h-8l-4.5 3.5v-3.5H4.5z" stroke-linejoin="round"></path>
+        <path d="M9 10.4l2 2 4-4"></path>
+      </svg>
+      TG Chat Validator
+    </a>
+    <nav class="nav">
+      <a href="#catalog">Каталог</a>
+      <a href="#catalog" data-view-link="check">Проверка</a>
+      <a href="#pricing">Тарифы</a>
+      <a class="nav-cta" href="#catalog">Открыть базу</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="pulse"></span> <span id="hero-count">База загружается</span></span>
+      <h1>Публичные чаты Telegram с поиском и проверкой ссылок.</h1>
+      <p class="lede">
+        Открытые групповые чаты по темам и городам: участники, дата проверки, прямая ссылка.
+        Свои ссылки можно проверить здесь же, без установки и входа в аккаунт.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#catalog">Найти чат</a>
+        <button class="btn btn-ghost" type="button" id="hero-check">Проверить свои ссылки</button>
+      </div>
+      <p class="hero-meta small muted">
+        <span id="stat-count">—</span> чатов в базе
+        <span class="dot-sep">·</span> <span id="stat-topics">—</span> тематик
+        <span class="dot-sep">·</span> <span id="stat-cities">—</span> городов
+        <span class="dot-sep">·</span> проверено <span id="stat-date">—</span>
+      </p>
+    </div>
+  </section>
+
+  <section id="catalog" class="app-section">
+    <div class="wrap">
+      <h2 class="sr-only">Каталог публичных чатов Telegram</h2>
+      <div class="catalog-top">
+        <div class="tabs tabs-lg" role="tablist" aria-label="Раздел">
+          <button class="tab" type="button" role="tab" aria-selected="true" data-view="base">Каталог</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-view="check">Проверка ссылок</button>
+        </div>
+        <div class="catalog-actions">
+          <span class="badge catalog-only" id="visible-badge">—</span>
+          <div class="dl-pair catalog-only">
+            <button class="btn btn-ghost btn-sm" type="button" id="dl-csv">CSV</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="dl-xlsx">XLSX</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Вся база, без лимита 25 строк, и пакетная проверка до 50 ссылок.">Pro</button>
+        </div>
+      </div>
+
+      <div class="panel card" id="view-base">
+        <div class="search-row">
+          <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input class="search-input" id="q" type="search" placeholder="Например: Python, Казань, родители" autocomplete="off" aria-label="Поиск чатов">
+          </div>
+          <select class="field select-city" id="city" aria-label="Город">
+            <option value="">Все города</option>
+          </select>
+          <select class="field select-sort" id="sort" aria-label="Сортировка">
+            <option value="members">По участникам</option>
+            <option value="fresh">По дате проверки</option>
+            <option value="title">По названию</option>
+          </select>
+        </div>
+
+        <div class="chips-row" id="topics" role="group" aria-label="Тематика"></div>
+
+        <div class="result-head">
+          <span>Чат</span>
+          <span>Тема</span>
+          <span>Город</span>
+          <span class="num">Участники</span>
+          <span class="num">Проверен</span>
+        </div>
+        <ul class="result-list" id="rows"></ul>
+        <div class="limit-bar" id="limit-bar" hidden>
+          <div>
+            <p class="small" id="limit-text">Показаны первые 25 чатов по этому фильтру.</p>
+            <p class="tiny muted">Pro открывает всю базу и снимает лимит на выгрузку.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Вся база, без лимита 25 строк, и пакетная проверка до 50 ссылок.">Открыть всё за $9</button>
+        </div>
+        <div class="empty-row" id="empty-row" hidden>
+          <p class="small">Ничего не нашлось. Попробуйте другой запрос или сбросьте фильтры.</p>
+          <button class="btn btn-ghost btn-sm" type="button" id="reset-filters">Сбросить фильтры</button>
+        </div>
+      </div>
+
+      <div class="panel card" id="view-check" hidden>
+        <div class="check-head">
+          <div>
+            <h3>Проверка ссылок</h3>
+            <p class="small muted">Вставьте ссылки вида <code class="mono">t.me/name</code> или <code class="mono">@name</code>. Страница откроет публичную карточку каждой и скажет, чат это, канал или ссылка не работает.</p>
+          </div>
+          <span class="badge" id="check-quota">10 ссылок за раз</span>
+        </div>
+        <textarea class="field check-input" id="check-input" spellcheck="false" aria-label="Ссылки на чаты" placeholder="https://t.me/example
+@another_chat
+t.me/third_chat"></textarea>
+        <div class="check-actions">
+          <span class="small muted" id="check-status">Проверка идёт по публичным страницам t.me, без входа в аккаунт.</span>
+          <button class="btn btn-primary btn-sm" type="button" id="check-run">Проверить</button>
+        </div>
+        <ul class="check-results" id="check-results"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section">
+    <div class="wrap">
+      <div class="price-head">
+        <h2>Тарифы</h2>
+        <p class="small muted">База обновляется вручную и отдаётся файлом. Оплата один раз, без подписки.</p>
+      </div>
+      <div class="price-grid">
+        <div class="price-card card">
+          <h3>Бесплатно</h3>
+          <p class="price">$0</p>
+          <p class="small muted">Без регистрации.</p>
+          <ul class="price-list">
+            <li>Поиск по всей базе</li>
+            <li>Первые 25 чатов по любому фильтру</li>
+            <li>Выгрузка этих 25 строк в CSV</li>
+            <li>Проверка до 10 ссылок за раз</li>
+          </ul>
+          <a class="btn btn-ghost" href="#catalog">Открыть каталог</a>
+        </div>
+        <div class="price-card card price-card-pro">
+          <div class="price-card-top">
+            <h3>Pro</h3>
+            <span class="badge">Навсегда</span>
+          </div>
+          <p class="price">$9 <span class="small muted">в USDC на Base</span></p>
+          <p class="small muted">Разблокируется в этом браузере.</p>
+          <ul class="price-list">
+            <li>Вся база без лимита 25 строк</li>
+            <li>Выгрузка в CSV и XLSX целиком</li>
+            <li>Проверка до 50 ссылок за раз</li>
+            <li>Повторная разблокировка по тому же хешу</li>
+          </ul>
+          <button class="btn btn-primary" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Вся база, без лимита 25 строк, и пакетная проверка до 50 ссылок.">Разблокировать Pro</button>
+          <p class="tiny muted price-fine">Платёж проверяется по блокчейну Base в браузере. Почту не спрашиваем.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>Вопросы</h2>
+      <div class="faq">
+        <details>
+          <summary>Откуда берутся чаты</summary>
+          <p class="small muted">Из публичного поиска по Telegram. Каждая ссылка открывается на t.me и проверяется: это групповой чат, а не канал; вступление свободное, а не по заявке; участников не меньше 25. Дата проверки стоит в таблице.</p>
+        </details>
+        <details>
+          <summary>Что считается открытым чатом</summary>
+          <p class="small muted">Публичная группа с юзернеймом, в которую можно войти по ссылке без приглашения. Каналы, закрытые группы и чаты по заявке в базу не попадают.</p>
+        </details>
+        <details>
+          <summary>Почему бесплатно только 25 строк</summary>
+          <p class="small muted">Сбор и проверка базы — ручная работа. Бесплатная часть показывает, что внутри, и позволяет проверить свои ссылки. Полная выгрузка стоит $9 один раз.</p>
+        </details>
+        <details>
+          <summary>Как проходит оплата</summary>
+          <p class="small muted">Страница показывает адрес в сети Base. После перевода вы вставляете хеш транзакции, браузер запрашивает квитанцию у публичного RPC, находит перевод USDC и сверяет сумму. При совпадении Pro включается в этом браузере.</p>
+        </details>
+        <details>
+          <summary>Данные куда-то отправляются</summary>
+          <p class="small muted">База встроена в страницу. Поиск и фильтры работают локально. При проверке ссылок браузер запрашивает публичную страницу t.me через открытый читатель — это единственный внешний запрос.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span>TG Chat Validator</span>
+    <div class="links">
+      <a href="#catalog">Каталог</a>
+      <a href="#catalog" data-view-link="check">Проверка</a>
+      <a href="#pricing">Тарифы</a>
+      <a href="../newsflow/">NewsFlow Studio</a>
+      <a href="../">Другие инструменты</a>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/verify.js"></script>
+<script src="../assets/unlock.js"></script>
+<script src="../assets/xlsx.js"></script>
+<script src="./catalog.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>

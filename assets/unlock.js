@@ -96,3 +96,218 @@
 
   root.ProUnlock = { create, PAY_TO, USDC, RPCS };
 })(window);
+
+/* --- second entry point ------------------------------------------------
+   The NewsFlow and TG Chat pages use a richer API: a product registry, a
+   modal that shows the address and the price, and verifyAtLeast() from
+   verify.js. Same address, same receipt logic, separate storage keys, so the
+   two APIs can coexist without touching each other's entitlements. */
+/* Freemium unlock: reads a Base transaction, confirms the USDC transfer, and
+ * stores the entitlement in this browser. No server, no account, no email. */
+(function () {
+  "use strict";
+
+  var PAY_TO = "0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a";
+  var USDC_DECIMALS = 6;
+
+  function key(product) { return "unlock:" + product; }
+  function usedKey() { return "unlock:used"; }
+
+  function readJSON(k, fallback) {
+    try { return JSON.parse(localStorage.getItem(k)) || fallback; } catch (e) { return fallback; }
+  }
+
+  function isPro(product) {
+    var rec = readJSON(key(product), null);
+    return !!(rec && rec.hash);
+  }
+
+  function state(product) { return readJSON(key(product), null); }
+
+  function activate(product, data) {
+    localStorage.setItem(key(product), JSON.stringify({
+      hash: data.hash,
+      received: String(data.received),
+      at: new Date().toISOString(),
+      price: data.price
+    }));
+    var used = readJSON(usedKey(), []);
+    if (used.indexOf(data.hash) === -1) used.push(data.hash);
+    localStorage.setItem(usedKey(), JSON.stringify(used));
+    document.dispatchEvent(new CustomEvent("unlock:changed", { detail: { product: product } }));
+  }
+
+  function deactivate(product) {
+    localStorage.removeItem(key(product));
+    document.dispatchEvent(new CustomEvent("unlock:changed", { detail: { product: product } }));
+  }
+
+  function short(addr) { return addr.slice(0, 6) + "…" + addr.slice(-4); }
+
+  function toast(message, bad) {
+    var zone = document.querySelector(".toast-zone");
+    if (!zone) {
+      zone = document.createElement("div");
+      zone.className = "toast-zone";
+      document.body.appendChild(zone);
+    }
+    var el = document.createElement("div");
+    el.className = "toast" + (bad ? " bad" : "");
+    el.setAttribute("role", "status");
+    el.textContent = message;
+    zone.appendChild(el);
+    setTimeout(function () { el.remove(); }, bad ? 7000 : 3400);
+  }
+
+  function copy(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function () { toast("Copied"); },
+        function () { fallbackCopy(text); });
+    }
+    fallbackCopy(text);
+    return Promise.resolve();
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); toast("Copied"); } catch (e) { toast("Copy failed — select the text manually", true); }
+    ta.remove();
+  }
+
+  var modalEl = null;
+
+  function buildModal() {
+    var wrap = document.createElement("div");
+    wrap.className = "modal-backdrop";
+    wrap.hidden = true;
+    wrap.innerHTML = [
+      '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="unlock-title">',
+      '  <div class="modal-head">',
+      '    <div>',
+      '      <h3 id="unlock-title">Unlock Pro</h3>',
+      '      <p class="small muted" id="unlock-sub" style="margin-top:2px"></p>',
+      '    </div>',
+      '    <button class="close-x" type="button" data-close aria-label="Close">',
+      '      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+      '    </button>',
+      '  </div>',
+      '  <div class="modal-body">',
+      '    <div class="pay-amount"><span id="unlock-price">$12</span><span class="small muted">in USDC on Base</span></div>',
+      '    <div class="pay-address">',
+      '      <code class="mono" id="unlock-addr"></code>',
+      '      <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>Copy</button>',
+      '    </div>',
+      '    <ol class="pay-steps">',
+      '      <li>Send the exact amount of USDC on the Base network to the address above.</li>',
+      '      <li>Copy the transaction hash from your wallet.</li>',
+      '      <li>Paste it below. This page reads Base directly and unlocks the tools in this browser.</li>',
+      '    </ol>',
+      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">Transaction hash</label>',
+      '    <input class="field mono" id="unlock-hash" placeholder="0x…" autocomplete="off" spellcheck="false">',
+      '    <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
+      '    <p class="tiny muted" style="margin-top:10px">Paying from an exchange? The withdrawal hash is the exchange’s, not the transfer to us. Pay from a wallet, or send both hashes by mail and we will unlock it manually.</p>',
+      '  </div>',
+      '  <div class="modal-foot">',
+      '    <button class="btn btn-ghost" type="button" data-close>Cancel</button>',
+      '    <button class="btn btn-primary" type="button" id="unlock-go">Verify payment</button>',
+      '  </div>',
+      '</div>'
+    ].join("");
+    document.body.appendChild(wrap);
+    return wrap;
+  }
+
+  var current = null;
+
+  function open(opts) {
+    current = opts;
+    if (!modalEl) modalEl = buildModal();
+    modalEl.querySelector("#unlock-title").textContent = "Unlock " + (opts.name || "Pro");
+    modalEl.querySelector("#unlock-sub").textContent = opts.sub || "One payment. Keeps working in this browser.";
+    modalEl.querySelector("#unlock-price").textContent = "$" + opts.price;
+    modalEl.querySelector("#unlock-addr").textContent = PAY_TO;
+    modalEl.querySelector("#unlock-hash").value = "";
+    modalEl.querySelector("#unlock-error").hidden = true;
+    modalEl.hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(function () { modalEl.querySelector("#unlock-hash").focus(); }, 30);
+  }
+
+  function close() {
+    if (!modalEl) return;
+    modalEl.hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  async function verifyAndUnlock(product, price, hash) {
+    var used = readJSON(usedKey(), []);
+    var res = await window.DefiAudit.verifyAtLeast(hash, price, {
+      usedHashes: used,
+      config: { PAY_TO: PAY_TO }
+    });
+    activate(product, { hash: res.hash, received: res.received, price: price });
+    return res;
+  }
+
+  function bind() {
+    document.addEventListener("click", function (e) {
+      var t = e.target.closest("[data-unlock]");
+      if (t) {
+        e.preventDefault();
+        open({
+          product: t.getAttribute("data-product"),
+          price: t.getAttribute("data-price"),
+          name: t.getAttribute("data-name") || "Pro",
+          sub: t.getAttribute("data-sub") || ""
+        });
+        return;
+      }
+      if (e.target.closest("[data-close]")) { close(); return; }
+      if (e.target.closest("[data-copy-addr]")) { copy(PAY_TO); return; }
+    });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+
+    document.addEventListener("click", async function (e) {
+      if (!e.target.closest("#unlock-go") || !current) return;
+      var btn = e.target.closest("#unlock-go");
+      var err = modalEl.querySelector("#unlock-error");
+      var hash = modalEl.querySelector("#unlock-hash").value.trim();
+      err.hidden = true;
+      btn.disabled = true;
+      btn.textContent = "Checking Base…";
+      try {
+        var res = await verifyAndUnlock(current.product, current.price, hash);
+        close();
+        toast("Pro unlocked. " + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + " USDC confirmed on Base.");
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.hidden = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Verify payment";
+      }
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+
+  window.Unlock = {
+    PAY_TO: PAY_TO,
+    isPro: isPro,
+    state: state,
+    activate: activate,
+    deactivate: deactivate,
+    open: open,
+    close: close,
+    copy: copy,
+    toast: toast,
+    short: short,
+    verifyAndUnlock: verifyAndUnlock
+  };
+})();
