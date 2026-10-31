@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table &amp; TG-Channel Clipper Pro</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">
+      <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+        <rect x="0" y="0" width="18" height="18" fill="#FF5200"/>
+        <circle cx="9" cy="9" r="4.6" fill="none" stroke="#141414" stroke-width="2.2"/>
+        <rect x="9" y="2.4" width="4.2" height="2.6" fill="#141414"/>
+      </svg>
+      <span class="brand-name">Table &amp; TG-Channel Clipper</span>
+      <span class="ver mono">v1.0.0</span>
+    </div>
+    <button id="tier-chip" class="chip chip-free mono" title="Pro status">FREE</button>
+  </header>
+
+  <main>
+    <section class="row row-detect">
+      <button id="btn-detect" class="btn btn-primary">DETECT</button>
+      <span id="detect-status" class="status mono">open the tab you want to clip</span>
+    </section>
+
+    <section id="groups" class="groups"></section>
+
+    <section id="preview-wrap" class="panel hidden">
+      <div class="panel-title mono">PREVIEW · FIRST 5 ROWS</div>
+      <div id="preview" class="preview mono"></div>
+    </section>
+
+    <section id="filter-wrap" class="row">
+      <input id="filter-input" class="mono" type="text" placeholder="keyword  /regex/i  (Pro)">
+      <span id="filter-chip" class="mono">OFF</span>
+    </section>
+
+    <section class="actions">
+      <button id="btn-csv" class="btn btn-primary" disabled>EXPORT CSV</button>
+      <button id="btn-xlsx" class="btn" disabled>EXPORT XLSX</button>
+    </section>
+    <section class="actions">
+      <button id="btn-scroll" class="btn" disabled>AUTO-SCROLL HARVEST</button>
+      <button id="btn-scroll-stop" class="btn hidden">STOP</button>
+      <button id="btn-tpl" class="btn" disabled>SAVE TEMPLATE</button>
+    </section>
+
+    <section class="meta mono">
+      <div id="cap-line">Free: up to 50 rows per export. Pro removes the cap.</div>
+      <div id="tpl-line"></div>
+    </section>
+  </main>
+
+  <!-- Pro unlock modal -->
+  <div id="modal" class="modal hidden" role="dialog" aria-label="Pro unlock">
+    <div class="modal-box">
+      <div class="modal-head">
+        <span class="modal-title">UNLOCK PRO</span>
+        <button id="modal-close" class="x mono" aria-label="close">×</button>
+      </div>
+      <p class="modal-copy">One-time <b>$9.00</b> in USDC on Base. No subscription, no account, no KYC. Payment verified on-chain inside this panel.</p>
+      <div class="tabs mono">
+        <button class="tab tab-active" data-tab="tx">TX HASH</button>
+        <button class="tab" data-tab="key">LICENSE KEY</button>
+      </div>
+      <div id="tab-tx" class="tabpane">
+        <div class="pay mono">
+          <div class="pay-line"><span class="lbl">SEND TO A:</span> <code>0x72Aa…4d1a</code> <button class="copy mono" data-addr="0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a">COPY</button></div>
+          <div class="pay-line"><span class="lbl">SEND TO B:</span> <code>0xbbe6…f926</code> <button class="copy mono" data-addr="0xbbe6966949d7265a7f5f0b793f08293b9b7fe926">COPY</button></div>
+          <div class="pay-line lbl">AMOUNT: 9.00 USDC · NETWORK: BASE</div>
+        </div>
+        <input id="tx-hash" class="mono" type="text" placeholder="0x… transaction hash of your transfer">
+        <button id="btn-verify-tx" class="btn btn-primary">VERIFY PAYMENT</button>
+      </div>
+      <div id="tab-key" class="tabpane hidden">
+        <input id="lic-key" class="mono" type="text" placeholder="LC1…-XXXXX-… license key">
+        <button id="btn-verify-key" class="btn btn-primary">VERIFY KEY</button>
+        <p class="fine mono">Keys are verified offline with Ed25519 inside this extension.</p>
+      </div>
+      <div id="verify-status" class="status mono"></div>
+    </div>
+  </div>
+
+  <footer class="foot mono">
+    <a href="https://9xj89gzrtw-hue.github.io/data-clipper/" target="_blank" rel="noopener">landing · sandbox</a>
+    <span>·</span>
+    <span>local-only · zero telemetry</span>
+  </footer>
+
+  <script src="engine.js"></script>
+  <script src="csv.js"></script>
+  <script src="xlsx.js"></script>
+  <script src="tx.js"></script>
+  <script src="license.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

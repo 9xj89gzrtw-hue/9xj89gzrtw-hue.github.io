@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Table & TG-Channel Clipper Pro",
+  "short_name": "dclip",
+  "version": "1.0.0",
+  "description": "One-click clean CSV from any page: TG feeds, catalogs, listings, tables. Free up to 50 rows. Pro: auto-scroll, XLSX, regex filter, templates. On-chain activation - no accounts, no KYC.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "optional_host_permissions": ["https://mainnet.base.org/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Table & TG-Channel Clipper"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src 'self' https://mainnet.base.org"
+  }
+}

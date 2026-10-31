@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table &amp; TG-Channel Clipper Pro — one-click clean CSV from any page</title>
+<meta name="description" content="Browser extension: one-click clean CSV/XLSX from any page — TG channels, catalogs, listings, tables. Free up to 50 rows. Pro unlocked on-chain, no accounts, no KYC.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Crect width='18' height='18' fill='%23FF5200'/%3E%3Ccircle cx='9' cy='9' r='4.6' fill='none' stroke='%23141414' stroke-width='2.2'/%3E%3Crect x='9' y='2.4' width='4.2' height='2.6' fill='%23141414'/%3E%3C/svg%3E">
+<script src="engine.js"></script>
+<script src="csv.js"></script>
+<script src="xlsx.js"></script>
+<script src="tx.js"></script>
+<script src="license.js"></script>
+<script src="sandbox.js" defer></script>
+<script src="tests.js" defer></script>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 18 18" aria-hidden="true"><rect width="18" height="18" fill="#FF5200"/><circle cx="9" cy="9" r="4.6" fill="none" stroke="#141414" stroke-width="2.2"/><rect x="9" y="2.4" width="4.2" height="2.6" fill="#141414"/></svg>
+      Table &amp; TG-Channel Clipper
+    </div>
+    <span class="spacer"></span>
+    <a class="nav" href="#sandbox">sandbox</a>
+    <a class="nav" href="#install">install</a>
+    <a class="nav" href="#pro">pro&nbsp;$9</a>
+    <a class="nav" href="#faq">faq</a>
+    <button id="tier-chip" class="tag o mono" type="button">FREE</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- hero -->
+  <section class="hero">
+    <div>
+      <div class="kicker">browser extension · csv/xlsx from any page</div>
+      <h1>Any page becomes a <span class="o">clean table</span>.<br>One click.</h1>
+      <p class="lede">Point at a Telegram channel, a catalog, a price list or any repeating block — Clipper finds the cards, picks the fields, exports honest CSV or XLSX. No accounts, no sign-ups, no telemetry.</p>
+      <div class="cta-row">
+        <a class="btn primary" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>DOWNLOAD .ZIP · FREE</a>
+        <a class="btn" href="#sandbox">Try the live sandbox</a>
+      </div>
+      <div class="tagrow">
+        <span class="tag">Free: 50 rows/export</span>
+        <span class="tag">Pro: $9 once · USDC on Base</span>
+        <span class="tag">no KYC · no subscription</span>
+        <span class="tag">Chrome/Edge/Brave · MV3</span>
+      </div>
+    </div>
+    <div class="shot" aria-hidden="true">
+      <div class="shot-bar">
+        <span class="dot f"></span><span class="dot"></span><span class="dot"></span>
+        <span class="shot-url">t.me/s/durov — clipper popup open</span>
+      </div>
+      <div class="shot-body">
+        <div class="shot-feed">
+          <div class="minipost"><div class="t">Telegram roadmap: what lands next</div><div class="m">durov · 14:02 · 41.2K views · /post/roadmap-2027</div></div>
+          <div class="minipost"><div class="t">Why we ship smaller updates</div><div class="m">durov · 12:31 · 28.7K views · /post/ship-small</div></div>
+          <div class="minipost"><div class="t">Video notes hit 30 seconds</div><div class="m">durov · 10:05 · 33.9K views · /post/vnotes-30s</div></div>
+        </div>
+        <div class="shot-csv">
+          <b>title,author,time,</b><b>views</b><br>
+          Telegram roadmap…,durov,14:02,41.2K<br>
+          Why we ship…,durov,12:31,28.7K<br>
+          Video notes…,durov,10:05,33.9K<br>
+          <br>→ 3 rows · 4 cols<br>→ CSV copied clean
+        </div>
+      </div>
+      <div class="shot-foot"><span>DETECT → pick fields → EXPORT</span><span>0 telemetry</span></div>
+    </div>
+  </section>
+
+  <!-- features -->
+  <section class="block">
+    <div class="block-head"><span class="kicker">01</span><h2>What it does</h2></div>
+    <div class="inst-grid">
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">detect</div>
+        <h3>Finds repeating cards for you</h3>
+        <p>The engine scans the page for repeated sibling blocks with the same signature — feeds, catalogs, listings — and proposes the fields: title, link, author, price, views, time.</p>
+        <div class="gauge"><span>cards detected</span><span>up to 12 groups</span></div>
+      </div>
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">extract</div>
+        <h3>Maps fields with one click</h3>
+        <p>Toggle the field tags, watch the 5-row preview update live, then export. HTML tables (with colspan expansion) are handled too.</p>
+        <div class="gauge"><span>preview rows</span><span>5 · live</span></div>
+      </div>
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">export</div>
+        <h3>CSV for all, XLSX for Pro</h3>
+        <p>CSV follows RFC 4180 with a UTF-8 BOM. Excel opens it without dialog fights. Pro exports a multi-sheet XLSX with a Meta sheet documenting each run.</p>
+        <div class="gauge"><span>formats</span><span>csv · xlsx</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- sandbox -->
+  <section class="block" id="sandbox">
+    <div class="block-head"><span class="kicker">02</span><h2>Live sandbox — the real engine on a demo feed</h2></div>
+    <p style="max-width: 70ch; color:#3a3a35; margin-top:0;">This is the same engine the extension injects, running on this page against a mock Telegram feed. Click <b>DETECT FEED</b>, select fields, export — exactly what the popup does.</p>
+    <div class="sandbox">
+      <div class="demo-pane">
+        <div class="demo-head">
+          <span>DEMO FEED · t.me/s/channel</span>
+          <span class="spacer" style="flex:1"></span>
+          <button id="btn-detect" class="btn sm" type="button">DETECT FEED</button>
+        </div>
+        <div class="demo-feed" id="demo-feed">
+          <article class="demo-post"><div class="pt"><a href="/post/alpha-01">Market open: traders eye liquidity shift</a></div><div class="px">Morning note — flows rotate into majors as spreads tighten across venues.</div><div class="pm"><span class="m-time">09:14</span><span class="m-views">12.4K views</span><span class="m-link"><a href="/post/alpha-01">/post/alpha-01</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/beta-02">Stablecoin rails: settlement dips below 2s</a></div><div class="px">Median settlement time on the new rail measured 1.8s over 500 transfers.</div><div class="pm"><span class="m-time">10:02</span><span class="m-views">9.8K views</span><span class="m-link"><a href="/post/beta-02">/post/beta-02</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/gamma-03">L2 fees slide to a two-week low</a></div><div class="px">Average swap cost down 14% week over week — batches fuller, blobs cheaper.</div><div class="pm"><span class="m-time">11:40</span><span class="m-views">15.1K views</span><span class="m-link"><a href="/post/gamma-03">/post/gamma-03</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/delta-04">OTC desks report quiet accumulation</a></div><div class="px">Quarterly discount rates compress; block sizes remain within range.</div><div class="pm"><span class="m-time">12:07</span><span class="m-views">7.3K views</span><span class="m-link"><a href="/post/delta-04">/post/delta-04</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/eps-05">Custody: MPC policies go template-first</a></div><div class="px">New defaults favor role thresholds over raw key ceremonies.</div><div class="pm"><span class="m-time">12:55</span><span class="m-views">11.0K views</span><span class="m-link"><a href="/post/eps-05">/post/eps-05</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/zeta-06">Perp funding normalizes after squeeze</a></div><div class="px">Basis back inside the corridor; liquidation cascade risk recedes.</div><div class="pm"><span class="m-time">13:21</span><span class="m-views">21.6K views</span><span class="m-link"><a href="/post/zeta-06">/post/zeta-06</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/eta-07">Audits in flight: two patches, one redeploy</a></div><div class="px">Fix branch frozen for review; post-mortem to follow publication.</div><div class="pm"><span class="m-time">14:03</span><span class="m-views">6.2K views</span><span class="m-link"><a href="/post/eta-07">/post/eta-07</a></span></div></article>
+          <article class="demo-post"><div class="pt"><a href="/post/theta-08">Data rooms: channel archiving tooling lands</a></div><div class="px">Bulk export improvements ship for research desk pipelines.</div><div class="pm"><span class="m-time">15:30</span><span class="m-views">8.9K views</span><span class="m-link"><a href="/post/theta-08">/post/theta-08</a></span></div></article>
+        </div>
+      </div>
+      <div class="out-pane">
+        <div class="out-head">
+          <span id="out-title">OUTPUT · no group selected</span>
+          <button id="btn-dl" class="btn sm" type="button" disabled>DOWNLOAD DEMO CSV</button>
+        </div>
+        <div class="out-body">
+          <div id="groups-out"></div>
+          <table class="out-table" id="preview-out" hidden></table>
+        </div>
+        <div class="out-foot"><span class="kicker">CSV</span><span id="csv-preview">— run DETECT FEED first —</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- install -->
+  <section class="block" id="install">
+    <div class="block-head"><span class="kicker">03</span><h2>Install in 5 steps (30 seconds)</h2></div>
+    <ol class="steps" style="max-width:70ch; line-height:2.1;">
+      <li><b>Download</b> the unpacked zip: <a class="mono" href="downloads/data-clipper-unpacked.zip" download>data-clipper-unpacked.zip</a></li>
+      <li><b>Unpack</b> it anywhere you keep tools.</li>
+      <li>Open <span class="mono">chrome://extensions</span> and enable <b>Developer mode</b> (top-right).</li>
+      <li>Click <b>Load unpacked</b> and select the unpacked folder.</li>
+      <li>Pin the icon, open any feed page, hit <b>DETECT</b>.</li>
+    </ol>
+    <div class="tagrow" style="margin-top:14px;">
+      <span class="tag">build</span><span class="tag mono">dclip-1.0.0+20261030</span>
+      <span class="tag">permissions</span><span class="tag mono">activeTab · scripting · storage</span>
+      <span class="tag">network</span><span class="tag mono">mainnet.base.org only, for Pro payment checks</span>
+    </div>
+    <p class="mono" style="color:var(--muted); font-size:11px; margin-top:10px;">Integrity: the zip ships exactly the files from the public source repo. No minified blobs, no remote code, no auto-updates.</p>
+  </section>
+
+  <!-- pro -->
+  <section class="block" id="pro">
+    <div class="block-head"><span class="kicker">04</span><h2>Free vs Pro</h2></div>
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="tier-k">Free</div>
+        <div class="big">$0</div><div class="per">forever · no signup</div>
+        <ul>
+          <li>Detect card groups &amp; tables</li>
+          <li>Live 5-row field mapping</li>
+          <li>CSV export up to <b>50 rows</b> per file</li>
+          <li>Local-only, zero telemetry</li>
+        </ul>
+        <div class="note">That's the honest deal: the free tier is a working tool, not a trial.</div>
+      </div>
+      <div class="price-card pro">
+        <div class="tier-k">Pro</div>
+        <div class="big">$9</div><div class="per">one-time · USDC on Base</div>
+        <ul>
+          <li><b>Row cap removed</b> (exports to 5,000+)</li>
+          <li><b>Auto-scroll harvest</b> for infinite feeds</li>
+          <li><b>Keyword / regex filter</b> at export time</li>
+          <li><b>XLSX</b> multi-sheet with Meta documentation</li>
+          <li><b>Saved templates</b> per website</li>
+        </ul>
+        <div class="note">Activate on-chain: send 9.00 USDC (Base) to the treasury, paste the tx hash, verification runs inside the extension. Or redeem an Ed25519 license key — both stay fully offline-capable. No account, no KYC.</div>
+      </div>
+    </div>
+
+    <div class="verify" style="margin-top:14px;">
+      <div class="addr"><span>TREASURY A:</span><code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
+      <div class="addr"><span>TREASURY B:</span><code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
+      <div class="tagrow">
+        <span class="tag o">NETWORK: BASE</span><span class="tag">ASSET: USDC</span><span class="tag">AMOUNT: 9.00</span>
+      </div>
+      <input id="tx-in" class="mono" type="text" placeholder="0x… transaction hash of your 9.00 USDC transfer (Base)">
+      <div style="display:flex; gap:9px; flex-wrap:wrap;">
+        <button id="buy-verify-tx" class="btn primary" type="button">VERIFY TX</button>
+        <button id="buy-verify-key" class="btn" type="button">VERIFY LICENSE KEY</button>
+      </div>
+      <input id="key-in" class="mono" type="text" placeholder="…-XXXXX-… license key (fallback path)">
+      <div class="status mono" id="tx-status">verification runs in your browser against a public Base RPC — we never see the hash</div>
+    </div>
+  </section>
+
+  <!-- faq -->
+  <section class="block" id="faq">
+    <div class="block-head"><span class="kicker">05</span><h2>Honest FAQ</h2></div>
+    <div class="faq">
+      <details><summary>Does the free tier expire or nag?</summary><p>No. Free is free forever, 50 rows per export, no counters, no pop-ups begging to upgrade. Pro just removes limits and adds the power tools.</p></details>
+      <details><summary>Why a payment instead of an account?</summary><p>Verifying a USDC transfer on Base costs the same $9 to you and nothing to maintain: no user database, no passwords to leak, no GDPR to process. Your tx hash (or license key) is the receipt and it checks out locally.</p></details>
+      <details><summary>What exactly does the extension have access to?</summary><p><span class="mono">activeTab</span> only: it injects the extractor when you click the popup, on the tab you are looking at. It requests <span class="mono">https://mainnet.base.org</span> solely to check your payment. Nothing is ever uploaded; there is no server to upload to.</p></details>
+      <details><summary>Telegram web previews work? IG? sites with login?</summary><p>It works on whatever you can open and see — <span class="mono">t.me/s/…</span> channels, logged-in catalogs and dashboards alike, because extraction runs in your session, in your browser. It does not bypass paywalls or anti-bot walls; it clips what is already on your screen.</p></details>
+      <details><summary>Refunds?</summary><p>On-chain payments can't be charged back, so we keep it simple: try the free tier and the sandbox first — they demonstrate the full engine. If Pro is genuinely broken for your case, paste your tx hash and a description into the public repo's issues; we refund from the treasury.</p></details>
+    </div>
+  </section>
+
+  <!-- tests (only ?test=1) -->
+  <section class="block" id="tests">
+    <div class="panel">
+      <div class="t-sum mono" id="t-sum">tests</div>
+      <div id="t-cases"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>© 2026 9xj89gzrtw-hue · MIT license</span>
+    <span><a href="https://github.com/9xj89gzrtw-hue/data-clipper" target="_blank" rel="noopener">source</a> · v1.0.0 · dclip-1.0.0+20261030</span>
+    <span>made without accounts, pop-ups or trackers</span>
+  </div>
+</footer>
+
+</body>
+</html>
