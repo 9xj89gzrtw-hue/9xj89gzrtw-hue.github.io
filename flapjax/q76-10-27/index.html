@@ -65,7 +65,8 @@ sampled — for the FLAPJAX contract with the treasury as the <code>from</code> 
 day differs.</li>
 <li><strong>The node refuses ranges it cannot serve instead of returning empty.</strong> Asked for a range it does not
 keep, the same endpoint answers <code>Archive requests require a personal token</code> — an error, not an empty array.
-Every chunk of 2026-10-27 came back as a valid empty result.</li>
+Every chunk of 2026-10-27 came back as a valid empty result, and the raw response for each chunk was written to the JSON
+file linked at the bottom.</li>
 <li><strong>Both directions are empty.</strong> No FLAPJAX entered the treasury either, so this is not a day when the
 treasury was quietly refilled and paid out through another address; the token balance is unchanged across the window
 because nothing moved.</li>
