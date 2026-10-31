@@ -7,52 +7,50 @@
 <link rel="icon" href="favicon/favicon.svg" type="image/svg+xml">
 <style>
   :root{
-    --azure:#0a9bff; --magenta:#ff2bd6; --yellow:#ffd60a; --green:#39ff6a;
-    --ink:#070b14; --ink2:#0d1322; --line:#1c2436; --muted:#8b93a7; --paper:#fff;
+    --azure:#0a7ac2; --magenta:#b8159a; --yellow:#8a5a00; --green:#1e6b3a;
+    --ink:#17181a; --ink2:#f6f4ef; --line:#e7e3da; --muted:#6f7276; --paper:#fbfaf7;
     --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{background:var(--ink);color:#eef1f8;font-family:var(--font);line-height:1.55;
+  body{background:var(--paper);color:var(--ink);font-family:var(--font);line-height:1.55;
        -webkit-font-smoothing:antialiased}
   a{color:var(--azure)}
   .wrap{max-width:1180px;margin:0 auto;padding:0 28px}
-  header.hero{padding:74px 0 64px;background:
-    radial-gradient(900px 460px at 82% -10%, rgba(255,43,214,.28), transparent 62%),
-    radial-gradient(760px 420px at 0% 110%, rgba(10,155,255,.22), transparent 62%), var(--ink);
+  header.hero{padding:74px 0 64px;background:var(--paper);
     border-bottom:1px solid var(--line)}
   img{max-width:100%;height:auto}
   .hero img{width:min(560px,100%);display:block}
-  .hero p{max-width:60ch;color:#b9c1d4;font-size:17px}
+  .hero p{max-width:60ch;color:var(--muted);font-size:17px}
   h1{font-size:13px;letter-spacing:2.6px;text-transform:uppercase;color:var(--yellow);
      font-weight:700;margin:0 0 26px}
   h2{font-size:clamp(24px,3vw,34px);letter-spacing:-.6px;margin:0 0 10px}
   h3{font-size:16px;letter-spacing:.2px;margin:0 0 8px}
   section{padding:64px 0;border-bottom:1px solid var(--line)}
-  .sub{color:#9aa3b8;max-width:62ch;margin:0 0 30px;font-size:15.5px}
+  .sub{color:var(--muted);max-width:62ch;margin:0 0 30px;font-size:15.5px}
   .grid{display:grid;gap:20px}
   .g3{grid-template-columns:repeat(3,1fr)}
   .g2{grid-template-columns:repeat(2,1fr)}
   @media(max-width:860px){.g3,.g2{grid-template-columns:1fr}}
-  .card{background:var(--ink2);border:1px solid var(--line);border-radius:16px;padding:22px}
-  .card h4{margin:0 0 4px;font-size:14px;letter-spacing:.4px;text-transform:uppercase;color:#9aa3b8}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
+  .card h4{margin:0 0 4px;font-size:14px;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
   .card small{color:var(--muted)}
   .stack{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:18px 0 8px}
   .lightbox{background:#fff;border-radius:16px;padding:26px;display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:#c7cfe0}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;color:var(--ink)}
   /* browser tab mock */
-  .browser{background:#202124;border-radius:12px 12px 8px 8px;padding:10px 10px 0;border:1px solid #333}
+  .browser{background:#f6f4ef;border-radius:12px 12px 8px 8px;padding:10px 10px 0;border:1px solid var(--line)}
   .tabs{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap}
-  .tab{background:#35363a;border-radius:8px 8px 0 0;padding:9px 14px;display:flex;gap:9px;
-       align-items:center;font-size:12.5px;color:#e8eaed;max-width:220px;min-width:0}
+  .tab{background:#fff;border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;padding:9px 14px;display:flex;gap:9px;
+       align-items:center;font-size:12.5px;color:var(--ink);max-width:220px;min-width:0}
   .tab img{width:16px;height:16px}
   .tab .x{opacity:.5;font-size:13px}
-  .omni{background:#202124;padding:8px 0 12px;display:flex;gap:8px;align-items:center}
-  .pill{flex:1;background:#292a2d;border-radius:12px;padding:7px 12px;font-size:12px;color:#9aa0a6}
+  .omni{background:#f6f4ef;padding:8px 0 12px;display:flex;gap:8px;align-items:center}
+  .pill{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:7px 12px;font-size:12px;color:var(--muted)}
   /* app header mock */
-  .appbar{background:#0b0f19;border-radius:14px;padding:14px 18px;display:flex;
-          align-items:center;justify-content:space-between;border:1px solid #1b2233}
-  .appbar .nav{display:flex;gap:18px;font-size:13px;color:#9aa3b8}
+  .appbar{background:#f6f4ef;border-radius:14px;padding:14px 18px;display:flex;
+          align-items:center;justify-content:space-between;border:1px solid var(--line)}
+  .appbar .nav{display:flex;gap:18px;font-size:13px;color:var(--muted)}
   /* avatars */
   .avatar{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;overflow:hidden}
   /* merch */
@@ -62,25 +60,24 @@
         border:12px solid #e6e1d5;border-bottom:0;border-radius:70px 70px 0 0}
   .tote img{width:120px}
   /* phone */
-  .phone{width:210px;height:400px;border-radius:30px;background:#000;padding:9px;border:1px solid #2a3242}
-  .screen{height:100%;border-radius:24px;background:
-     radial-gradient(300px 200px at 70% 10%, rgba(255,43,214,.35), transparent 60%), #10141f;
+  .phone{width:210px;height:400px;border-radius:30px;background:#fff;padding:9px;border:1px solid var(--line);box-shadow:0 8px 28px rgba(23,24,26,.06)}
+  .screen{height:100%;border-radius:24px;background:#f6f4ef;
      padding:18px;display:flex;flex-direction:column;gap:16px}
-  .appicon{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:#cfd6e6}
+  .appicon{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--ink)}
   .appicon img{width:56px;height:56px;border-radius:14px}
   /* swatches */
   .sw{border-radius:12px;padding:16px;border:1px solid var(--line);font-size:12px}
   .sw b{display:block;font-size:13px;margin-bottom:14px}
   table{width:100%;border-collapse:collapse;font-size:14px}
   th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
-  th{color:#9aa3b8;font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
-  code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#111827;padding:2px 6px;border-radius:5px}
+  th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.6px;background:var(--ink2)}
+  code{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:var(--ink2);padding:2px 6px;border-radius:5px;border:1px solid var(--line)}
   footer{padding:48px 0 70px;color:var(--muted);font-size:13px}
-  .note{border-left:3px solid var(--yellow);padding:2px 0 2px 16px;color:#c3cade;margin:22px 0}
+  .note{border-left:3px solid var(--yellow);padding:2px 0 2px 16px;color:var(--muted);margin:22px 0}
   .dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;font-size:13px}
-  .dl a{display:block;background:#0f1526;border:1px solid var(--line);border-radius:8px;padding:9px 12px;
-        text-decoration:none;color:#dfe5f2}
-  .dl a:hover{border-color:#3b4a66}
+  .dl a{display:block;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px 12px;
+        text-decoration:none;color:var(--ink)}
+  .dl a:hover{border-color:#b9b2a3;background:var(--ink2)}
 </style>
 </head>
 <body>
@@ -88,7 +85,7 @@
 <header class="hero">
   <div class="wrap">
     <h1>Holler — logo system</h1>
-    <img src="svg/A-lockup-reversed.svg" alt="Holler primary lockup">
+    <img src="svg/A-lockup-color.svg" alt="Holler primary lockup">
     <p style="margin-top:28px">A primary lockup and a standalone mark for a consumer app about
     internet fan culture. Arena energy, chunky letterforms, a neon edge that survives a 16&nbsp;px
     favicon and a busy stream behind it. Everything on this page is drawn as vector paths —
@@ -118,7 +115,7 @@
       </div>
       <div class="card">
         <h4>Dark surface</h4>
-        <div class="stack" style="align-items:flex-end">
+        <div class="stack" style="align-items:flex-end;background:#16171a;border-radius:12px;padding:18px">
           <img src="svg/A-mark-reversed.svg" width="16" height="16" alt="mark 16 rev">
           <img src="svg/A-mark-reversed.svg" width="32" height="32" alt="mark 32 rev">
           <img src="svg/A-mark-reversed.svg" width="48" height="48" alt="mark 48 rev">
@@ -176,7 +173,7 @@
         <div class="appbar" style="margin-top:12px">
           <div style="display:flex;align-items:center;gap:12px">
             <img src="svg/A-mark-color.svg" width="32" alt="">
-            <img src="svg/A-wordmark-reversed.svg" height="22" alt="Holler">
+            <img src="svg/A-wordmark-color.svg" height="22" alt="Holler">
           </div>
           <div class="nav"><span>Rooms</span><span>Clips</span><span>Me</span></div>
         </div>
@@ -201,7 +198,7 @@
         <div style="display:flex;gap:26px;align-items:center;margin-top:26px;flex-wrap:wrap">
           <div><div class="tote"><img src="svg/A-lockup-mono.svg" alt=""></div>
           <small style="display:block;margin-top:14px">Single-colour print, 1 ink</small></div>
-          <div><div class="tote" style="background:#070b14;box-shadow:none"><img src="svg/A-lockup-reversed.svg" alt=""></div>
+          <div><div class="tote" style="background:#16171a;box-shadow:none"><img src="svg/A-lockup-reversed.svg" alt=""></div>
           <small style="display:block;margin-top:14px">Reversed on black</small></div>
         </div>
       </div>

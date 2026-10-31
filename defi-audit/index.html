@@ -6,29 +6,29 @@
 <title>Method — how the 411 silent DefiLlama fee feeds were measured</title>
 <meta name="description" content="Exact method, definitions, and the things this audit gets wrong on purpose: 10 of 10 hand-checked breaks were not adapter bugs. Reproduce every row with the commands below.">
 <style>
-:root{--bg:#07090d;--bg2:#0c1017;--card:#10151e;--line:#1d2532;--txt:#e6edf7;--dim:#8b98ab;--acc:#4ade80;--acc2:#38bdf8;--bad:#f87171;--warn:#fbbf24;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+:root{--bg:#fbfaf7;--bg2:#f6f4ef;--card:#ffffff;--line:#e7e3da;--line2:#d9d4c8;--txt:#17181a;--dim:#6f7276;--acc:#1e4b3a;--acc2:#1a5c8a;--bad:#9b2c2c;--warn:#8a5a00;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
 a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{max-width:780px;margin:0 auto;padding:0 22px}
-header{border-bottom:1px solid var(--line);padding:16px 0}
+header{border-bottom:1px solid var(--line);padding:16px 0;background:var(--card)}
 header .wrap{display:flex;gap:18px;align-items:center}
 .logo{font:600 15px/1 var(--mono);color:var(--txt)}.logo b{color:var(--acc)}
 header a{color:var(--dim);font-size:14px}
-h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;letter-spacing:-1px;margin:44px 0 14px}
-h2{font-size:24px;letter-spacing:-.4px;margin:44px 0 10px}
+h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;letter-spacing:-1px;margin:44px 0 14px;color:var(--txt)}
+h2{font-size:24px;letter-spacing:-.4px;margin:44px 0 10px;color:var(--txt)}
 h3{font-size:17px;margin:26px 0 6px}
-p{margin:0 0 14px;color:#c2cddd}
+p{margin:0 0 14px;color:var(--txt)}
 .kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
 .dim{color:var(--dim)}
-code{font-family:var(--mono);font-size:.9em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
-pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
-.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2);margin:18px 0}
-.warn{border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.06)}
+code{font-family:var(--mono);font-size:.9em;background:var(--bg2);padding:1.5px 5px;border-radius:4px;color:#2c2f33;border:1px solid var(--line)}
+pre{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:var(--txt)}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--card);margin:18px 0}
+.warn{border-color:#ecdcb4;background:#fdf7e9}
 table{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
-th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line)}
-td{padding:7px 8px;border-bottom:1px solid #151b25}
-.cta{display:inline-block;background:linear-gradient(180deg,#22c55e,#16a34a);color:#04140a;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line2);background:var(--bg2)}
+td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--txt)}
+.cta{display:inline-block;background:var(--acc);color:#fff;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
 footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;color:var(--dim);font-size:13px}
 </style>
 </head>
@@ -59,7 +59,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;colo
 <div class="box warn">
 <p style="margin:0 0 10px"><b>Ten of the ten largest and most recent breaks were not adapter bugs.</b></p>
 <p style="margin:0 0 10px">We ran each adapter through its own harness and then hit its data source directly. In every case the source genuinely reported zero:</p>
-<ul style="margin:0 0 10px;padding-left:20px;color:#c2cddd">
+<ul style="margin:0 0 10px;padding-left:20px;color:var(--txt)">
 <li><b>USD AI</b> — no <code>FeePaid</code> event in two days at the contract, $266M TVL, zero fees collected. Nothing to fix.</li>
 <li><b>Theo Straddle Vaults</b> — <code>pricePerShare</code> unchanged for 96 hours. Nothing to fix.</li>
 </ul>
@@ -87,7 +87,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;colo
 <p>If the harness prints real numbers while the API shows zero, you have a publish-side or chain-mapping problem, not an adapter problem. If both print zero, check the source before you write anything. That single distinction is the difference between an audit and a slander.</p>
 
 <h2>5. Known limits</h2>
-<ul style="padding-left:20px;color:#c2cddd">
+<ul style="padding-left:20px;color:var(--txt)">
 <li><b>Slug matching.</b> 142 of 491 rows have an exact adapter file resolved against the dimension-adapters tree. The rest use a slug that does not match a file name — either the adapter is named differently or there is none. The pack says <code>null</code> rather than guessing.</li>
 <li><b>Diagnosis classes are heuristics</b> except the 6 rows marked <code>confidence: verified</code>. Every one carries the command to overturn it.</li>
 <li><b>Snapshot, not a feed.</b> One point in time, 2026-10-26. Feeds recover; a protocol that fixed itself yesterday is still listed here. Re-run the script before quoting a number to anyone.</li>
@@ -95,7 +95,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;colo
 </ul>
 
 <h2>6. What we do not do</h2>
-<ul style="padding-left:20px;color:#c2cddd">
+<ul style="padding-left:20px;color:var(--txt)">
 <li>No cold DMs to protocol teams pairing a defect with a wallet address. That pattern reads as extortion, it gets accounts banned, and it is not how anyone gets paid in this ecosystem.</li>
 <li>No PR against a feed whose source legitimately returns zero.</li>
 <li>No claim of a partnership, endorsement or review by DefiLlama. None exists.</li>
@@ -103,7 +103,7 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;colo
 </ul>
 
 <a class="cta" href="/#check">Check your protocol free →</a>
-<a class="cta" href="/#products" style="background:#151b26;color:var(--txt);border:1px solid var(--line);margin-left:8px">See the pack</a>
+<a class="cta" href="/#products" style="background:var(--card);color:var(--txt);border:1px solid var(--line2);margin-left:8px">See the pack</a>
 
 <footer>
   Source: <a href="https://github.com/9xj89gzrtw-hue/defillama-fee-feed-audit">github.com/9xj89gzrtw-hue/defillama-fee-feed-audit</a> — scripts, raw CSVs, evidence log. Snapshot 2026-10-26T01:28Z.

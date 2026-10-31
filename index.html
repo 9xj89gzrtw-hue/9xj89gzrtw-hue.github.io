@@ -10,9 +10,9 @@
 <meta property="og:type" content="website">
 <style>
 :root{
-  --bg:#07090d; --bg2:#0c1017; --card:#10151e; --line:#1d2532;
-  --txt:#e6edf7; --dim:#8b98ab; --acc:#4ade80; --acc2:#38bdf8;
-  --warn:#fbbf24; --bad:#f87171; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+  --bg:#fbfaf7; --bg2:#f6f4ef; --card:#ffffff; --line:#e7e3da; --line-2:#d9d4c8;
+  --txt:#17181a; --dim:#6f7276; --acc:#1e4b3a; --acc2:#1a5c8a;
+  --warn:#8a5a00; --bad:#9b2c2c; --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -20,7 +20,7 @@ body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.6 -apple-system,
 a{color:var(--acc2);text-decoration:none}
 a:hover{text-decoration:underline}
 .wrap{max-width:1120px;margin:0 auto;padding:0 22px}
-header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(7,9,13,.82);border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(251,250,247,.9);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;gap:20px;height:60px}
 .logo{font:600 15px/1 var(--mono);letter-spacing:.5px;color:var(--txt)}
 .logo b{color:var(--acc)}
@@ -30,7 +30,7 @@ header{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rg
 h1{font-size:clamp(30px,5vw,50px);line-height:1.08;letter-spacing:-1.5px;margin:0 0 18px;font-weight:700}
 h2{font-size:clamp(22px,3vw,30px);letter-spacing:-.6px;margin:0 0 10px;font-weight:650}
 h3{font-size:17px;margin:0 0 8px}
-p.lead{font-size:18px;color:#c2cddd;max-width:760px}
+p.lead{font-size:18px;color:var(--dim);max-width:760px}
 .hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
 .kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:16px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:34px 0 0}
@@ -46,46 +46,53 @@ section{padding:58px 0;border-bottom:1px solid var(--line)}
 #q:focus{outline:none;border-color:var(--acc2)}
 table{width:100%;border-collapse:collapse;font-size:14px;margin-top:16px}
 th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.8px;text-transform:uppercase;color:var(--dim);padding:8px 10px;border-bottom:1px solid var(--line)}
-td{padding:9px 10px;border-bottom:1px solid #151b25;vertical-align:top}
-tr:hover td{background:#0d1219}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:hover td{background:var(--bg2)}
 .chip{display:inline-block;font:700 10.5px/1 var(--mono);padding:4px 7px;border-radius:5px;letter-spacing:.4px}
-.chip.BROKEN{background:rgba(248,113,113,.14);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
-.chip.MISSING{background:rgba(251,191,36,.13);color:var(--warn);border:1px solid rgba(251,191,36,.3)}
-.chip.ok{background:rgba(74,222,128,.12);color:var(--acc);border:1px solid rgba(74,222,128,.3)}
+.chip.BROKEN{background:#fbeceb;color:var(--bad);border:1px solid #f0cdc9}
+.chip.MISSING{background:#fbf1dd;color:var(--warn);border:1px solid #ecd9b2}
+.chip.ok{background:#e9f1ec;color:var(--acc);border:1px solid #c8dbcf}
 .mono{font-family:var(--mono)}
 .dim{color:var(--dim)}
 .small{font-size:13px}
-button{font:600 15px/1 inherit;cursor:pointer;border-radius:9px;padding:13px 18px;border:1px solid var(--line);background:#151b26;color:var(--txt);transition:.15s}
-button:hover{border-color:#2c394d;background:#1a2230}
+button{font:600 15px/1 inherit;cursor:pointer;border-radius:9px;padding:13px 18px;border:1px solid var(--line-2);background:var(--card);color:var(--txt);transition:.15s}
+button:hover{border-color:#b9b2a3;background:var(--bg2)}
 button:disabled{opacity:.5;cursor:not-allowed}
-button.primary{background:linear-gradient(180deg,#22c55e,#16a34a);border-color:#16a34a;color:#04140a;font-weight:700}
-button.primary:hover{filter:brightness(1.08)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+button.primary:hover{filter:brightness(1.12)}
 button.ghost{background:transparent}
 .price{font:700 34px/1 var(--mono);letter-spacing:-1.5px}
 .price small{font-size:14px;color:var(--dim);font-weight:500;letter-spacing:0}
 ul.clean{list-style:none;padding:0;margin:14px 0 0}
-ul.clean li{padding:7px 0 7px 22px;position:relative;font-size:14.4px;color:#c2cddd}
+ul.clean li{padding:7px 0 7px 22px;position:relative;font-size:14.4px;color:var(--txt)}
 ul.clean li:before{content:"";position:absolute;left:0;top:14px;width:7px;height:7px;border-radius:2px;background:var(--acc)}
-ul.clean li.no:before{background:#334155}
+ul.clean li.no:before{background:#c9c4b7}
 ul.clean li.no{color:var(--dim)}
-input[type=text]{width:100%;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:13.5px}
+input[type=text]{width:100%;padding:13px 14px;background:var(--card);border:1px solid var(--line-2);border-radius:9px;color:var(--txt);font-family:var(--mono);font-size:13.5px}
 input[type=text]:focus{outline:none;border-color:var(--acc2)}
-pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
-code{font-family:var(--mono);font-size:.92em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
+pre{background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:var(--txt)}
+code{font-family:var(--mono);font-size:.92em;background:var(--bg2);padding:1.5px 5px;border-radius:4px;color:#2c2f33;border:1px solid var(--line)}
 #log{font:12.5px/1.7 var(--mono);white-space:pre-wrap;margin-top:12px;color:var(--dim);min-height:20px}
 .box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2)}
-.warnbox{border-color:rgba(251,191,36,.32);background:rgba(251,191,36,.06)}
-.okbox{border-color:rgba(74,222,128,.35);background:rgba(74,222,128,.07)}
-.errbox{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.07)}
+.warnbox{border-color:#ecdcb4;background:#fdf7e9}
+.okbox{border-color:#c8dbcf;background:#eef5f0}
+.errbox{border-color:#f0cdc9;background:#fbeceb}
 footer{padding:44px 0 60px;color:var(--dim);font-size:13px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #151b25;font-size:13.5px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .hidden{display:none}
 .copybtn{padding:6px 10px;font-size:12px;font-family:var(--mono)}
 details{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg2);margin-top:14px}
 summary{cursor:pointer;font-weight:600;font-size:14.5px}
 .ok-ico{color:var(--acc);font-weight:700}
 .tag{font:600 11px/1 var(--mono);color:var(--dim);border:1px solid var(--line);padding:4px 7px;border-radius:5px}
+@media(max-width:720px){
+  .nav{gap:12px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .badge{display:none}
+  .wrap{padding:0 16px}
+  h1{letter-spacing:-.8px}
+}
 </style>
 </head>
 <body>
@@ -117,7 +124,7 @@ summary{cursor:pointer;font-weight:600;font-size:14.5px}
 
   <div class="box warnbox" style="margin-top:22px">
     <strong>Read this before you panic about a number above.</strong>
-    <div class="small" style="margin-top:6px;color:#c2cddd">
+    <div class="small" style="margin-top:6px;color:var(--dim)">
       A silent feed is not automatically a broken adapter. Of the ten largest and most recent breaks we hand-checked, <b>ten</b> returned <code>0.00</code> because the data source itself was zero — the adapter was right. The $3.33M/day figure is the <em>measured</em> aggregate across all 411 rows, including feeds that are years stale and protocols that stopped charging. The actionable subset — recent breaks on protocols that still hold TVL — is <b id="s-live">$23,735/day</b> across <b id="s-liven">18</b> protocols. That is the number we sell you a fix for, and every row ships with the command to verify it yourself.
     </div>
   </div>
@@ -195,7 +202,7 @@ summary{cursor:pointer;font-weight:600;font-size:14.5px}
   <h2>Pay, paste the hash, get the thing</h2>
   <div class="grid2" style="margin-top:22px">
     <div>
-      <p class="small" style="color:#c2cddd">The page talks to Base directly: <code>eth_getTransactionReceipt</code> on <code>mainnet.base.org</code>. It checks four things and nothing else — the transaction succeeded, it contains a USDC <code>Transfer</code> into our address, the amount covers the price, and the hash has not already been redeemed on this browser.</p>
+      <p class="small" style="color:var(--dim)">The page talks to Base directly: <code>eth_getTransactionReceipt</code> on <code>mainnet.base.org</code>. It checks four things and nothing else — the transaction succeeded, it contains a USDC <code>Transfer</code> into our address, the amount covers the price, and the hash has not already been redeemed on this browser.</p>
       <div class="box" style="margin-top:14px">
         <div class="kv"><span class="dim">Network</span><span class="mono">Base · chainId 8453</span></div>
         <div class="kv"><span class="dim">Token</span><span class="mono">USDC · 0x833589…2913</span></div>

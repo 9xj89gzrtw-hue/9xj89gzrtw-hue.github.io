@@ -6,27 +6,27 @@
 <title>ledgerkit — prove an on-chain ledger down to the wei, then pay for one</title>
 <meta name="description" content="Open-source Python engine that turns raw EVM logs into a per-wallet ledger and reconciles it against a second independent recount. Custom ledgers and contract audits from $149, paid in USDC on Base.">
 <style>
-:root{--bg:#07090d;--bg2:#0c1017;--card:#10151e;--line:#1d2532;--txt:#e6edf7;--dim:#8b98ab;--acc:#4ade80;--acc2:#38bdf8;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+:root{--bg:#fbfaf7;--bg2:#f6f4ef;--card:#ffffff;--line:#e7e3da;--line2:#d9d4c8;--txt:#17181a;--dim:#6f7276;--acc:#1e4b3a;--acc2:#1a5c8a;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
 a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{max-width:800px;margin:0 auto;padding:0 22px}
-header{border-bottom:1px solid var(--line);padding:16px 0}
+header{border-bottom:1px solid var(--line);padding:16px 0;background:var(--card)}
 header .wrap{display:flex;gap:18px;align-items:center}
 .logo{font:600 15px/1 var(--mono)}.logo b{color:var(--acc)}
 header a{color:var(--dim);font-size:14px}
 h1{font-size:clamp(28px,4.5vw,42px);line-height:1.1;letter-spacing:-1px;margin:44px 0 14px}
 h2{font-size:23px;letter-spacing:-.4px;margin:40px 0 10px}
-p{margin:0 0 14px;color:#c2cddd}
+p{margin:0 0 14px;color:var(--txt)}
 .kicker{font:600 12px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
-code{font-family:var(--mono);font-size:.9em;background:#131a24;padding:1.5px 5px;border-radius:4px;color:#cfe0f5}
-pre{background:#080b11;border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:#a7b6cb}
+code{font-family:var(--mono);font-size:.9em;background:var(--bg2);padding:1.5px 5px;border-radius:4px;color:#2c2f33;border:1px solid var(--line);overflow-wrap:anywhere}
+pre{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:14px;overflow:auto;font:12.5px/1.65 var(--mono);color:var(--txt)}
 table{width:100%;border-collapse:collapse;font-size:13.5px;margin:16px 0}
-th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line)}
-td{padding:8px;border-bottom:1px solid #151b25;vertical-align:top}
-.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--bg2);margin:18px 0}
-.warn{border-color:rgba(251,191,36,.3);background:rgba(251,191,36,.06)}
-.cta{display:inline-block;background:linear-gradient(180deg,#22c55e,#16a34a);color:#04140a;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
+th{text-align:left;font:600 11px/1 var(--mono);letter-spacing:.7px;text-transform:uppercase;color:var(--dim);padding:8px;border-bottom:1px solid var(--line2);background:var(--bg2)}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.box{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--card);margin:18px 0}
+.warn{border-color:#ecdcb4;background:#fdf7e9}
+.cta{display:inline-block;background:var(--acc);color:#fff;font-weight:700;padding:12px 18px;border-radius:9px;margin:8px 0}
 .dim{color:var(--dim)}
 footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;color:var(--dim);font-size:13px}
 </style>
@@ -49,9 +49,8 @@ footer{border-top:1px solid var(--line);margin-top:50px;padding:26px 0 60px;colo
 logs       ledger     reconciliation</pre>
 
 <h2>Run it</h2>
-<pre>pip install eth-abi
-
-python -m ledgerkit fetch --chain arbitrum \
+<p class="dim" style="margin-bottom:10px">Clone the repository and run from its root with Python 3.11 or newer. Three subcommands, no service to host.</p>
+<pre>python -m ledgerkit fetch --chain arbitrum \
     --address 0xdffe8a4a4103f968ffd61fd082d08c41dcf9b940 \
     --from-block 0 --out logs.json
 
@@ -90,7 +89,7 @@ python -m ledgerkit verify --logs logs.json --fee-bps 250 \
 <p>Paid in USDC on Base to <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code>. Scope agreed in a public GitHub issue first — public and timestamped protects both sides more than any email thread.</p>
 
 <a class="cta" href="https://github.com/9xj89gzrtw-hue/ledgerkit/issues/new?title=ledger%3A%20&body=Contract%20address%3A%0AChain%3A%0AWhat%20counts%20as%20earned%3A%0AWhat%20counts%20as%20paid%20out%3A%0ADeadline%3A">Open a scoping issue →</a>
-<a class="cta" href="https://github.com/9xj89gzrtw-hue/ledgerkit" style="background:#151b26;color:var(--txt);border:1px solid var(--line);margin-left:8px">Read the source</a>
+<a class="cta" href="https://github.com/9xj89gzrtw-hue/ledgerkit" style="background:var(--card);color:var(--txt);border:1px solid var(--line2);margin-left:8px">Read the source</a>
 
 <footer>
   MIT licensed. Repository: <a href="https://github.com/9xj89gzrtw-hue/ledgerkit">github.com/9xj89gzrtw-hue/ledgerkit</a>. Test suite runs in CI on every push.
