@@ -175,11 +175,81 @@
     ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
-    try { document.execCommand("copy"); toast("Copied"); } catch (e) { toast("Copy failed — select the text manually", true); }
+    try { document.execCommand("copy"); toast(T.copied); } catch (e) { toast(T.copyFailed, true); }
     ta.remove();
   }
 
   var modalEl = null;
+
+  /* The modal is shared by every tool page; two pages are Russian, the rest are
+     English, so the copy follows <html lang>. */
+  var RU = document.documentElement.lang === "ru";
+  var T = RU ? {
+    title: "Разблокировать ",
+    sub: "Оплата один раз. Работает в этом браузере.",
+    onBase: "в USDC на Base",
+    copy: "Копировать",
+    steps: [
+      "Переведите точную сумму USDC в сети Base на адрес выше.",
+      "Скопируйте хеш транзакции из кошелька.",
+      "Вставьте его ниже. Страница читает Base напрямую и включает инструменты в этом браузере."
+    ],
+    hash: "Хеш транзакции",
+    exchange: "Платите с биржи? Хеш вывода — это хеш биржи, а не перевода нам. Отправьте с кошелька или пришлите оба хеша письмом, и мы откроем доступ вручную.",
+    cancel: "Отмена",
+    verify: "Проверить оплату",
+    checking: "Проверяем в Base…",
+    copied: "Скопировано",
+    copyFailed: "Не удалось скопировать — выделите адрес вручную",
+    unlocked: "Pro открыт. Подтверждено в Base: ",
+    confirmed: " USDC.",
+    close: "Закрыть",
+    noReceipt: "Платежа пока нет: транзакция неизвестна или ещё не подтверждена. Подождите и повторите.",
+    reverted: "Транзакция отменена (status 0). Перевода не было, доступ не открывается.",
+    noTransfer: "В транзакции нет перевода USDC на наш адрес. Если платили с биржи, хеш вывода — это хеш биржи: найдите перевод, который он создал.",
+    redeemed: "Этот хеш уже использован в этом браузере.",
+    badHash: "Это не хеш транзакции: нужны 0x и 64 шестнадцатеричных символа."
+  } : {
+    title: "Unlock ",
+    sub: "One payment. Keeps working in this browser.",
+    onBase: "in USDC on Base",
+    copy: "Copy",
+    steps: [
+      "Send the exact amount of USDC on the Base network to the address above.",
+      "Copy the transaction hash from your wallet.",
+      "Paste it below. This page reads Base directly and unlocks the tools in this browser."
+    ],
+    hash: "Transaction hash",
+    exchange: "Paying from an exchange? The withdrawal hash is the exchange\u2019s, not the transfer to us. Pay from a wallet, or send both hashes by mail and we will unlock it manually.",
+    cancel: "Cancel",
+    verify: "Verify payment",
+    checking: "Checking Base\u2026",
+    copied: "Copied",
+    copyFailed: "Copy failed \u2014 select the text manually",
+    unlocked: "Pro unlocked. ",
+    confirmed: " USDC confirmed on Base.",
+    close: "Close",
+    noReceipt: "",
+    reverted: "",
+    noTransfer: "",
+    redeemed: "",
+    badHash: ""
+  };
+
+  /* verify.js speaks English because it is also a Node module under test; the
+     Russian pages translate the four messages a buyer can actually hit. */
+  function localize(message) {
+    var m = String(message || "");
+    if (!RU) return m;
+    if (/not a transaction hash/i.test(m)) return T.badHash;
+    if (/already redeemed/i.test(m)) return T.redeemed;
+    if (/No receipt yet/i.test(m)) return T.noReceipt;
+    if (/reverted/i.test(m)) return T.reverted;
+    if (/^No USDC transfer to/i.test(m)) return T.noTransfer;
+    var low = m.match(/^This transaction carried ([\d.]+) USDC, and the price is ([\d.]+)/);
+    if (low) return "В транзакции " + low[1] + " USDC, а цена " + low[2] + ". Доплатите разницу и проверьте второй хеш.";
+    return m;
+  }
 
   function buildModal() {
     var wrap = document.createElement("div");
@@ -189,32 +259,32 @@
       '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="unlock-title">',
       '  <div class="modal-head">',
       '    <div>',
-      '      <h3 id="unlock-title">Unlock Pro</h3>',
+      '      <h3 id="unlock-title"></h3>',
       '      <p class="small muted" id="unlock-sub" style="margin-top:2px"></p>',
       '    </div>',
-      '    <button class="close-x" type="button" data-close aria-label="Close">',
+      '    <button class="close-x" type="button" data-close aria-label="' + T.close + '">',
       '      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 6 6 18M6 6l12 12"/></svg>',
       '    </button>',
       '  </div>',
       '  <div class="modal-body">',
-      '    <div class="pay-amount"><span id="unlock-price">$12</span><span class="small muted">in USDC on Base</span></div>',
+      '    <div class="pay-amount"><span id="unlock-price"></span><span class="small muted">' + T.onBase + '</span></div>',
       '    <div class="pay-address">',
       '      <code class="mono" id="unlock-addr"></code>',
-      '      <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>Copy</button>',
+      '      <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>' + T.copy + '</button>',
       '    </div>',
       '    <ol class="pay-steps">',
-      '      <li>Send the exact amount of USDC on the Base network to the address above.</li>',
-      '      <li>Copy the transaction hash from your wallet.</li>',
-      '      <li>Paste it below. This page reads Base directly and unlocks the tools in this browser.</li>',
+      '      <li>' + T.steps[0] + '</li>',
+      '      <li>' + T.steps[1] + '</li>',
+      '      <li>' + T.steps[2] + '</li>',
       '    </ol>',
-      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">Transaction hash</label>',
+      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">' + T.hash + '</label>',
       '    <input class="field mono" id="unlock-hash" placeholder="0x…" autocomplete="off" spellcheck="false">',
       '    <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
-      '    <p class="tiny muted" style="margin-top:10px">Paying from an exchange? The withdrawal hash is the exchange’s, not the transfer to us. Pay from a wallet, or send both hashes by mail and we will unlock it manually.</p>',
+      '    <p class="tiny muted" style="margin-top:10px">' + T.exchange + '</p>',
       '  </div>',
       '  <div class="modal-foot">',
-      '    <button class="btn btn-ghost" type="button" data-close>Cancel</button>',
-      '    <button class="btn btn-primary" type="button" id="unlock-go">Verify payment</button>',
+      '    <button class="btn btn-ghost" type="button" data-close>' + T.cancel + '</button>',
+      '    <button class="btn btn-primary" type="button" id="unlock-go">' + T.verify + '</button>',
       '  </div>',
       '</div>'
     ].join("");
@@ -227,8 +297,8 @@
   function open(opts) {
     current = opts;
     if (!modalEl) modalEl = buildModal();
-    modalEl.querySelector("#unlock-title").textContent = "Unlock " + (opts.name || "Pro");
-    modalEl.querySelector("#unlock-sub").textContent = opts.sub || "One payment. Keeps working in this browser.";
+    modalEl.querySelector("#unlock-title").textContent = T.title + (opts.name || "Pro");
+    modalEl.querySelector("#unlock-sub").textContent = opts.sub || T.sub;
     modalEl.querySelector("#unlock-price").textContent = "$" + opts.price;
     modalEl.querySelector("#unlock-addr").textContent = PAY_TO;
     modalEl.querySelector("#unlock-hash").value = "";
@@ -279,17 +349,17 @@
       var hash = modalEl.querySelector("#unlock-hash").value.trim();
       err.hidden = true;
       btn.disabled = true;
-      btn.textContent = "Checking Base…";
+      btn.textContent = T.checking;
       try {
         var res = await verifyAndUnlock(current.product, current.price, hash);
         close();
-        toast("Pro unlocked. " + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + " USDC confirmed on Base.");
+        toast(T.unlocked + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + T.confirmed);
       } catch (ex) {
-        err.textContent = ex.message;
+        err.textContent = localize(ex.message);
         err.hidden = false;
       } finally {
         btn.disabled = false;
-        btn.textContent = "Verify payment";
+        btn.textContent = T.verify;
       }
     });
   }
