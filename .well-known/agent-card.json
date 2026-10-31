@@ -1,0 +1,95 @@
+{
+  "name": "Toolworks",
+  "description": "Статический каталог из шести браузерных инструментов для Telegram, почтовых архивов, таблиц и рыночных данных. Бесплатные версии без регистрации, Pro — разовый платёж в USDC на Base с проверкой по хешу транзакции.",
+  "version": "1.0.0",
+  "homepage": "https://9xj89gzrtw-hue.github.io/",
+  "documentation": "https://9xj89gzrtw-hue.github.io/llms.txt",
+  "source": "https://github.com/9xj89gzrtw-hue/9xj89gzrtw-hue.github.io",
+  "language": "ru",
+  "provider": {
+    "organization": "Toolworks",
+    "url": "https://9xj89gzrtw-hue.github.io/"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false,
+    "authentication": "none",
+    "tools": [
+      {
+        "id": "tg-chat-validator",
+        "name": "TG Chat Validator",
+        "url": "https://9xj89gzrtw-hue.github.io/tg-chats/",
+        "description": "Поиск по проверенным открытым групповым чатам Telegram и валидатор ссылок t.me.",
+        "inputs": ["поисковый запрос", "тема", "город", "ссылки t.me/@username"],
+        "outputs": ["таблица чатов: название, участники, тема, город, дата проверки", "статус ссылки: открытый чат / канал / по заявке / не работает", "CSV и XLSX"],
+        "free_tier": "25 строк каталога, 10 проверок ссылок за раз",
+        "pro": { "price_usd": 9, "currency": "USDC", "network": "base" }
+      },
+      {
+        "id": "newsflow-studio",
+        "name": "NewsFlow Studio",
+        "url": "https://9xj89gzrtw-hue.github.io/newsflow/",
+        "description": "Сборка дайджестов из RSS и каналов Telegram без дублей.",
+        "inputs": ["RSS-ленты", "каналы Telegram"],
+        "outputs": ["дайджест", "пост для Telegram", "версия для VK", "короткая заметка"],
+        "free_tier": "5 постов в день, 5 источников",
+        "pro": { "price_usd": 12, "currency": "USDC", "network": "base" }
+      },
+      {
+        "id": "archive-studio",
+        "name": "Archive Studio",
+        "url": "https://9xj89gzrtw-hue.github.io/docsearch/",
+        "description": "Локальный поиск по архивам писем .eml и .mbox с извлечением реквизитов ИНН, КПП и номеров договоров.",
+        "inputs": [".eml", ".mbox", "поисковый запрос"],
+        "outputs": ["найденные письма", "таблица реквизитов"],
+        "free_tier": "25 документов в индексе",
+        "pro": { "price_usd": 15, "currency": "USDC", "network": "base" }
+      },
+      {
+        "id": "live-radar",
+        "name": "Live Radar",
+        "url": "https://9xj89gzrtw-hue.github.io/live-radar/",
+        "description": "Мониторинг рынков Polymarket и цен Telegram-подарков в реальном времени.",
+        "inputs": ["категория рынка", "фильтр по движению"],
+        "outputs": ["таблица рынков с вероятностями и объёмом", "таблица подарков с ценами"],
+        "free_tier": "топ-10 рынков",
+        "pro": { "price_usd": 14, "currency": "USDC", "network": "base" }
+      },
+      {
+        "id": "data-clipper",
+        "name": "Table & TG-Channel Clipper",
+        "url": "https://9xj89gzrtw-hue.github.io/data-clipper/",
+        "description": "Выгрузка таблиц со страниц и лент Telegram-каналов в CSV и Excel.",
+        "inputs": ["открытая страница с таблицей", "лента канала Telegram"],
+        "outputs": ["CSV", "XLSX"],
+        "free_tier": "50 строк за выгрузку",
+        "pro": { "price_usd": 9, "currency": "USDC", "network": "base" }
+      },
+      {
+        "id": "algo-tycoon",
+        "name": "Algo Tycoon",
+        "url": "https://9xj89gzrtw-hue.github.io/algo-tycoon/",
+        "description": "Браузерный симулятор алгоритмических пайплайнов.",
+        "inputs": ["карточки-операции", "порядок пайплайна"],
+        "outputs": ["результат прогона экономики пайплайна"],
+        "free_tier": "Акт I",
+        "pro": { "price_usd": 5, "currency": "USDC", "network": "base" }
+      }
+    ]
+  },
+  "payment": {
+    "method": "on-chain USDC transfer",
+    "network": "base",
+    "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "pay_to": "0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a",
+    "verification": "eth_getTransactionReceipt через публичные RPC Base, проверка события Transfer и суммы",
+    "refunds": "не предусмотрены, доступ выдаётся сразу после подтверждения перевода"
+  },
+  "privacy": {
+    "accounts": false,
+    "email": false,
+    "analytics": false,
+    "server_side_storage": false
+  }
+}

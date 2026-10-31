@@ -37,7 +37,64 @@ const FIXTURE_TX = "0xd27af909788e20f66ac57e2e4f49c0c610fdbf5d6ff20066669076e770
   await throws("rejects a hash that was already redeemed",
     () => A.verify("0x" + "a".repeat(64), { usedHashes: ["0x" + "a".repeat(64)] }), /already redeemed/);
 
+  /* Everything below this point would hit mainnet.base.org, but the parsing and
+   * the whole verify path can be exercised on a synthetic receipt with a stubbed
+   * fetch — so the logic is covered even when the RPC is unreachable. */
+  console.log("receipt parsing (stubbed RPC)");
+  const PAY = "0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a";
+  const PAYOUT = "0x1111111111111111111111111111111111111111";
+  const units = (n) => "0x" + BigInt(n).toString(16).padStart(64, "0");
+  const logFor = (to, amount, token) => ({
+    address: token || A.CONFIG.USDC,
+    topics: [A.TRANSFER, A.pad32(PAYOUT), A.pad32(to)],
+    data: units(amount)
+  });
+  const synth = (logs, status) => ({
+    status: status || "0x1",
+    logs
+  });
+
+  ok("sumUsdcIn reads a synthetic USDC transfer",
+    A.sumUsdcIn(synth([logFor(PAY, 9000000)]), PAY) === 9000000n);
+  ok("sumUsdcIn ignores another token",
+    A.sumUsdcIn(synth([logFor(PAY, 9000000, "0x000000000000000000000000000000000000dEaD")]), PAY) === 0n);
+  ok("sumUsdcIn ignores a transfer to someone else",
+    A.sumUsdcIn(synth([logFor(PAYOUT, 9000000)]), PAY) === 0n);
+  ok("sumUsdcIn adds two transfers in one receipt",
+    A.sumUsdcIn(synth([logFor(PAY, 5000000), logFor(PAY, 4000000)]), PAY) === 9000000n);
+
+  const realFetch = globalThis.fetch;
+  const stub = (receipt) => (globalThis.fetch = async () => ({
+    ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id: 1, result: receipt })
+  }));
+  const H = "0x" + "7".repeat(64);
+  try {
+    stub(synth([logFor(PAY, 9000000)]));
+    const paid = await A.verifyAtLeast(H, 9, { rpcs: ["http://stub"], config: { PAY_TO: PAY } });
+    ok("verifyAtLeast accepts exactly $9 for the $9 tier", paid.received === 9000000n);
+    ok("verifyAtLeast returns a lowercased hash", paid.hash === H);
+
+    stub(synth([logFor(PAY, 8999999)]));
+    await throws("verifyAtLeast refuses one unit short",
+      () => A.verifyAtLeast(H, 9, { rpcs: ["http://stub"], config: { PAY_TO: PAY } }), /carried 8\.999999 USDC/);
+
+    stub(synth([logFor(PAYOUT, 9000000)]));
+    await throws("verifyAtLeast refuses a payment to another address",
+      () => A.verifyAtLeast(H, 9, { rpcs: ["http://stub"], config: { PAY_TO: PAY } }), /No USDC transfer to 0x72Aa/);
+
+    stub(synth([logFor(PAY, 9000000)], "0x0"));
+    await throws("verifyAtLeast refuses a reverted transaction",
+      () => A.verifyAtLeast(H, 9, { rpcs: ["http://stub"], config: { PAY_TO: PAY } }), /reverted/);
+
+    stub(null);
+    await throws("verifyAtLeast refuses an unknown hash",
+      () => A.verifyAtLeast(H, 9, { rpcs: ["http://stub"], config: { PAY_TO: PAY } }), /No receipt yet/);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+
   console.log("live chain: " + FIXTURE_TX.slice(0, 12) + "…");
+  try {
   const receipt = await A.rpc("eth_getTransactionReceipt", [FIXTURE_TX]);
   ok("receipt fetched from a public Base RPC", !!receipt);
   ok("fixture transaction succeeded", receipt.status === "0x1");
@@ -82,6 +139,17 @@ const FIXTURE_TX = "0xd27af909788e20f66ac57e2e4f49c0c610fdbf5d6ff20066669076e770
 
   await throws("unknown hash gives a clear message",
     () => A.verify("0x" + "b".repeat(64)), /No receipt yet|unknown or still pending/);
+  } catch (e) {
+    /* These checks read a real transaction from Base, so they cannot run on a
+       network that blocks the public RPCs (VPN, corporate DNS, offline). Skip
+       them loudly: a skip is not a pass, and the offline checks above still
+       count. */
+    const text = String((e && e.name) + " " + (e && e.message));
+    if (!/AbortError|fetch failed|Connect|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|network/i.test(text)) throw e;
+    console.log("  skip live-chain checks — no Base RPC reachable from this network");
+    console.log("       (" + text.slice(0, 90) + ")");
+    console.log("       re-run where mainnet.base.org is reachable; earlier checks are unaffected");
+  }
 
   console.log("\n" + pass + " passed, " + fail + " failed");
   process.exit(fail ? 1 : 0);

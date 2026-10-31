@@ -26,21 +26,29 @@
 
   const pad32 = h => "0x" + h.replace(/^0x/, "").toLowerCase().padStart(64, "0");
   const HASH_RE = /^0x[0-9a-fA-F]{64}$/;
+  const RPC_TIMEOUT_MS = 9000;
 
   async function rpc(method, params, opts) {
     const urls = (opts && opts.rpcs) || CONFIG.RPCS;
+    const timeout = (opts && opts.timeout) || RPC_TIMEOUT_MS;
     let lastErr;
     for (const url of urls) {
+      // A dead endpoint must not hang the page: without a deadline the browser
+      // waits on the socket for a minute or more and the buyer sees "checking".
+      const ctl = typeof AbortController === "function" ? new AbortController() : null;
+      const timer = ctl ? setTimeout(() => ctl.abort(), timeout) : null;
       try {
         const res = await fetch(url, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params })
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+          signal: ctl ? ctl.signal : undefined
         });
         const j = await res.json();
         if (j.error) { lastErr = new Error(j.error.message); continue; }
         return j.result;
       } catch (e) { lastErr = e; }
+      finally { if (timer) clearTimeout(timer); }
     }
     throw lastErr || new Error("all RPC endpoints failed");
   }

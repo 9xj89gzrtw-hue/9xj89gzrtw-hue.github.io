@@ -1,3 +1,7 @@
 User-agent: *
 Allow: /
+
+# Описание инструментов для ИИ-каталогов и поисковых агентов
+# https://9xj89gzrtw-hue.github.io/llms.txt
+
 Sitemap: https://9xj89gzrtw-hue.github.io/sitemap.xml

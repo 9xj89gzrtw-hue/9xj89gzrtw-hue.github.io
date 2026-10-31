@@ -5,15 +5,14 @@
 
   var PRODUCT = "tgchats";
   var PRICE = 9;
-  var FREE_ROWS = 25;
   var FREE_CHECKS = 10;
   var PRO_CHECKS = 50;
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 
-  var DATA = window.CHAT_CATALOG || { count: 0, chats: [], generated_at: "" };
-  var TOPICS = ["Все", "Разработка", "Данные и ИИ", "Дизайн и продукт", "Маркетинг", "Бизнес", "Работа и карьера", "Образование", "Город и соседи", "Общение"];
+  var DATA = window.CHAT_CATALOG || { count: 0, chats: [], generated_at: "", total: 0 };
+  var TOTAL = DATA.total || DATA.count || DATA.chats.length;  var TOPICS = ["Все", "Разработка", "Данные и ИИ", "Дизайн и продукт", "Маркетинг", "Бизнес", "Работа и карьера", "Образование", "Город и соседи", "Общение"];
 
   var state = { topic: "Все", city: "", query: "", sort: "members", view: "base", checking: false };
 
@@ -106,7 +105,7 @@
     var list = $("#rows");
     var all = filtered();
     var pro = isPro();
-    var shown = pro ? all : all.slice(0, FREE_ROWS);
+    var shown = all;
     list.innerHTML = "";
 
     shown.forEach(function (c) {
@@ -163,19 +162,23 @@
     });
 
     $("#empty-row").hidden = all.length !== 0;
-    $("#limit-bar").hidden = pro || all.length <= FREE_ROWS;
-    $("#limit-text").textContent = "Показаны первые " + FREE_ROWS + " из " + all.length + " чатов по этому фильтру.";
+    var more = TOTAL > DATA.chats.length;
+    $("#limit-bar").hidden = pro || !more;
+    if (!pro && more) {
+      $("#limit-text").textContent = "В бесплатной версии " + fmt(DATA.chats.length) +
+        " чатов из " + fmt(TOTAL) + ". Поиск и фильтры работают по доступной части.";
+    }
 
     var badge = $("#visible-badge");
-    badge.textContent = pro ? fmt(all.length) + " чатов" : fmt(shown.length) + " из " + fmt(all.length);
-    badge.className = "badge" + (!pro && all.length > FREE_ROWS ? " badge-warn" : "");
+    badge.textContent = pro ? fmt(all.length) + " чатов" : fmt(all.length) + " из " + fmt(TOTAL);
+    badge.className = "badge" + (!pro && more ? " badge-warn" : "");
     $("#check-quota").textContent = (isPro() ? PRO_CHECKS : FREE_CHECKS) + " ссылок за раз";
   }
 
   function download(format) {
     var all = filtered();
     var pro = isPro();
-    var rows = pro ? all : all.slice(0, FREE_ROWS);
+    var rows = all;
     if (!rows.length) { toast("Нет строк для выгрузки", true); return; }
     var table = [["Название", "Ссылка", "Тематика", "Город", "Участники", "Проверен", "Описание"]];
     rows.forEach(function (c) {
@@ -200,7 +203,7 @@
     a.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
     toast("Выгружено " + rows.length + " строк");
-    if (!pro && all.length > FREE_ROWS) toast("В Pro — все " + all.length + " строк", false);
+    if (!pro && TOTAL > DATA.chats.length) toast("Полная база, " + fmt(TOTAL) + " строк, открывается в Pro", false);
   }
 
   /* ---------------------------------------------------------------- checker */
@@ -361,16 +364,47 @@
     if (scroll) $("#catalog").scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function init() {
-    $("#stat-count").textContent = fmt(DATA.count);
+  function renderStats() {
+    var pro = isPro() && DATA.count >= TOTAL;
+    $("#stat-count").textContent = pro ? fmt(DATA.chats.length) : fmt(DATA.chats.length) + " из " + fmt(TOTAL);
     $("#stat-topics").textContent = String(new Set(DATA.chats.map(function (c) { return c.topic; })).size);
     $("#stat-cities").textContent = String(new Set(DATA.chats.map(function (c) { return c.city; }).filter(Boolean)).size);
     $("#stat-date").textContent = DATA.generated_at ? dateShort(DATA.generated_at) : "—";
-    $("#hero-count").textContent = "Проверено вручную · " + dateShort(DATA.generated_at);
+    $("#hero-count").textContent = (pro ? "Полная база · " : "Бесплатная часть · ") + "проверено " + dateShort(DATA.generated_at);
+  }
+
+  /* The full catalogue ships encrypted; a verified USDC payment unlocks it. */
+  function loadPro() {
+    if (!isPro() || !window.ChatPack || window.ChatPack.isLoaded()) return;
+    var rec = window.Unlock && window.Unlock.state("tgchats");
+    var bar = $("#limit-bar");
+    bar.hidden = false;
+    $("#limit-text").textContent = "Оплата подтверждена. Проверяем перевод в Base и расшифровываем полную базу…";
+    window.ChatPack.ensure(rec && rec.hash).then(function (pack) {
+      if (!pack || !pack.chats || !pack.chats.length) throw new Error("Пакет Pro пуст");
+      DATA = pack;
+      TOTAL = pack.total || pack.count || pack.chats.length;
+      renderCities();
+      renderTopics();
+      renderStats();
+      renderRows();
+      toast("Полная база открыта: " + fmt(DATA.chats.length) + " чатов");
+    }).catch(function (err) {
+      $("#limit-text").textContent = "Полная база не открылась: " + (err && err.message ? err.message : "ошибка");
+      toast("Не удалось открыть полную базу", true);
+      /* A hash that Base rejects is not a payment: drop it so the page stops
+         retrying on every load. */
+      if (err && err.paymentFailed && window.Unlock) window.Unlock.deactivate("tgchats");
+    });
+  }
+
+  function init() {
+    renderStats();
 
     renderCities();
     renderTopics();
     renderRows();
+    if (isPro()) loadPro();
 
     $("#q").addEventListener("input", function (e) { state.query = e.target.value; renderRows(); });
     $("#city").addEventListener("change", function (e) { state.city = e.target.value; renderRows(); });
@@ -401,7 +435,7 @@
       download("xlsx");
     });
 
-    document.addEventListener("unlock:changed", function () { renderRows(); });
+    document.addEventListener("unlock:changed", function () { renderRows(); if (isPro()) loadPro(); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

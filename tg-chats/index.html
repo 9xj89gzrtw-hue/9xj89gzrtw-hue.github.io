@@ -101,8 +101,8 @@
         <ul class="result-list" id="rows"></ul>
         <div class="limit-bar" id="limit-bar" hidden>
           <div>
-            <p class="small" id="limit-text">Показаны первые 25 чатов по этому фильтру.</p>
-            <p class="tiny muted">Pro открывает всю базу и снимает лимит на выгрузку.</p>
+            <p class="small" id="limit-text">В бесплатной версии 25 чатов.</p>
+            <p class="tiny muted">Полная база отдаётся шифрованным пакетом и открывается после оплаты в этом браузере.</p>
           </div>
           <button class="btn btn-primary btn-sm" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Вся база, без лимита 25 строк, и пакетная проверка до 50 ссылок.">Открыть всё за $9</button>
         </div>
@@ -144,8 +144,7 @@ t.me/third_chat"></textarea>
           <p class="price">$0</p>
           <p class="small muted">Без регистрации.</p>
           <ul class="price-list">
-            <li>Поиск по всей базе</li>
-            <li>Первые 25 чатов по любому фильтру</li>
+            <li>Поиск и фильтры по 25 чатам</li>
             <li>Выгрузка этих 25 строк в CSV</li>
             <li>Проверка до 10 ссылок за раз</li>
           </ul>
@@ -159,13 +158,13 @@ t.me/third_chat"></textarea>
           <p class="price">$9 <span class="small muted">в USDC на Base</span></p>
           <p class="small muted">Разблокируется в этом браузере.</p>
           <ul class="price-list">
-            <li>Вся база без лимита 25 строк</li>
+            <li>Полная база, все проверенные чаты</li>
             <li>Выгрузка в CSV и XLSX целиком</li>
             <li>Проверка до 50 ссылок за раз</li>
-            <li>Повторная разблокировка по тому же хешу</li>
+            <li>Повторная разблокировка в этом браузере</li>
           </ul>
           <button class="btn btn-primary" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Вся база, без лимита 25 строк, и пакетная проверка до 50 ссылок.">Разблокировать Pro</button>
-          <p class="tiny muted price-fine">Платёж проверяется по блокчейну Base в браузере. Почту не спрашиваем.</p>
+          <p class="tiny muted price-fine">Платёж проверяется по блокчейну Base в браузере. Почту не спрашиваем. Полная база лежит на странице шифрованным пакетом AES-256-GCM; ключ собирается локально после подтверждения перевода — это защита от массовой выгрузки, а не DRM.</p>
         </div>
       </div>
     </div>
@@ -193,7 +192,7 @@ t.me/third_chat"></textarea>
         </details>
         <details>
           <summary>Данные куда-то отправляются</summary>
-          <p class="small muted">База встроена в страницу. Поиск и фильтры работают локально. При проверке ссылок браузер запрашивает публичную страницу t.me через открытый читатель — это единственный внешний запрос.</p>
+          <p class="small muted">Бесплатная часть базы встроена в страницу, полная лежит рядом шифрованным пакетом и расшифровывается в браузере. Поиск и фильтры работают локально. При проверке ссылок браузер запрашивает публичную страницу t.me через открытый читатель — это единственный внешний запрос.</p>
         </details>
       </div>
     </div>
@@ -217,6 +216,7 @@ t.me/third_chat"></textarea>
 <script src="../assets/unlock.js"></script>
 <script src="../assets/xlsx.js"></script>
 <script src="./catalog.js"></script>
+<script src="./pro.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
