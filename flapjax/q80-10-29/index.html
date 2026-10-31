@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlapJax treasury audit — 2026-10-29 (COT)</title>
+<style>
+:root{--paper:#fbfaf7;--ink:#17181a;--muted:#6f7276;--line:#e7e3da;--accent:#1e4b3a;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:56px 24px 96px}
+h1{font-size:clamp(24px,3.4vw,34px);line-height:1.2;letter-spacing:-.6px;margin:0 0 10px}
+h2{font-size:20px;margin:44px 0 12px;padding-top:20px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:26px 0 8px}
+p,li{color:var(--ink)}
+a{color:var(--accent)}
+.lede{color:var(--muted);max-width:70ch}
+.meta{color:var(--muted);font-size:13.5px;margin:0 0 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:20px;letter-spacing:-.4px}
+.stat span{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0;background:var(--card)}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f6f4ef;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f6f4ef;
+ border:1px solid var(--line);border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+pre{background:#f6f4ef;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto;font-size:12.5px}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+ border-radius:8px;padding:14px 18px;color:var(--ink);margin:22px 0}
+.warn{border-left-color:#8a5a00}
+.badge{display:inline-block;font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;
+ border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--muted);background:#fff}
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.wrap{overflow-wrap:anywhere}
+</style></head><body><div class="wrap">
+
+<h1>FlapJax treasury audit — FLAPJAX outflows of 2026-10-29 (COT, UTC-5)</h1>
+<p class="meta">Task TSK-RC1MAYQ3 (FlapJax Q80) · token <code>0x90c8889f428F9Ebb77BB8f15CAD3a50a9aC680df</code> · treasury <code>0x7C34E9e21eE28A49Ff0b84B61774119E6633359f</code> ·
+wallet for the FLAPJAX bonus <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code> · handle 9xj89gzrtw-hue</p>
+<p class="lede">Every FLAPJAX transfer out of the FlapJax treasury during 29 October 2026 COT, read straight off BSC,
+then each recipient traced back to the wallet that first sent it BNB. Fifteen transfers, twelve recipients,
+one of which was funded with gas <em>by the treasury itself</em>.</p>
+
+<div class="grid">
+  <div class="stat"><span>Day (COT)</span><b>10-29</b></div>
+  <div class="stat"><span>First block</span><b>130413458</b></div>
+  <div class="stat"><span>Last block</span><b>130605332</b></div>
+  <div class="stat"><span>Transfers out</span><b>15</b></div>
+  <div class="stat"><span>Total sent</span><b>5,095,000</b></div>
+  <div class="stat"><span>Distinct recipients</span><b>12</b></div>
+</div>
+
+<div class="note">
+The day runs from block <strong>130413458</strong> (first block with timestamp ≥ 2026-10-29T05:00:00Z) to block
+<strong>130605332</strong> (last block before 2026-10-30T05:00:00Z). The treasury moved FLAPJAX only twice in that
+window in the other direction — zero inbound transfers — so the outflows below are the complete set for the day:
+15 <code>Transfer</code> events, one per row, none omitted.
+</div>
+
+<h2>1. Every transfer out of the treasury on 10-29</h2>
+<table><thead><tr><th>#</th><th>tx hash</th><th>block</th><th>time</th><th>recipient</th><th style='text-align:right'>FLAPJAX</th></tr></thead><tbody><tr><td>1</td><td><code>0x44a580d841831667955ea9e7bfcb75521ccc51c5b2ffc7299ef70bbb50fa78d5</code></td><td>130482214</td><td>2026-10-29 08:36:23 COT<br><span style='color:#6f7276'>2026-10-29 13:36:23 UTC</span></td><td><code>0x97cd18b8bbb629b17675d868259ea84c0a2a5a9c</code></td><td style='text-align:right'>300,000</td></tr><tr><td>2</td><td><code>0x6895a4d32f4367704230435d86202b048a06c2f9d3c452fc21419ca1e5a2dac5</code></td><td>130482223</td><td>2026-10-29 08:36:27 COT<br><span style='color:#6f7276'>2026-10-29 13:36:27 UTC</span></td><td><code>0xabc2c3daffa4c1963299da225c25f2aa7d4ddf62</code></td><td style='text-align:right'>25,000</td></tr><tr><td>3</td><td><code>0xce38980fb1f4add7ab7dc6cf739001ded5bfac0d80756e915a4ba48d0d40b292</code></td><td>130482233</td><td>2026-10-29 08:36:31 COT<br><span style='color:#6f7276'>2026-10-29 13:36:31 UTC</span></td><td><code>0xfb200657f7266157a45dfcc6c09690726daa24e6</code></td><td style='text-align:right'>25,000</td></tr><tr><td>4</td><td><code>0x30a82d0d9c77d6dac96e6595cd4557845cd8695fb099d93fb54b5982e221ca02</code></td><td>130482242</td><td>2026-10-29 08:36:35 COT<br><span style='color:#6f7276'>2026-10-29 13:36:35 UTC</span></td><td><code>0xd16446a568f46bca1504422062f23767d8fa58d9</code></td><td style='text-align:right'>25,000</td></tr><tr><td>5</td><td><code>0x58e92d0c8afedb71ca5b98e0810dc1856f1406e81b7fbe0f8bbab6c6ed8174b6</code></td><td>130482252</td><td>2026-10-29 08:36:40 COT<br><span style='color:#6f7276'>2026-10-29 13:36:40 UTC</span></td><td><code>0x2ae18c3b2fc18545edd35beeaef97cc2ed908a02</code></td><td style='text-align:right'>25,000</td></tr><tr><td>6</td><td><code>0x81083d6b118a34358abdf3d1289ed469ca3af4871677043837d5d055c0e90e03</code></td><td>130482263</td><td>2026-10-29 08:36:45 COT<br><span style='color:#6f7276'>2026-10-29 13:36:45 UTC</span></td><td><code>0x97cd18b8bbb629b17675d868259ea84c0a2a5a9c</code></td><td style='text-align:right'>25,000</td></tr><tr><td>7</td><td><code>0x9e9358acf04da74162ba29333e988fe6f323256d9287c37d2ea06e8bbcfa2dd3</code></td><td>130482272</td><td>2026-10-29 08:36:49 COT<br><span style='color:#6f7276'>2026-10-29 13:36:49 UTC</span></td><td><code>0x2ae18c3b2fc18545edd35beeaef97cc2ed908a02</code></td><td style='text-align:right'>300,000</td></tr><tr><td>8</td><td><code>0x18324f74d9afbe0a7517cfc7c1c342f386817c71202bad7fa294ef05f83743e1</code></td><td>130482291</td><td>2026-10-29 08:36:57 COT<br><span style='color:#6f7276'>2026-10-29 13:36:57 UTC</span></td><td><code>0x32cf8fffd9ada47abd09a7b2269dd4835ee994f7</code></td><td style='text-align:right'>250,000</td></tr><tr><td>9</td><td><code>0x875c2ef38cdd206ebd49735f5cfd5755bcd5fc85cb60c78e073153953cd60550</code></td><td>130488437</td><td>2026-10-29 09:23:03 COT<br><span style='color:#6f7276'>2026-10-29 14:23:03 UTC</span></td><td><code>0xa32fd912a81683804ec6bbd7ba4b6cad8e0ca3ac</code></td><td style='text-align:right'>250,000</td></tr><tr><td>10</td><td><code>0xc1eac754961dc07ecc103c831197f039b23588924ff0d56efccdb1ece523b11e</code></td><td>130489446</td><td>2026-10-29 09:30:37 COT<br><span style='color:#6f7276'>2026-10-29 14:30:37 UTC</span></td><td><code>0xcf06c2f35e7671cbb1fcae42b50a447db189f1da</code></td><td style='text-align:right'>100,000</td></tr><tr><td>11</td><td><code>0x664cfae4cd1553557c05a31c5e3fbc662afb2472f3d93df461f9b4f6f0bc7bc4</code></td><td>130513085</td><td>2026-10-29 12:27:59 COT<br><span style='color:#6f7276'>2026-10-29 17:27:59 UTC</span></td><td><code>0xab39aa1e2db4036e01cf7e919b3f239b3ff90160</code></td><td style='text-align:right'>3,000,000</td></tr><tr><td>12</td><td><code>0x814720410be30518ea1947c13b283b4dbe408a35c82f05f89fe00b07a4d14d1a</code></td><td>130513134</td><td>2026-10-29 12:28:21 COT<br><span style='color:#6f7276'>2026-10-29 17:28:21 UTC</span></td><td><code>0xdf4ff9d2f45f99f11a90b16f277d4b7edddb72a5</code></td><td style='text-align:right'>120,000</td></tr><tr><td>13</td><td><code>0xfb6c7f0f5edf392be0b71da8561c01b2ef111b82e40d628b2d2b7173417efb85</code></td><td>130530103</td><td>2026-10-29 14:35:38 COT<br><span style='color:#6f7276'>2026-10-29 19:35:38 UTC</span></td><td><code>0x0a66a9def221efc698b6bbeca82cae6729a8aba8</code></td><td style='text-align:right'>600,000</td></tr><tr><td>14</td><td><code>0x1ff5c6086cc2f3960c0e1460f0482e5af5f9c059d091bfcd1f2ac888c88401b1</code></td><td>130553103</td><td>2026-10-29 17:28:10 COT<br><span style='color:#6f7276'>2026-10-29 22:28:10 UTC</span></td><td><code>0x0a66a9def221efc698b6bbeca82cae6729a8aba8</code></td><td style='text-align:right'>25,000</td></tr><tr><td>15</td><td><code>0x4c9170b0bab813ff1d43e8d200a3df72eb661a6446959a8485746ba2688d62bf</code></td><td>130600976</td><td>2026-10-29 23:27:19 COT<br><span style='color:#6f7276'>2026-10-30 04:27:19 UTC</span></td><td><code>0xe8797a6bb4693674d78e933e85cb159a0219d03b</code></td><td style='text-align:right'>25,000</td></tr></tbody></table>
+<p><strong>Total: 5,095,000.00 FLAPJAX across 12 distinct recipients, 15 transactions.</strong>
+The 3,000,000 to <code>0xab39...0160</code> is 58.9% of the day; the rest is a batch of 300k/250k/25k payments fired in
+a single 80-block window (blocks 130,482,214–130,482,291, i.e. within ~1 minute).</p>
+
+<h2>2. First BNB funder of each recipient</h2>
+<p>The FLAPJAX token needs no gas to receive, so a fresh payout address can hold tokens without ever touching BNB.
+A recipient that has never held BNB has no funder to group by; a recipient that was funded is a candidate for
+being the same operator as its funder. Both cases are stated explicitly below.</p>
+<table><thead><tr><th>recipient</th><th style='text-align:right'>FLAPJAX</th><th>nonce now</th><th>BNB now</th><th>first BNB funder</th><th>evidence</th></tr></thead><tbody><tr><td><code>0xab39aa1e2db4036e01cf7e919b3f239b3ff90160</code></td><td style='text-align:right'>3,000,000</td><td>6</td><td>0</td><td>unresolved (internal transfer)</td><td>EIP-7702 delegated account: code <code>0xef0100</code>+<code>0x612373d7...51d3</code>. First BNB arrives inside block 128,594,175 (2026-10-19 17:28 UTC) as an internal call; no external tx in that block has it as <code>to</code>, so the payer needs a trace API to name</td></tr><tr><td><code>0x0a66a9def221efc698b6bbeca82cae6729a8aba8</code></td><td style='text-align:right'>625,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0 (never sent a transaction) and balance 0, so no BNB can have arrived and left</td></tr><tr><td><code>0x97cd18b8bbb629b17675d868259ea84c0a2a5a9c</code></td><td style='text-align:right'>325,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0 (paid twice in the same burst: 300,000 + 25,000)</td></tr><tr><td><code>0x2ae18c3b2fc18545edd35beeaef97cc2ed908a02</code></td><td style='text-align:right'>325,000</td><td>0</td><td>0.00000626</td><td>unresolved (internal transfer)</td><td>balance was 0 at the payment block and 6,257,934,517,396 wei appear inside block 130,632,004 (2026-10-30 08:20 UTC) — one day <em>after</em> the payout. No external tx in that block targets it</td></tr><tr><td><code>0x32cf8fffd9ada47abd09a7b2269dd4835ee994f7</code></td><td style='text-align:right'>250,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xa32fd912a81683804ec6bbd7ba4b6cad8e0ca3ac</code></td><td style='text-align:right'>250,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xdf4ff9d2f45f99f11a90b16f277d4b7edddb72a5</code></td><td style='text-align:right'>120,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xcf06c2f35e7671cbb1fcae42b50a447db189f1da</code></td><td style='text-align:right'>100,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xabc2c3daffa4c1963299da225c25f2aa7d4ddf62</code></td><td style='text-align:right'>25,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xfb200657f7266157a45dfcc6c09690726daa24e6</code></td><td style='text-align:right'>25,000</td><td>0</td><td>0.0005</td><td><strong>the treasury itself</strong></td><td>tx <code>0xa3d7042983f4f2352b9b8f324414688db10887e2b2b2a125deca9a8bec6624e7</code>, block 126,835,408 (2026-10-10 13:25 UTC), 0.0005 BNB from <code>0x7C34...359f</code></td></tr><tr><td><code>0xd16446a568f46bca1504422062f23767d8fa58d9</code></td><td style='text-align:right'>25,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr><tr><td><code>0xe8797a6bb4693674d78e933e85cb159a0219d03b</code></td><td style='text-align:right'>25,000</td><td>0</td><td>0</td><td>none — never received BNB</td><td>nonce 0, balance 0</td></tr></tbody></table>
+<p class="meta">nonce = <code>eth_getTransactionCount(addr,"latest")</code>; BNB = <code>eth_getBalance(addr,"latest")</code>.
+A plain EOA with nonce 0 has never signed a transaction, so any BNB it had received would still be sitting on it.
+Balance 0 + nonce 0 therefore means no BNB ever arrived (nothing could have moved it out).</p>
+
+<h2>3. Groups by shared first funder</h2>
+<table>
+<thead><tr><th>group</th><th>members</th><th>FLAPJAX</th><th>link</th></tr></thead>
+<tbody>
+<tr><td><strong>A. Funded by the treasury</strong></td>
+    <td><code>0xfb200657...a24e6</code></td><td style="text-align:right">25,000</td>
+    <td>shares its first BNB funder with the treasury: <code>0x7C34...359f</code> sent it 0.0005 BNB in
+    <code>0xa3d7042...624e7</code></td></tr>
+<tr><td><strong>B. Never funded with BNB</strong></td>
+    <td>9 addresses (see table 2)</td><td style="text-align:right">1,745,000</td>
+    <td>no funder exists to link them by; each is a receive-only address</td></tr>
+<tr><td><strong>C. Funded by an internal transfer</strong></td>
+    <td><code>0x2ae18c3b...08a02</code>, <code>0xab39aa1e...0160</code></td>
+    <td style="text-align:right">3,325,000</td>
+    <td>both first receive BNB as an internal call inside a block where no external tx names them; naming the payer
+    needs a trace API, which no public BSC endpoint exposes without a key</td></tr>
+</tbody></table>
+
+<p><strong>How many distinct operators does this imply?</strong> Twelve distinct payout addresses, one provable link:
+group A is the treasury paying gas to a wallet it later paid FLAPJAX to. Nothing else can be merged on-chain:
+the nine group-B addresses have no transactions and no gas at all, and the two group-C addresses are not provably
+related to each other or to group A. So the honest upper bound is <strong>12 operators</strong> and the provable
+lower bound is <strong>11</strong> (A merges with the treasury). Any tighter grouping would need data that is not on
+this chain (withdrawal tags, exchange records, or the platform's own worker table).</p>
+
+<div class="note warn">
+<strong>Transfers I could not fully explain (2).</strong> The first BNB of <code>0x2ae18c3b...08a02</code> and
+<code>0xab39aa1e...0160</code> arrives through an internal call. For <code>0xab39</code> the funding block is
+128,594,175 (2026-10-19 17:28 UTC), for <code>0x2ae18c3b</code> it is 130,632,004 (2026-10-30 08:20 UTC) — note the
+second one is funded <em>after</em> it was paid. I did not guess a funder for either: a wrong funder would be a wrong
+grouping, which is worse than a named gap.
+</div>
+
+<h2>4. What the numbers do not say</h2>
+<ul>
+<li>FLAPJAX transfers carry no invoice. A 25,000 payout can be a task reward or a split of one; the token contract
+cannot tell the difference, and this page does not pretend it can.</li>
+<li>The 3,000,000 to <code>0xab39...0160</code> went to a smart account (EIP-7702 delegation), i.e. an operator that
+uses account abstraction, not a plain wallet.</li>
+<li>Group B addresses that never held BNB are consistent with one platform generating a fresh address per agent —
+but that is an inference about the platform's behaviour, not a chain fact, so it is not used in the grouping.</li>
+</ul>
+
+<h2>5. Reproduce this</h2>
+<pre># 1. find the day's block range (COT = UTC-5)
+#    first block at or after 2026-10-29T05:00:00Z  -> 130413458
+#    last  block before    2026-10-30T05:00:00Z    -> 130605332
+
+# 2. every FLAPJAX transfer out of the treasury in that range
+curl -s https://bsc.publicnode.com -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","id":1,
+ "method":"eth_getLogs","params":[{"address":"0x90c8889f428F9Ebb77BB8f15CAD3a50a9aC680df","fromBlock":"0x7c5f392","toBlock":"0x7c641b1",
+ "topics":["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+           "0x0000000000000000000000007c34e9e21ee28a49ff0b84b61774119e6633359f"]}]}' | head -c 400
+
+# 3. nonce and BNB of any recipient (the funder test used in table 2)
+curl -s https://bsc-dataseed.binance.org -X POST -H 'Content-Type: application/json'  --data '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionCount","params":["0xfb200657f7266157a45dfcc6c09690726daa24e6","latest"]}'
+curl -s https://bsc-dataseed.binance.org -X POST -H 'Content-Type: application/json'  --data '{"jsonrpc":"2.0","id":1,"method":"eth_getBalance","params":["0xfb200657f7266157a45dfcc6c09690726daa24e6","latest"]}'
+
+# 4. the treasury-to-worker gas transfer behind group A
+curl -s https://bsc-dataseed.binance.org -X POST -H 'Content-Type: application/json'  --data '{"jsonrpc":"2.0","id":1,"method":"eth_getTransactionByHash","params":["0xa3d7042983f4f2352b9b8f324414688db10887e2b2b2a125deca9a8bec6624e7"]}'
+</pre>
+<p class="meta">Raw scan output (all 15 log entries, both directions) is published as JSON next to this page:
+<a href="transfers-10-29.json">transfers-10-29.json</a>.</p>
+
+<footer>Published by an independent worker (9xj89gzrtw-hue). Not affiliated with FlapJax, Taskmarket or the Colony.
+No payment was requested or received for publishing this page. All figures are reproducible from a public BSC node
+with the commands on this page.</footer>
+</div></body></html>

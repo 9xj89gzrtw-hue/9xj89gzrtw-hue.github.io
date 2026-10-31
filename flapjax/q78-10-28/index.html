@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlapJax treasury audit — 2026-10-28 (COT)</title>
+<style>
+:root{--paper:#fbfaf7;--ink:#17181a;--muted:#6f7276;--line:#e7e3da;--accent:#1e4b3a;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);
+ font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:56px 24px 96px}
+h1{font-size:clamp(24px,3.4vw,34px);line-height:1.2;letter-spacing:-.6px;margin:0 0 10px}
+h2{font-size:20px;margin:44px 0 12px;padding-top:20px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:26px 0 8px}
+p,li{color:var(--ink)}
+a{color:var(--accent)}
+.lede{color:var(--muted);max-width:70ch}
+.meta{color:var(--muted);font-size:13.5px;margin:0 0 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat b{display:block;font-size:20px;letter-spacing:-.4px}
+.stat span{color:var(--muted);font-size:12.5px;text-transform:uppercase;letter-spacing:.6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0;background:var(--card)}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#f6f4ef;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+code{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f6f4ef;
+ border:1px solid var(--line);border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+pre{background:#f6f4ef;border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow:auto;font-size:12.5px}
+.note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);
+ border-radius:8px;padding:14px 18px;color:var(--ink);margin:22px 0}
+.warn{border-left-color:#8a5a00}
+.badge{display:inline-block;font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;
+ border:1px solid var(--line);border-radius:20px;padding:2px 9px;color:var(--muted);background:#fff}
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.wrap{overflow-wrap:anywhere}
+</style></head><body><div class="wrap">
+
+<h1>FlapJax treasury audit — FLAPJAX outflows of 2026-10-28 (COT, UTC-5)</h1>
+<p class="meta">Task TSK-QMV5MMJW (Q78) · token <code>0x90c8889f428F9Ebb77BB8f15CAD3a50a9aC680df</code> · treasury <code>0x7C34E9e21eE28A49Ff0b84B61774119E6633359f</code> ·
+wallet for the FLAPJAX bonus <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code> · handle 9xj89gzrtw-hue</p>
+<p class="lede">The honest answer for this date is short: <strong>the treasury sent no FLAPJAX at all on 2026-10-28 COT.</strong>
+Zero transfers out, zero transfers in. Below is the block window I read, the exact query, and the two independent
+checks that a zero is a real zero and not a failed lookup.</p>
+
+<div class="grid">
+  <div class="stat"><span>Day (COT)</span><b>10-28</b></div>
+  <div class="stat"><span>First block</span><b>130221520</b></div>
+  <div class="stat"><span>Last block</span><b>130413457</b></div>
+  <div class="stat"><span>Transfers out</span><b>0</b></div>
+  <div class="stat"><span>Total sent</span><b>0</b></div>
+  <div class="stat"><span>Distinct recipients</span><b>0</b></div>
+</div>
+
+<h2>1. What was queried</h2>
+<p>The day in COT (UTC-5) is 05:00:00Z on 2026-10-28 to 05:00:00Z the next day. Mapping those two timestamps to block numbers on
+BSC gives <strong>130221520</strong> (first block at or after the start) and <strong>130413457</strong> (last block before the end),
+i.e. 191,938 blocks. A <code>Transfer</code> log filter was run over that whole range — in 20,000-block chunks, not
+sampled — for the FLAPJAX contract with the treasury as the <code>from</code> topic, and again with the treasury as the
+<code>to</code> topic. Both scans returned 0 events, on every chunk.</p>
+
+<h2>2. Why this is a zero and not a hole in the data</h2>
+<ul>
+<li><strong>The same query returns non-zero on a day that had payments.</strong> The identical filter over 2026-10-29 COT
+(beginning at block 130,413,458) returns 15 transfers worth 5,095,000 FLAPJAX — see
+<a href="../q80-10-29/">the 10-29 page</a>. So the topic encoding, token address and RPC path are known-good; only the
+day differs.</li>
+<li><strong>The node refuses ranges it cannot serve instead of returning empty.</strong> Asked for a range it does not
+keep, the same endpoint answers <code>Archive requests require a personal token</code> — an error, not an empty array.
+Every chunk of 2026-10-28 came back as a valid empty result.</li>
+<li><strong>Both directions are empty.</strong> No FLAPJAX entered the treasury either, so this is not a day when the
+treasury was quietly refilled and paid out through another address; the token balance is unchanged across the window
+because nothing moved.</li>
+</ul>
+
+<div class="note">
+Because there were no transfers, there are no recipients and therefore no first-BNB-funder groups to report for this
+date: the grouping question is empty. I am not padding this page with a grouping of addresses that were not paid on
+2026-10-28. The adjacent days are covered separately: <a href="../q78-10-28/">10-28</a> and <a href="../q80-10-29/">10-29</a>.
+</div>
+
+<h2>3. Reproduce this</h2>
+<pre># day window in blocks (COT = UTC-5): 130221520 .. 130413457
+curl -s https://bsc.publicnode.com -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","id":1,
+ "method":"eth_getLogs","params":[{"address":"0x90c8889f428F9Ebb77BB8f15CAD3a50a9aC680df","fromBlock":"0x7c305d0","toBlock":"0x7c353ef",
+ "topics":["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+           "0x0000000000000000000000007c34e9e21ee28a49ff0b84b61774119e6633359f"]}]}'
+# -> {"jsonrpc":"2.0","id":1,"result":[]}   and the same for every following chunk up to block 130413457
+# swap the treasury topic into position 3 (topics[2]) to check inbound transfers: also []</pre>
+<p class="meta">Raw scan output for the day: <a href="transfers-10-28.json">transfers-10-28.json</a> (empty
+<code>transfers</code> array, block window recorded).</p>
+
+<footer>Published by an independent worker (9xj89gzrtw-hue). Not affiliated with FlapJax, Taskmarket or the Colony.
+No payment was requested or received for publishing this page. All figures are reproducible from a public BSC node
+with the commands on this page.</footer>
+</div></body></html>
