@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Algo Tycoon — build the pipeline, ship the algorithm</title>
+<meta name="description" content="A pipeline-puzzle economy game: stack deterministic op-cards into a pipeline, ship correct algorithms for a synthetic order flow, grow a research tree. Free to play. Pro: sandbox, level editor, source — one-time USDC on Base, no accounts, no KYC.">
+<link rel="stylesheet" href="style.css">
+<script src="js/rng.js"></script>
+<script src="js/ops.js"></script>
+<script src="js/pipeline.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/save.js"></script>
+<script src="js/pay.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+<script src="tests.js" defer></script>
+</head>
+<body>
+
+<header class="bar">
+  <div class="brand"><span class="mark"></span>ALGO TYCOON</div>
+  <div class="hud">
+    <span class="gauge">CREDITS <b id="hud-credits">0</b></span>
+    <span class="gauge" id="slot-cap">0/6 CARDS</span>
+    <button class="chip mono" id="tier-chip">FREE</button>
+  </div>
+</header>
+
+<div class="desk">
+
+  <aside class="col">
+    <section class="panel" id="jobs-panel">
+      <h3>Contracts</h3>
+      <div id="jobs"></div>
+    </section>
+    <section class="panel">
+      <h3>Research</h3>
+      <div id="research"></div>
+    </section>
+  </aside>
+
+  <section class="col">
+    <div class="panel" id="brief">
+      <div id="job-title">—</div>
+      <div id="job-brief" class="mono">—</div>
+      <div class="stream" id="stream"></div>
+      <div class="target mono" id="target">TARGET —</div>
+    </div>
+    <div class="panel">
+      <h3>Pipeline</h3>
+      <div class="pipeline" id="pipeline"></div>
+      <h3 style="margin-top:12px;">Card library</h3>
+      <div class="library" id="library"></div>
+      <div class="actions">
+        <button class="btn primary" id="run" disabled>RUN COMPILE</button>
+      </div>
+      <div class="verdict mono" id="verdict">—</div>
+    </div>
+    <div class="panel pro-only">
+      <h3>Sandbox (Pro)</h3>
+      <div class="sbx">
+        <label>SEED / N</label>
+        <div style="display:flex; gap:8px;">
+          <input id="sb-seed" type="text" value="7" style="flex:1;">
+          <input id="sb-n" type="text" value="8" style="width:70px;">
+        </div>
+        <label>OPS (comma list)</label>
+        <input id="sb-ops" type="text" value="floor, even, sum">
+        <button class="btn" id="sb-run">RUN SANDBOX</button>
+        <label>STREAM</label>
+        <div class="out-block mono" id="sb-stream">—</div>
+        <label>OUTPUT</label>
+        <div class="out-block mono" id="sb-out">—</div>
+      </div>
+    </div>
+    <div class="panel pro-only">
+      <h3>Level editor (Pro)</h3>
+      <div class="sbx">
+        <button class="btn" id="ed-export">EXPORT CURRENT JOB + PIPELINE AS JSON</button>
+        <div class="out-block mono" id="editor-out">—</div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="col">
+    <div class="ticker mono" id="ticker">— ORDER BOOK —</div>
+    <div class="panel">
+      <h3>Desk</h3>
+      <p style="font-size:12.5px; color:#3a3a35; margin:0 0 8px;">
+        Deterministic feeds seed-by-seed: every contract is reproducible — the
+        solver, you and the client all see the same stream. Stack op-cards into
+        the pipeline, hit <b>RUN COMPILE</b>, land the exact scalar target.
+      </p>
+      <p style="font-size:12.5px; color:#3a3a35; margin:0;">
+        Free tier holds a <b>6-card</b> pipeline. Pro keeps 11 cards, opens the
+        sandbox and the level editor. One-time <b>$5</b> in USDC on Base — or an
+        Ed25519 key. No account, no KYC, no telemetry, saves stay in
+        <span class="mono">localStorage</span>; offline compilers accrue up to 8h.
+      </p>
+      <div class="actions">
+        <button class="btn" id="chip-pro-zone">UNLOCK PRO · $5</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Notes</h3>
+      <p style="font-size:12px; color:#3a3a35; margin:0;">
+        Scalar cards: <span class="mono">SUM Σ · PROD Π · MIN · MAX</span> — a
+        compilable pipeline must end in one of them. Ordering cards sort, chunk,
+        zigzag or re-time the tape; the desk tips well for exactness (1e-9).
+      </p>
+    </div>
+  </aside>
+
+</div>
+
+<!-- Pro modal -->
+<div class="modal hidden" id="pro-modal" role="dialog" aria-label="Unlock Pro">
+  <div class="modal-box">
+    <div class="modal-head"><b>UNLOCK PRO</b><button class="x" id="modal-close" aria-label="close">×</button></div>
+    <div class="pay">
+      <div>A: <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
+      <div>B: <code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
+      <div style="margin-top:5px;">NETWORK: BASE · ASSET: USDC · NO KYC</div>
+    </div>
+    <button class="btn" style="width:100%; margin-bottom:8px;" id="tab-tx-btn">VERIFY TX — PRO $5.00</button>
+    <button class="btn" style="width:100%; margin-bottom:8px;" id="tab-src-btn">VERIFY TX — SOURCE PACK $19.00</button>
+    <input id="tx-in" class="mono" type="text" placeholder="0x… tx hash of your transfer">
+    <input id="key-in" class="mono" type="text" placeholder="…-XXXXX-… license key (offline path)">
+    <div class="actions"><button class="btn" id="tab-key-btn" style="width:100%;">VERIFY LICENSE KEY</button></div>
+    <div class="pro-status mono" id="pro-status"></div>
+    <p class="fine mono">Verification runs in this browser against a public Base RPC — we never see your hash.</p>
+  </div>
+</div>
+
+<section id="tests">
+  <div class="panel">
+    <div class="t-sum" id="t-sum">tests</div>
+    <div id="t-cases"></div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span>© 2026 9xj89gzrtw-hue · MIT</span>
+  <span><a href="https://github.com/9xj89gzrtw-hue/algo-tycoon" target="_blank" rel="noopener">source</a> · v1.0.0 · offline save · zero telemetry</span>
+</footer>
+
+</body>
+</html>
