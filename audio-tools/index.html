@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AudioTools — 1-кликовое скачивание звука с видео и нейроперевода Яндекса</title>
+<title>AudioTools Studio — 1-кликовое скачивание звука с видео и нейроперевода Яндекса</title>
 <meta name="description" content="Два микро-расширения для браузера: скачивание русской озвучки нейроперевода Яндекса в MP3 и сохранение чистого звука с YouTube в 1 клик. Free план + Pro безлимит.">
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/audio-tools/">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/unlock.js" defer></script>
 <style>
   .app-hero {
     padding: 64px 0 44px;
@@ -123,11 +124,6 @@
     font-weight: 400;
     color: var(--muted);
   }
-  .steps-guide {
-    margin-top: 48px;
-    border-top: 1px solid var(--line);
-    padding-top: 40px;
-  }
   .step-num-pill {
     display: inline-flex;
     align-items: center;
@@ -150,7 +146,7 @@
     <a class="brand" href="../">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
         <rect x="3.5" y="3.5" width="7" height="7" rx="1.6"></rect>
-        <rect x="13.5" y="3.5" width="7" height="7" rx="1.6"></rect>
+        <rect x="13.5" y="13.5" width="7" height="7" rx="1.6"></rect>
         <rect x="3.5" y="13.5" width="7" height="7" rx="1.6"></rect>
         <rect x="13.5" y="13.5" width="7" height="7" rx="1.6"></rect>
       </svg>
@@ -281,40 +277,45 @@
               <li><span class="check-icon">✓</span> <b>Неограниченное число скачиваний</b> в день</li>
               <li><span class="check-icon">✓</span> Приоритетная скорость онлайн-конвертации</li>
               <li><span class="check-icon">✓</span> Вечная лицензия на все обновления</li>
-              <li><span class="check-icon">✓</span> Прямая поддержка автора</li>
+              <li><span class="check-icon">✓</span> Мгновенная разблокировка без ожидания</li>
             </ul>
           </div>
           <div style="margin-top: 24px;">
-            <a class="btn btn-primary" style="width: 100%;" href="#payment-details">Купить Pro-ключ</a>
+            <button class="btn btn-primary" style="width: 100%;" type="button" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
+              Купить Pro в 1 клик (3 USDC)
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Payment details box -->
       <div id="payment-details" class="pricing-block">
-        <h3 style="margin-bottom: 8px;">Как оплатить Pro-доступ (Крипта / Карта РФ)</h3>
+        <h3 style="margin-bottom: 8px;">Способы оплаты Pro-доступа</h3>
         <p class="small muted" style="margin-bottom: 18px;">
-          Оплата происходит напрямую автору без посредников. После отправки вы получаете код активации безлимита.
+          Все способы полностью автоматизированы: мгновенная разблокировка без необходимости писать кому-либо в личные сообщения.
         </p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          <!-- Crypto Base USDC -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 16px;">
-            <b style="font-size: 14px;">1. Оплата в криптовалюте (3 USDC на Base):</b>
-            <p class="small muted" style="margin: 6px 0 10px;">Мгновенное зачисление в сети Base без KYC:</p>
-            <div class="pay-address">
-              <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code>
+          <!-- Crypto 1-Click Base USDC -->
+          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <b style="font-size: 15px;">1. Оплата криптой в 1 клик (3 USDC):</b>
+              <p class="small muted" style="margin: 6px 0 14px;">Мгновенная оплата через ваш криптокошелёк в сети Base без комиссий посредников:</p>
             </div>
+            <button class="btn btn-primary" type="button" style="width: 100%;" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
+              Оплатить 3 USDC в 1 клик
+            </button>
           </div>
 
-          <!-- Russian Card / Telegram -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 16px;">
-            <b style="font-size: 14px;">2. Оплата на карту РФ (299 ₽ по СБП):</b>
-            <p class="small muted" style="margin: 6px 0 10px;">Быстрый перевод через СБП или Telegram:</p>
-            <div class="pay-address">
-              <span>Для получения реквизитов напишите в Telegram:</span>
-              <a href="https://t.me/danilaonly" target="_blank" style="font-weight: 600;">@danilaonly</a>
+          <!-- Digiseller / Plati.Market / WebMoney / Card -->
+          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <b style="font-size: 15px;">2. Оплата в рублях (299 ₽):</b>
+              <p class="small muted" style="margin: 6px 0 14px;">Карты РФ (МИР, СБП), WebMoney через официальный торговый шлюз Digiseller:</p>
             </div>
+            <a class="btn btn-ghost" style="width: 100%; text-align: center;" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
+              Оплатить картой РФ / WebMoney
+            </a>
           </div>
         </div>
       </div>
