@@ -235,6 +235,25 @@
     });
   }
 
+  /* One click: the wallet switches to Base, sends USDC.transfer, and the page
+     unlocks itself from the receipt. The hash inputs below stay as the manual
+     path for mobile wallets and exchange withdrawals. */
+  function wireOneClick() {
+    if (!window.Unlock || !window.Unlock.mountOneClick) return;
+    window.Unlock.mountOneClick($("pay-1click"), {
+      product: "algo-tycoon",
+      price: P.PRICE_PRO,
+      note: $("pay-1click-hint"),
+      onError: function (msg) { $("pro-status").textContent = msg || ""; },
+      onDone: function (r) {
+        ui.state.pro = true;
+        S.save(ui.state);
+        applyEntitlements();
+        $("pro-status").textContent = "paid in one click: " + (Number(r.received) / 1e6).toFixed(2) + " USDC confirmed on Base";
+      }
+    });
+  }
+
   function verifyKey() {
     var el = $("pro-status");
     el.textContent = "checking key…";
@@ -302,6 +321,7 @@
     $("tab-tx-btn").addEventListener("click", function () { verifyPro("pro"); });
     $("tab-src-btn").addEventListener("click", function () { verifyPro("source"); });
     $("tab-key-btn").addEventListener("click", verifyKey);
+    wireOneClick();
     $("sb-run").addEventListener("click", sandboxRun);
     $("ed-export").addEventListener("click", editorExport);
     applyEntitlements();

@@ -93,6 +93,53 @@ const FIXTURE_TX = "0xd27af909788e20f66ac57e2e4f49c0c610fdbf5d6ff20066669076e770
     globalThis.fetch = realFetch;
   }
 
+  console.log("one-click payload");
+  const FROM = "0x1111111111111111111111111111111111111111";
+  const t12 = A.buildTransferTx({ from: FROM, usd: 12 });
+  ok("1-click tx targets the USDC contract", t12.to === A.CONFIG.USDC, t12.to);
+  ok("1-click tx sends no ETH", t12.value === "0x0");
+  ok("1-click tx pins Base chain id", t12.chainId === "0x2105", t12.chainId);
+  ok("1-click tx keeps the buyer as from", t12.from === FROM);
+  ok("1-click tx encodes $12 as 12e6", BigInt("0x" + t12.data.slice(74)) === 12000000n);
+  ok("1-click tx pays the configured address",
+    t12.data.slice(10, 74) === "0".repeat(24) + A.CONFIG.PAY_TO.replace(/^0x/, "").toLowerCase());
+  ok("1-click tx accepts explicit units", BigInt("0x" + A.buildTransferTx({ from: FROM, amountUnits: 9000000n }).data.slice(74)) === 9000000n);
+  await throws("1-click tx refuses a zero amount", () => A.buildTransferTx({ from: FROM, usd: 0 }), /No amount/);
+  await throws("1-click tx refuses a missing wallet", () => A.buildTransferTx({ usd: 12 }), /connect a wallet/);
+
+  console.log("receipt polling (stubbed RPC)");
+  {
+    let calls = 0;
+    const realFetch2 = globalThis.fetch;
+    globalThis.fetch = async () => {
+      calls += 1;
+      return { ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id: 1, result: calls < 3 ? null : synth([logFor(PAY, 12000000)]) }) };
+    };
+    try {
+      const r = await A.waitForReceipt("0x" + "c".repeat(64), { rpcs: ["http://stub"], intervalMs: 1, timeoutMs: 5000 });
+      ok("waitForReceipt polls until the receipt appears", !!r && r.status === "0x1", String(calls) + " calls");
+      ok("waitForReceipt needed more than one poll", calls >= 3, String(calls));
+    } finally { globalThis.fetch = realFetch2; }
+  }
+  {
+    const realFetch3 = globalThis.fetch;
+    globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id: 1, result: null }) });
+    try {
+      await throws("waitForReceipt gives up and names the hash",
+        () => A.waitForReceipt("0x" + "d".repeat(64), { rpcs: ["http://stub"], intervalMs: 1, timeoutMs: 60 }),
+        /has no receipt after .*0xdddd/);
+    } finally { globalThis.fetch = realFetch3; }
+  }
+  {
+    const realFetch4 = globalThis.fetch;
+    globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => ({ jsonrpc: "2.0", id: 1, result: synth([logFor(PAY, 12000000)], "0x0") }) });
+    try {
+      await throws("waitForReceipt rejects a reverted tx",
+        () => A.waitForReceipt("0x" + "e".repeat(64), { rpcs: ["http://stub"], intervalMs: 1, timeoutMs: 500 }),
+        /reverted/);
+    } finally { globalThis.fetch = realFetch4; }
+  }
+
   console.log("live chain: " + FIXTURE_TX.slice(0, 12) + "…");
   try {
   const receipt = await A.rpc("eth_getTransactionReceipt", [FIXTURE_TX]);

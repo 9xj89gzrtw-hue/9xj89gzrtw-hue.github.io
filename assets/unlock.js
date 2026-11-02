@@ -91,7 +91,15 @@
       try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
     }
 
-    return { isPro, verify, reset, PAY_TO, priceUnits: price };
+    /* Grant from a verification done elsewhere (the one-click flow checks the
+       chain itself and hands the hash back). Keeps the entitlement in the same
+       storage key this page already reads. */
+    function activate(hash) {
+      if (hash) markUsed(String(hash).toLowerCase());
+      grant();
+    }
+
+    return { isPro, verify, activate, reset, PAY_TO, priceUnits: price };
   }
 
   root.ProUnlock = { create, PAY_TO, USDC, RPCS };
@@ -208,7 +216,20 @@
     reverted: "Транзакция отменена (status 0). Перевода не было, доступ не открывается.",
     noTransfer: "В транзакции нет перевода USDC на наш адрес. Если платили с биржи, хеш вывода — это хеш биржи: найдите перевод, который он создал.",
     redeemed: "Этот хеш уже использован в этом браузере.",
-    badHash: "Это не хеш транзакции: нужны 0x и 64 шестнадцатеричных символа."
+    badHash: "Это не хеш транзакции: нужны 0x и 64 шестнадцатеричных символа.",
+    oneClick: "Оплатить в 1 клик",
+    oneClickHint: "MetaMask · Rabby · Base Wallet — кошелёк сам переключится на Base и подтвердит перевод",
+    noWallet: "Кошелёк в браузере не найден. Оплатите вручную по адресу ниже или откройте страницу внутри MetaMask, Rabby или Base Wallet.",
+    connecting: "Подключаем кошелёк…",
+    switching: "Переключаемся на Base…",
+    sending: "Подтвердите перевод в кошельке…",
+    waiting: "Ждём подтверждение в Base…",
+    verifying: "Проверяем перевод…",
+    rejected: "Вы отклонили транзакцию в кошельке. Ничего не отправлено.",
+    pending: "Транзакция ещё не подтверждена. Хеш сохранён — вставьте его ниже через минуту.",
+    orManual: "или оплатите вручную",
+    manualTitle: "Ручной вариант — мобильный кошелёк или биржа",
+    oneClickUnlocked: "Pro открыт в 1 клик. Подтверждено в Base: "
   } : {
     title: "Unlock ",
     sub: "One payment. Keeps working in this browser.",
@@ -233,7 +254,20 @@
     reverted: "",
     noTransfer: "",
     redeemed: "",
-    badHash: ""
+    badHash: "",
+    oneClick: "Pay in 1 Click",
+    oneClickHint: "MetaMask · Rabby · Base Wallet — the wallet switches to Base and confirms the transfer itself",
+    noWallet: "No browser wallet found. Pay manually to the address below, or open this page inside MetaMask, Rabby or Base Wallet.",
+    connecting: "Connecting wallet…",
+    switching: "Switching to Base…",
+    sending: "Confirm the transfer in your wallet…",
+    waiting: "Waiting for a Base confirmation…",
+    verifying: "Checking the transfer…",
+    rejected: "You rejected the transaction in your wallet. Nothing was sent.",
+    pending: "The transaction is not confirmed yet. The hash is kept — paste it below in a minute.",
+    orManual: "or pay manually",
+    manualTitle: "Manual fallback — mobile wallet or exchange",
+    oneClickUnlocked: "Pro unlocked in one click. Confirmed on Base: "
   };
 
   /* verify.js speaks English because it is also a Node module under test; the
@@ -249,6 +283,45 @@
     var low = m.match(/^This transaction carried ([\d.]+) USDC, and the price is ([\d.]+)/);
     if (low) return "В транзакции " + low[1] + " USDC, а цена " + low[2] + ". Доплатите разницу и проверьте второй хеш.";
     return m;
+  }
+
+  /* Base mainnet, in the shape wallet_addEthereumChain expects. A wallet that
+     has never seen Base answers 4902 to the switch, so we add it and switch
+     again — the buyer never has to leave the modal. */
+  var BASE_CHAIN = {
+    chainId: "0x2105",
+    chainName: "Base",
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+    rpcUrls: ["https://mainnet.base.org"],
+    blockExplorerUrls: ["https://basescan.org"]
+  };
+
+  /* EIP-6963 wallets expose window.ethereum.providers; plain MetaMask does not. */
+  function wallet() {
+    var injected = window.ethereum;
+    if (!injected) return null;
+    if (Array.isArray(injected.providers) && injected.providers.length) {
+      for (var i = 0; i < injected.providers.length; i += 1) {
+        if (injected.providers[i] && typeof injected.providers[i].request === "function") return injected.providers[i];
+      }
+    }
+    return typeof injected.request === "function" ? injected : null;
+  }
+
+  function walletError(e) {
+    var code = e && (e.code || (e.data && e.data.originalError && e.data.originalError.code));
+    if (code === 4001 || /rejected|denied/i.test(String(e && e.message))) return T.rejected;
+    return String((e && e.message) || e);
+  }
+
+  async function switchToBase(provider) {
+    try {
+      await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: BASE_CHAIN.chainId }] });
+    } catch (e) {
+      var code = e && e.code;
+      if (code !== 4902 && !/Unrecognized chain|not added|try adding/i.test(String(e && e.message))) throw e;
+      await provider.request({ method: "wallet_addEthereumChain", params: [BASE_CHAIN] });
+    }
   }
 
   function buildModal() {
@@ -268,6 +341,12 @@
       '  </div>',
       '  <div class="modal-body">',
       '    <div class="pay-amount"><span id="unlock-price"></span><span class="small muted">' + T.onBase + '</span></div>',
+      '    <button class="btn btn-primary pay-1click" type="button" id="unlock-1click">',
+      '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg>',
+      '      <span id="unlock-1click-label">' + T.oneClick + '</span>',
+      '    </button>',
+      '    <p class="tiny muted pay-1click-hint" id="unlock-1click-hint">' + T.oneClickHint + '</p>',
+      '    <div class="pay-or"><span>' + T.orManual + '</span></div>',
       '    <div class="pay-address">',
       '      <code class="mono" id="unlock-addr"></code>',
       '      <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>' + T.copy + '</button>',
@@ -277,14 +356,14 @@
       '      <li>' + T.steps[1] + '</li>',
       '      <li>' + T.steps[2] + '</li>',
       '    </ol>',
-      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">' + T.hash + '</label>',
+      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">' + T.manualTitle + '</label>',
       '    <input class="field mono" id="unlock-hash" placeholder="0x…" autocomplete="off" spellcheck="false">',
       '    <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
       '    <p class="tiny muted" style="margin-top:10px">' + T.exchange + '</p>',
       '  </div>',
       '  <div class="modal-foot">',
       '    <button class="btn btn-ghost" type="button" data-close>' + T.cancel + '</button>',
-      '    <button class="btn btn-primary" type="button" id="unlock-go">' + T.verify + '</button>',
+      '    <button class="btn" type="button" id="unlock-go">' + T.verify + '</button>',
       '  </div>',
       '</div>'
     ].join("");
@@ -303,9 +382,14 @@
     modalEl.querySelector("#unlock-addr").textContent = PAY_TO;
     modalEl.querySelector("#unlock-hash").value = "";
     modalEl.querySelector("#unlock-error").hidden = true;
+    var one = modalEl.querySelector("#unlock-1click");
+    var hint = modalEl.querySelector("#unlock-1click-hint");
+    one.disabled = !wallet();
+    one.classList.toggle("is-unavailable", !wallet());
+    hint.textContent = wallet() ? T.oneClickHint : T.noWallet;
     modalEl.hidden = false;
     document.body.style.overflow = "hidden";
-    setTimeout(function () { modalEl.querySelector("#unlock-hash").focus(); }, 30);
+    setTimeout(function () { (wallet() ? one : modalEl.querySelector("#unlock-hash")).focus(); }, 30);
   }
 
   function close() {
@@ -322,6 +406,77 @@
     });
     activate(product, { hash: res.hash, received: res.received, price: price });
     return res;
+  }
+
+  /**
+   * The one-click flow itself, shared by the built-in modal and by the pages
+   * that keep their own markup: connect → switch to Base → USDC.transfer →
+   * wait for the receipt → verify → unlock. The buyer signs one transaction
+   * and copies nothing.
+   */
+  async function oneClick(opts, onStage) {
+    var provider = wallet();
+    if (!provider) throw new Error(T.noWallet);
+    var stage = onStage || function () {};
+    stage("connect");
+    var accounts = await provider.request({ method: "eth_requestAccounts" });
+    if (!accounts || !accounts.length) throw new Error(T.rejected);
+    stage("switch");
+    await switchToBase(provider);
+    stage("send");
+    var tx = window.DefiAudit.buildTransferTx({
+      from: accounts[0],
+      usd: Number(opts.price),
+      config: { PAY_TO: PAY_TO }
+    });
+    var hash = await provider.request({ method: "eth_sendTransaction", params: [tx] });
+    if (!hash) throw new Error(T.rejected);
+    stage("wait");
+    await window.DefiAudit.waitForReceipt(hash, { timeoutMs: 150000 });
+    stage("verify");
+    return await verifyAndUnlock(opts.product, opts.price, hash);
+  }
+
+  /**
+   * Attach that flow to a button a page renders itself (docsearch, live-radar,
+   * algo-tycoon). Keeps the page's own modal and status line; only the payment
+   * path is shared.
+   */
+  function mountOneClick(btn, opts) {
+    if (!btn) return;
+    var label = btn.querySelector("[data-1click-label]") || btn;
+    var idle = label.textContent;
+    var setStage = function (name) {
+      var map = { connect: T.connecting, switch: T.switching, send: T.sending, wait: T.waiting, verify: T.verifying };
+      label.textContent = map[name] || idle;
+    };
+    function refresh() {
+      var ok = !!wallet();
+      btn.disabled = !ok;
+      btn.classList.toggle("is-unavailable", !ok);
+      if (opts.note) opts.note.textContent = ok ? (opts.hint || T.oneClickHint) : T.noWallet;
+    }
+    refresh();
+    /* Some wallets inject window.ethereum after the page loads. */
+    window.addEventListener("ethereum#initialized", refresh);
+    btn.addEventListener("click", async function (e) {
+      e.preventDefault();
+      btn.disabled = true;
+      if (opts.onError) opts.onError("");
+      try {
+        var res = await oneClick(opts, setStage);
+        if (opts.onDone) opts.onDone(res);
+        else toast(T.oneClickUnlocked + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + T.confirmed);
+      } catch (ex) {
+        var msg = walletError(ex);
+        if (/has no receipt after/i.test(String(ex && ex.message))) msg = T.pending;
+        if (opts.onError) opts.onError(msg);
+        else toast(msg, true);
+      } finally {
+        label.textContent = idle;
+        refresh();
+      }
+    });
   }
 
   function bind() {
@@ -341,6 +496,37 @@
       if (e.target.closest("[data-copy-addr]")) { copy(PAY_TO); return; }
     });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+
+    /* One-click pay: connect → switch to Base → send USDC.transfer → wait for
+       the receipt → unlock. The buyer signs one transaction and copies nothing. */
+    document.addEventListener("click", async function (e) {
+      var btn = e.target.closest("#unlock-1click");
+      if (!btn || !current) return;
+      var err = modalEl.querySelector("#unlock-error");
+      var label = modalEl.querySelector("#unlock-1click-label");
+      var go = modalEl.querySelector("#unlock-go");
+      var stage = function (name) {
+        var map = { connect: T.connecting, switch: T.switching, send: T.sending, wait: T.waiting, verify: T.verifying };
+        label.textContent = map[name] || T.oneClick;
+      };
+      err.hidden = true;
+      btn.disabled = true;
+      go.disabled = true;
+      try {
+        var res = await oneClick(current, stage);
+        close();
+        toast(T.oneClickUnlocked + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + T.confirmed);
+      } catch (ex) {
+        var msg = walletError(ex);
+        if (/has no receipt after/i.test(String(ex && ex.message))) msg = T.pending;
+        err.textContent = localize(msg);
+        err.hidden = false;
+      } finally {
+        label.textContent = T.oneClick;
+        btn.disabled = !wallet();
+        go.disabled = false;
+      }
+    });
 
     document.addEventListener("click", async function (e) {
       if (!e.target.closest("#unlock-go") || !current) return;
@@ -378,6 +564,9 @@
     copy: copy,
     toast: toast,
     short: short,
-    verifyAndUnlock: verifyAndUnlock
+    verifyAndUnlock: verifyAndUnlock,
+    oneClick: oneClick,
+    mountOneClick: mountOneClick,
+    hasWallet: function () { return !!wallet(); }
   };
 })();

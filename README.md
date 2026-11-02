@@ -35,8 +35,21 @@ under test:
 node tests/verify.test.js
 ```
 
-18 checks against a **real Base mainnet transaction**. The fixture's recipient and amount are read
-from the chain, so the suite fails loudly if the fixture stops being a USDC transfer.
+44 checks against a **real Base mainnet transaction**. The fixture's recipient and amount are read
+from the chain, so the suite fails loudly if the fixture stops being a USDC transfer. The one-click
+path is covered too: the exact `eth_sendTransaction` payload (contract, chain id, calldata) and the
+receipt polling loop are asserted with a stubbed RPC, so no network is needed for those.
+
+## One-click payment
+
+Every Pro modal leads with **Pay in 1 Click**: the page asks the wallet for an account, switches it to
+Base (`0x2105`, adding the chain if the wallet has never seen it), sends `transfer(payTo, price)` to
+native USDC, waits for the receipt and unlocks itself. The buyer never copies an address or a hash.
+
+The manual tx-hash field stays below the button as the fallback for mobile wallets and exchange
+withdrawals, because an exchange withdrawal hash is not the transfer hash and has to be handled by
+hand. The extension popup keeps the manual flow only — a Chrome extension popup has no injected
+provider, so one-click would be a button that cannot work there.
 
 ## Building the Pro archives
 

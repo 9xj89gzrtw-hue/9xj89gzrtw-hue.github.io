@@ -133,5 +133,70 @@
     return "0xa9059cbb" + to.padStart(64, "0") + BigInt(amountUnits).toString(16).padStart(64, "0");
   }
 
-  return { CONFIG, verify, verifyAtLeast, loadReceipt, sumUsdcIn, transferCalldata, rpc, TRANSFER, pad32 };
+  /**
+   * Build the eth_sendTransaction payload for a one-click USDC payment.
+   * The buyer's wallet signs it — this page never sees a private key. Kept here
+   * (not in the UI file) so the exact object the wallet is asked to sign can be
+   * asserted in a test.
+   */
+  function buildTransferTx(opts) {
+    const o = opts || {};
+    const cfg = Object.assign({}, CONFIG, o.config || {});
+    let amount;
+    if (o.amountUnits != null) amount = BigInt(o.amountUnits);
+    else amount = BigInt(Math.round(Number(o.usd) * 1e6));
+    if (!(amount > 0n)) throw new Error("No amount to pay.");
+    if (!/^0x[0-9a-fA-F]{40}$/.test(String(o.from || "")))
+      throw new Error("No wallet address: connect a wallet before paying.");
+    return {
+      from: o.from,
+      to: cfg.USDC,
+      value: "0x0",
+      data: transferCalldata(amount, o.payTo || cfg.PAY_TO),
+      chainId: cfg.CHAIN_ID
+    };
+  }
+
+  /**
+   * Wait until the transaction has a receipt, so a one-click buyer never has to
+   * copy anything. Resolves with the receipt, or throws with a message that
+   * names the hash so a pending payment is never lost.
+   */
+  async function waitForReceipt(hash, opts) {
+    const o = opts || {};
+    const clean = String(hash || "").trim();
+    if (!HASH_RE.test(clean))
+      throw new Error("That is not a transaction hash — a Base hash is 0x followed by 64 hex characters.");
+    const h = clean.toLowerCase();
+    const timeout = o.timeoutMs == null ? 120000 : o.timeoutMs;
+    const interval = o.intervalMs == null ? 1500 : o.intervalMs;
+    const now = o.now || (() => Date.now());
+    const pause = o.sleep || (ms => new Promise(r => setTimeout(r, ms)));
+    const deadline = now() + timeout;
+    let lastErr = null;
+    for (;;) {
+      try {
+        const receipt = await rpc("eth_getTransactionReceipt", [h], { rpcs: o.rpcs, timeout: o.rpcTimeoutMs });
+        if (receipt) {
+          if (receipt.status !== "0x1")
+            throw new Error("That transaction reverted (status 0). Nothing was transferred, so nothing unlocks.");
+          return receipt;
+        }
+      } catch (e) {
+        if (/reverted/.test(String(e && e.message))) throw e;
+        lastErr = e;
+      }
+      if (now() >= deadline) {
+        const why = lastErr ? " Last RPC error: " + lastErr.message : "";
+        throw new Error("The transaction has no receipt after " + Math.round(timeout / 1000) +
+          "s, so it is still pending or was dropped. Hash " + h + " — paste it below once it confirms." + why);
+      }
+      await pause(interval);
+    }
+  }
+
+  return {
+    CONFIG, verify, verifyAtLeast, loadReceipt, sumUsdcIn, transferCalldata,
+    buildTransferTx, waitForReceipt, rpc, TRANSFER, pad32
+  };
 });

@@ -7,6 +7,8 @@
 <meta name="description" content="Browser extension: one-click clean CSV/XLSX from any page — TG channels, catalogs, listings, tables. Free up to 50 rows. Pro unlocked on-chain, no accounts, no KYC.">
 <link rel="stylesheet" href="style.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18'%3E%3Crect width='18' height='18' fill='%23FF5200'/%3E%3Ccircle cx='9' cy='9' r='4.6' fill='none' stroke='%23141414' stroke-width='2.2'/%3E%3Crect x='9' y='2.4' width='4.2' height='2.6' fill='%23141414'/%3E%3C/svg%3E">
+<script src="../assets/verify.js"></script>
+<script src="../assets/unlock.js"></script>
 <script src="engine.js"></script>
 <script src="csv.js"></script>
 <script src="xlsx.js"></script>
@@ -183,6 +185,10 @@
     </div>
 
     <div class="verify" style="margin-top:14px;">
+      <button id="pay-1click" class="btn primary" type="button" style="width:100%; justify-content:center; margin-bottom:6px;">
+        <span data-1click-label>PAY IN 1 CLICK — $9.00</span>
+      </button>
+      <p id="pay-1click-hint" style="font-size:11px; text-align:center; margin:0 0 12px; opacity:.7;">MetaMask · Rabby · Base Wallet — the wallet switches to Base and confirms the transfer</p>
       <div class="addr"><span>TREASURY A:</span><code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
       <div class="addr"><span>TREASURY B:</span><code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
       <div class="tagrow">
@@ -228,5 +234,50 @@
   </div>
 </footer>
 
+<script>
+/* Landing-page payment: one click through the wallet, with the tx-hash field
+   kept as the manual path for mobile wallets and exchange withdrawals. The
+   popup inside the extension keeps its own flow — a Chrome extension popup has
+   no injected provider, so one-click only works on the web page. */
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var status = $("tx-status");
+  function say(msg, ok) {
+    if (!status) return;
+    status.textContent = msg;
+    status.style.opacity = msg ? "1" : ".7";
+    status.style.color = ok ? "var(--ok, #2c6b4f)" : "";
+  }
+
+  if (window.Unlock && window.Unlock.mountOneClick) {
+    window.Unlock.mountOneClick($("pay-1click"), {
+      product: "data-clipper",
+      price: 9,
+      note: $("pay-1click-hint"),
+      onError: function (msg) { say(msg, false); },
+      onDone: function (r) {
+        say("paid in one click: " + (Number(r.received) / 1e6).toFixed(2) + " USDC confirmed on Base — Pro unlocked in this browser", true);
+      }
+    });
+  }
+
+  var btn = $("buy-verify-tx");
+  if (btn && window.ClipTx) {
+    btn.addEventListener("click", function () {
+      say("checking Base…", false);
+      window.ClipTx.verifyBaseUSDCPayment({ txHash: $("tx-in").value, minAmountUSD: 9 })
+        .then(function (r) {
+          if (r.ok) {
+            say("verified: " + r.amountUSDC + " USDC @ block " + r.blockNumber, true);
+            if (window.Unlock) window.Unlock.activate("data-clipper", { hash: r.txHash, received: String(Math.round(r.amountUSDC * 1e6)), price: 9 });
+          } else {
+            say("not verified: " + r.reason, false);
+          }
+        }, function (e) { say("rpc error: " + e.message, false); });
+    });
+  }
+})();
+</script>
 </body>
 </html>

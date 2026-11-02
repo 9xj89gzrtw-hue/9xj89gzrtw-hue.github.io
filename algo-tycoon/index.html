@@ -7,6 +7,8 @@
 <meta name="description" content="A pipeline-puzzle economy game: stack deterministic op-cards into a pipeline, ship correct algorithms for a synthetic order flow, grow a research tree. Free to play. Pro: sandbox, level editor, source — one-time USDC on Base, no accounts, no KYC.">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
+<script src="../assets/verify.js"></script>
+<script src="../assets/unlock.js"></script>
 <script src="js/rng.js"></script>
 <script src="js/ops.js"></script>
 <script src="js/pipeline.js"></script>
@@ -119,6 +121,10 @@
 <div class="modal hidden" id="pro-modal" role="dialog" aria-label="Unlock Pro">
   <div class="modal-box">
     <div class="modal-head"><b>UNLOCK PRO</b><button class="x" id="modal-close" aria-label="close">×</button></div>
+    <button class="btn" style="width:100%; margin-bottom:6px;" id="pay-1click" type="button">
+      <span data-1click-label>PAY IN 1 CLICK — PRO $5.00</span>
+    </button>
+    <p class="pay-hint" id="pay-1click-hint" style="font-size:10.5px;text-align:center;margin:0 0 12px;opacity:.7;">MetaMask · Rabby · Base Wallet</p>
     <div class="pay">
       <div>A: <code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
       <div>B: <code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>

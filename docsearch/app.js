@@ -696,6 +696,31 @@
 
   function closePro() { $("#proModalBg").classList.remove("open"); }
 
+  /* One click: the wallet switches to Base, sends USDC.transfer, and the page
+     unlocks itself from the receipt. The hash field below stays as the manual
+     path for mobile wallets and exchange withdrawals. */
+  function wireOneClick() {
+    if (!window.Unlock || !window.Unlock.mountOneClick) return;
+    window.Unlock.mountOneClick($("#payOneClick"), {
+      product: "archive-studio",
+      price: 15,
+      note: $("#payOneClickHint"),
+      onError: function (msg) {
+        var st = $("#payStatus");
+        st.className = msg ? "status err" : "status";
+        st.textContent = msg || "";
+      },
+      onDone: function (res) {
+        S.unlock.activate(res.hash);
+        var st = $("#payStatus");
+        st.className = "status ok";
+        st.textContent = "Оплата подтверждена: " + (Number(res.received) / 1e6).toFixed(2) + " USDC. Pro включён.";
+        applyPro();
+        setTimeout(function () { closePro(); toast("Pro включён. Лимит увеличен до 10 000 документов."); }, 900);
+      }
+    });
+  }
+
   function applyPro() {
     S.pro = true;
     $("#proPill").classList.remove("hidden");
@@ -904,6 +929,7 @@
     S.unlock = ProUnlock.create({ priceUnits: 15000000n, storageKey: "archive-studio:pro" });
     S.pro = S.unlock.isPro();
     if (S.pro) { $("#proPill").classList.remove("hidden"); $("#proBtn").textContent = "Pro активен"; }
+    wireOneClick();
     // Saved index wins over the demo; a first visit opens the demo so the page
     // is useful before the visitor finds a file.
     let seen = false;

@@ -413,6 +413,33 @@
   }
   function closePro() { $("#proModalBg").classList.remove("open"); }
 
+  /* One click: the wallet switches to Base, sends USDC.transfer, and the page
+     unlocks itself from the receipt. The hash field stays as the manual path
+     for mobile wallets and exchange withdrawals. */
+  function wireOneClick() {
+    if (!window.Unlock || !window.Unlock.mountOneClick) return;
+    window.Unlock.mountOneClick($("#payOneClick"), {
+      product: "live-radar",
+      price: 14,
+      note: $("#payOneClickHint"),
+      onError: function (msg) {
+        var st = $("#payStatus");
+        st.className = msg ? "status err" : "status";
+        st.textContent = msg || "";
+      },
+      onDone: function (res) {
+        S.unlock.activate(res.hash);
+        var st = $("#payStatus");
+        st.className = "status ok";
+        st.textContent = "Оплата подтверждена: " + (Number(res.received) / 1e6).toFixed(2) + " USDC. Pro включён.";
+        S.pro = true;
+        syncProUI();
+        renderTable();
+        setTimeout(function () { closePro(); toast("Pro включён: все рынки, CSV и Telegram."); }, 900);
+      }
+    });
+  }
+
   function syncProUI() {
     const btn = $("#proBtn");
     if (S.pro) {
@@ -753,6 +780,7 @@
     S.unlock = ProUnlock.create({ priceUnits: 14000000n, storageKey: "live-radar:pro" });
     S.pro = S.unlock.isPro();
     $("#payAddr").textContent = S.unlock.PAY_TO;
+    wireOneClick();
 
     renderGifts();
     calc();
