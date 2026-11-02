@@ -280,10 +280,18 @@
               <li><span class="check-icon">✓</span> Мгновенная разблокировка без ожидания</li>
             </ul>
           </div>
-          <div style="margin-top: 24px;">
-            <button class="btn btn-primary" style="width: 100%;" type="button" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-              Купить Pro в 1 клик (3 USDC)
-            </button>
+          <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
+              Купить Pro (299 ₽) — Карты РФ / СБП
+            </a>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
+                ⭐ В Telegram
+              </a>
+              <button class="btn btn-ghost" style="flex: 1; font-size: 13px;" type="button" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
+                Web3 (3 USDC)
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -291,31 +299,53 @@
       <!-- Payment details box -->
       <div id="payment-details" class="pricing-block">
         <h3 style="margin-bottom: 8px;">Способы оплаты Pro-доступа</h3>
-        <p class="small muted" style="margin-bottom: 18px;">
-          Все способы полностью автоматизированы: мгновенная разблокировка без необходимости писать кому-либо в личные сообщения.
+        <p class="small muted" style="margin-bottom: 20px;">
+          Все способы автоматизированы: мгновенная разблокировка без необходимости писать кому-либо в личные сообщения.
         </p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          <!-- Crypto 1-Click Base USDC -->
+          <!-- 1. Plati / Digiseller / Bank Cards / SBP -->
           <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <b style="font-size: 15px;">1. Оплата криптой в 1 клик (3 USDC):</b>
-              <p class="small muted" style="margin: 6px 0 14px;">Мгновенная оплата через ваш криптокошелёк в сети Base без комиссий посредников:</p>
+              <b style="font-size: 15px;">1. Оплата картой РФ / СБП (299 ₽):</b>
+              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
+                Карты РФ (МИР, Visa, MasterCard), СБП по QR-коду и WebMoney через официальный шлюз Plati.Market / Digiseller с мгновенной автовыдачей.
+              </p>
             </div>
-            <button class="btn btn-primary" type="button" style="width: 100%;" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-              Оплатить 3 USDC в 1 клик
-            </button>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
+                Купить на Plati.Market (299 ₽)
+              </a>
+              <a class="btn btn-ghost" style="width: 100%; text-align: center; font-size: 13px; text-decoration: none;" href="https://oplata.info/asp2/pay_wm.asp?id_d=6326936" target="_blank" rel="noopener">
+                Прямая форма оплаты (СБП / Карты)
+              </a>
+            </div>
           </div>
 
-          <!-- Digiseller / Plati.Market / WebMoney / Card -->
+          <!-- 2. Telegram Stars / CryptoBot -->
           <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <b style="font-size: 15px;">2. Оплата в рублях (299 ₽):</b>
-              <p class="small muted" style="margin: 6px 0 14px;">Карты РФ (МИР, СБП), WebMoney через официальный торговый шлюз Digiseller:</p>
+              <b style="font-size: 15px;">2. В 1 клик в Telegram (Stars / USDT):</b>
+              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
+                Оплата внутри мессенджера без браузерных расширений. <b>Telegram Stars</b> (⭐ 150) с любой карты или <b>CryptoBot</b> ($3 USDT/TON).
+              </p>
             </div>
-            <a class="btn btn-ghost" style="width: 100%; text-align: center;" href="https://plati.market/seller/danilaonly/1481449/" target="_blank" rel="noopener">
-              Оплатить картой РФ / WebMoney
+            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
+              Оплатить в Telegram (@Shop010_bot)
             </a>
+          </div>
+
+          <!-- 3. Web3 Base USDC -->
+          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <b style="font-size: 15px;">3. Криптовалюта Web3 (3 USDC):</b>
+              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
+                Оплата в сети Base. Работает в 1 клик при наличии расширения <b>MetaMask</b> или <b>Rabby</b> в браузере. Либо ручной перевод по адресу.
+              </p>
+            </div>
+            <button class="btn btn-ghost" type="button" style="width: 100%;" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
+              Открыть Web3 (3 USDC)
+            </button>
           </div>
         </div>
       </div>
