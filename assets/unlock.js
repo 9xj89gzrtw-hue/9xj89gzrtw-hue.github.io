@@ -378,7 +378,7 @@
     licenseErrorProduct: "Ключ выпущен для другого продукта. Для этого инструмента нужен свой ключ или универсальный ALL.",
     licenseErrorCrypto: "Браузер не дал проверить подпись (crypto.subtle). Откройте страницу по https и повторите.",
     cardPay: "Оплатить картой РФ / СБП — получить ключ мгновенно",
-    cardHint: "Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Ключ TW1-… выдаётся автоматически сразу после оплаты: вернитесь сюда, вставьте его в поле ниже — Pro включится без переписки.",
+    cardHint: "Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Итог в рублях касса считает по своему курсу на момент оплаты, поэтому он может отличаться от подписи на пару рублей. Ключ TW1-… выдаётся автоматически сразу после оплаты: вернитесь сюда, вставьте его в поле ниже — Pro включится без переписки.",
     cardNote: "Ключ действует бессрочно. Он привязан к вашему заказу — не публикуйте его."
   } : {
     title: "Unlock ",
@@ -425,7 +425,7 @@
     licenseErrorProduct: "This key is issued for another product. Use that product's key, or a universal ALL key.",
     licenseErrorCrypto: "The browser refused to check the signature (crypto.subtle). Open the page over https and retry.",
     cardPay: "Pay by card — get the key instantly",
-    cardHint: "Card or instant bank transfer on Plati.Market. The TW1-… key is delivered automatically right after checkout: come back here, paste it below, and Pro opens with no back-and-forth.",
+    cardHint: "Card or instant bank transfer on Plati.Market. The rouble total is computed by the checkout at its own rate on the day, so it can differ from the label by a rouble or two. The TW1-… key is delivered automatically right after checkout: come back here, paste it below, and Pro opens with no back-and-forth.",
     cardNote: "The key never expires. It is tied to your order, so keep it private."
   };
 
