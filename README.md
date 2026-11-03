@@ -8,9 +8,15 @@ Static storefront for three digital kits. Paid in USDC on Base, delivered withou
 - **`/ledgerkit/`** — landing page for the open-source ledger engine.
 - **`/packs/`** — the encrypted Pro archives. Useless without the passphrase, which is revealed only
   after a verified payment.
+- **`/base-tax-audit/`** — Base wallet guard: live ERC-20 approvals with the balance behind each one,
+  a free **Revoke in 1 Click**, and a tax-ready CSV/XLSX export. Source:
+  [9xj89gzrtw-hue/base-tax-audit](https://github.com/9xj89gzrtw-hue/base-tax-audit).
 
 Everything is static: no backend, no database, no accounts, no analytics. The only network calls the
 page makes are JSON-RPC reads to public Base endpoints, and only after a visitor presses verify.
+
+Russian buyers pay by card or SBP: every paid page carries a rouble checkout next to the USDC
+one-click, and the shop auto-delivers a signed `TW1-…` key that the page verifies offline.
 
 ## How the checkout works
 
@@ -42,6 +48,24 @@ files (no network needed). The fixture's recipient and amount are read
 from the chain, so the suite fails loudly if the fixture stops being a USDC transfer. The one-click
 path is covered too: the exact `eth_sendTransaction` payload (contract, chain id, calldata) and the
 receipt polling loop are asserted with a stubbed RPC, so no network is needed for those.
+
+## Rouble checkout next to one-click
+
+A buyer in Russia rarely holds USDC on Base, so the same Pro upgrade is sold in roubles inside the
+same modal:
+
+| Product | Rouble listing | Key prefix |
+|---|---|---|
+| Audio Dub Extractor & Studio Pro | 299 ₽ | `TW1-AUDIO-…` |
+| TG Chat Validator Pro | 490 ₽ | `TW1-TG-…` |
+| Archive Studio DocSearch Pro | 690 ₽ | `TW1-DOC-…` |
+| Table & TG-Channel Clipper Pro | 390 ₽ | `TW1-CLIP-…` |
+
+Card, SBP and Sber Pay are handled by Plati.Market; the key arrives in the order page and is checked
+in the browser with ECDSA P-256, so the entitlement survives with no account and no network.
+`node tools/e2e-card-pay.cjs` asserts the button, its href, the price in its label, a key from the
+real stock unlocking the page, and a key for another product being refused — 27 assertions across
+the four products.
 
 ## One-click payment
 
