@@ -341,7 +341,7 @@
       '  </div>',
       '  <div class="modal-body">',
       '    <div class="pay-amount"><span id="unlock-price"></span><span class="small muted">' + T.onBase + '</span></div>',
-      '    <button class="btn btn-primary pay-1click" type="button" id="unlock-1click">',
+      '    <button class="btn btn-primary pay-1click" type="button" id="unlock-1click" data-method="eth_sendTransaction">',
       '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg>',
       '      <span id="unlock-1click-label">' + T.oneClick + '</span>',
       '    </button>',
@@ -480,6 +480,7 @@
   }
 
   function bind() {
+    if (!modalEl && document.body) modalEl = buildModal();
     document.addEventListener("click", function (e) {
       var t = e.target.closest("[data-unlock]");
       if (t) {

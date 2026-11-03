@@ -25,6 +25,13 @@
 
   var V = function (s) { return s.split(",").map(Number); };
 
+  /* ---------- Acts II–III content gate (WebCrypto AES-GCM) ---------- */
+  test("crypt: acts II–III decrypt into the full job list", async function () {
+    var r = await AT.crypt.ready();
+    ok(r.loaded === true, "act2/3 decrypted (error: " + (r.error || "none") + ")");
+    eq(AT.levels.JOBS.length, 14, "14 jobs after decrypt");
+  });
+
   /* ---------- RNG ---------- */
   test("rng: mulberry32 deterministic per seed", function () {
     var a = AT.rng.mulberry32(2026), b = AT.rng.mulberry32(2026);

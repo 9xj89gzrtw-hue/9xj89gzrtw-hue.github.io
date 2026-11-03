@@ -17,6 +17,14 @@
   };
 
   function demoRoot() { return $("demo-feed"); }
+  function demoRoots() {
+    var out = [];
+    ["demo-feed", "demo-table"].forEach(function (id) {
+      var el = $(id);
+      if (el) out.push(el);
+    });
+    return out;
+  }
 
   function renderGroups() {
     var wrap = $("groups-out");
@@ -92,7 +100,8 @@
       renderPreview();
       return;
     }
-    var res = ClipEngine.extractRows({ selector: g.selector }, state.roles, ClipEngine.FREE_ROW_CAP, demoRoot());
+    var rootEl = g.rootEl || demoRoot();
+    var res = ClipEngine.extractRows({ selector: g.selector }, state.roles, ClipEngine.FREE_ROW_CAP, rootEl);
     state.rows = res.rows;
     var columns = state.roleOrder.length ? state.roleOrder : Object.keys(res.rows[0] || {});
     state.csv = ClipCSV.buildCSV(state.rows, columns, { withBOM: false });
@@ -138,7 +147,14 @@
   }
 
   function detect() {
-    state.groups = ClipEngine.findCardGroups(demoRoot());
+    state.groups = [];
+    demoRoots().forEach(function (rootEl) {
+      var groups = ClipEngine.findCardGroups(rootEl);
+      groups.forEach(function (g) {
+        g.rootEl = rootEl;
+        state.groups.push(g);
+      });
+    });
     state.selectedIdx = null;
     state.roles = {};
     state.roleOrder = [];
@@ -151,11 +167,13 @@
 
   function downloadDemoCSV() {
     if (!state.csv) return;
+    var sel = state.groups[state.selectedIdx];
+    var fname = (sel && sel.rootEl && sel.rootEl.id === "demo-table") ? "public-table-clip.csv" : "demo-feed-clip.csv";
     var blob = new Blob([state.csv], { type: "text/csv" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "demo-feed-clip.csv";
+    a.download = fname;
     a.click();
     setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
   }

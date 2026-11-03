@@ -11,7 +11,7 @@ window.CHAT_CATALOG = {
   {
    "username": "freelead",
    "title": "БИЗНЕС ЧАТ | ПРЕДПРИНИМАТЕЛИ",
-   "about": "БИЗНЕС ЧАТ | ПРЕДПРИНИМАТЕЛИ | МАРКЕТИНГ Реклама 👉 @reklama_freelead Рекламный прайс 👉 @freelead_price Самый большой бизнес чат в СНГ Правила: https://t.me/freelead/1189432 Блог 👉 @raspiarych Гарант 👉 @reklama_freelead Я",
+   "about": "БИЗНЕС ЧАТ | ПРЕДПРИНИМАТЕЛИ | МАРКЕТИНГ Реклама: @reklama_freelead Рекламный прайс: @freelead_price Самый большой бизнес чат в СНГ Правила: https://t.me/freelead/1189432 Блог: @raspiarych Гарант: @reklama_freelead Я",
    "topic": "Бизнес",
    "city": "",
    "members": 90443,
@@ -250,7 +250,7 @@ window.CHAT_CATALOG = {
   },
   {
    "username": "luckycenterchat",
-   "title": "🔵 Чат LuckyCenter | Бесплатное обучение по FB",
+   "title": "Чат LuckyCenter | Бесплатное обучение по FB",
    "about": "Деятельность проекта приостановлена. Поддержка: @LuckyCenter_Support",
    "topic": "Маркетинг",
    "city": "",

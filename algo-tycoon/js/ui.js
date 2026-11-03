@@ -44,6 +44,10 @@
     var acts = { 1: "ACT I — PILOT", 2: "ACT II — VOLUME", 3: "ACT III — PLAYBOOK" };
     var keys = [1, 2, 3];
     keys.forEach(function (a) {
+      var visible = L.JOBS.filter(function (j) {
+        return j.act === a && (G.isJobUnlocked(ui.state, L.JOBS.indexOf(j)) || G.isJobSolved(ui.state, j.id));
+      });
+      if (!visible.length) return; /* no grey LOCKED rows: unseen acts stay unseen */
       var head = document.createElement("div");
       head.className = "act-head mono";
       head.textContent = acts[a] + " · " + G.actsCleared(ui.state)[a] + "/" + L.JOBS.filter(function (j) { return j.act === a; }).length;
@@ -52,16 +56,23 @@
         var idx = L.JOBS.indexOf(j);
         var unlocked = G.isJobUnlocked(ui.state, idx);
         var solved = G.isJobSolved(ui.state, j.id);
+        if (!unlocked && !solved) return; /* locked rows are simply not rendered */
         var row = document.createElement("button");
-        row.className = "job" + (solved ? " solved" : "") + (ui.jobId === j.id ? " sel" : "") + (unlocked ? "" : " locked");
+        row.className = "job" + (solved ? " solved" : "") + (ui.jobId === j.id ? " sel" : "");
         row.innerHTML =
-          "<span class='jpay mono'>" + (unlocked ? fmt(G.creditFor(ui.state, j)) : "—") + " cr</span>" +
-          "<span class='jtitle'>" + (unlocked ? j.id.toUpperCase() + " · " + j.rtl : (solved ? j.id.toUpperCase() : "LOCKED")) + "</span>" +
+          "<span class='jpay mono'>" + fmt(G.creditFor(ui.state, j)) + " cr</span>" +
+          "<span class='jtitle'>" + j.id.toUpperCase() + " · " + j.rtl + "</span>" +
           (solved ? "<span class='jmark mono'>DONE</span>" : "");
         if (unlocked) row.addEventListener("click", function () { selectJob(j.id); });
         wrap.appendChild(row);
       });
     });
+    if (L.act23Error) {
+      var note = document.createElement("div");
+      note.className = "act-head mono warn";
+      note.textContent = "ACT II/III unlock error: " + L.act23Error;
+      wrap.appendChild(note);
+    }
   }
 
   function selectJob(id) {
@@ -82,9 +93,10 @@
     var stream = R.genStream(j.seed, j.n);
     var box = $("stream");
     box.textContent = "";
-    stream.forEach(function (v) {
+    stream.forEach(function (v, i) {
       var c = document.createElement("span");
-      c.className = "val" + (v > 0 ? " pos" : v < 0 ? " neg" : "");
+      c.className = "val" + (v > 0 ? " pos" : v < 0 ? " neg" : "") + " flow";
+      c.style.animationDelay = (i * 70) + "ms";
       c.textContent = (v > 0 ? "+" : "") + v.toFixed(1);
       box.appendChild(c);
     });
@@ -101,7 +113,8 @@
         var slot = document.createElement("button");
         slot.className = "slot";
         if (ui.cards[i]) {
-          slot.classList.add("filled");
+          slot.classList.add("filled", "pop");
+          slot.style.animationDelay = (i * 80) + "ms";
           slot.textContent = OPS.get(ui.cards[i]).label;
           slot.addEventListener("click", function () {
             ui.cards.splice(i, 1);
@@ -304,7 +317,7 @@
   }
 
   /* ---------- boot ---------- */
-  function boot() {
+  function __boot() {
     ui.state = S.load();
     var off = S.offlineEarnings(ui.state);
     if (off.credits > 0) {
@@ -313,7 +326,9 @@
     }
     renderLibrary();
     renderResearch();
-    selectJob(L.JOBS[G.unlockedIndex(ui.state)] ? L.JOBS[G.unlockedIndex(ui.state)].id : L.JOBS[0].id);
+    /* start screen opens straight onto the live board: first unsolved job (fresh save = J01) */
+    var first = L.JOBS[G.unlockedIndex(ui.state)] || L.JOBS[0];
+    selectJob(first.id);
     tickTicker(); setInterval(tickTicker, 4000);
     $("run").addEventListener("click", runPipeline);
     $("chip-pro-zone").addEventListener("click", openPro);
@@ -326,6 +341,12 @@
     $("ed-export").addEventListener("click", editorExport);
     applyEntitlements();
     renderHud();
+  }
+
+  function boot() {
+    /* Acts II–III stay AES-GCM-sealed until crypt.ready() merges the blob;
+       without WebCrypto the game still boots on Act I (see board notice). */
+    root.AT.crypt.whenReady(function () { __boot(); });
   }
 
   if (document.readyState === "loading") {

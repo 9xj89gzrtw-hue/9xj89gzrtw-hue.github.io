@@ -45,6 +45,9 @@
       <div class="cta-row">
         <a class="btn primary" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>DOWNLOAD .ZIP · FREE</a>
         <a class="btn" href="#sandbox">Try the live sandbox</a>
+        <a class="btn bookmarklet" id="bookmarklet-1click"
+           href="javascript:(function(){function x(v){return (v.textContent||'').replace(/\s+/g,' ').trim();}var res=[];document.querySelectorAll('table').forEach(function(tb){var rs=tb.querySelectorAll('tr');if(rs.length<2)return;var w=[];rs.forEach(function(r){var c=r.querySelectorAll('th,td');if(!c.length)return;w.push(Array.prototype.map.call(c,function(f){return '\x22'+x(f).replace(/\x22/g,'\x22\x22')+'\x22';}).join(','));});if(w.length>1)res.push(w.join('%5Cn'));});if(!res.length){alert('DataClipper: no table rows found on this page');return;}var csv=res.join('%5Cn%5Cn');var b=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=document.title.replace(/%5Ba-z0-9 -%5D/ig,'').trim().substring(0,40)+'.csv';a.click();})();"
+           title="Drag this button onto your bookmarks bar, then click it on ANY site to export its tables to CSV — no ZIP, no install.">1-CLICK BOOKMARKLET — DRAG TO BOOKMARKS</a>
       </div>
       <div class="tagrow">
         <span class="tag">Free: 50 rows/export</span>
@@ -103,12 +106,12 @@
 
   <!-- sandbox -->
   <section class="block" id="sandbox">
-    <div class="block-head"><span class="kicker">02</span><h2>Live sandbox — the real engine on a demo feed</h2></div>
-    <p style="max-width: 70ch; color:#3a3a35; margin-top:0;">This is the same engine the extension injects, running on this page against a mock Telegram feed. Click <b>DETECT FEED</b>, select fields, export — exactly what the popup does.</p>
+    <div class="block-head"><span class="kicker">02</span><h2>Live sandbox — the real engine on real public data</h2></div>
+    <p style="max-width: 70ch; color:#3a3a35; margin-top:0;">This is the same engine the extension injects, running live on this page against two real public datasets: <b>a snapshot of the markup of a public Telegram channel feed</b> (<span class="mono">t.me/s/…</span>, collected 2026-10-31) and <b>a snapshot of a public table</b> — Wikipedia «List of largest banks» (collected 2026-11-02, source: en.wikipedia.org). The engine scans BOTH sources with DETECT FEED, groups the repeated rows, picks fields, and exports the same CSV the popup produces. Same engine, same code path, real public data.</p>
     <div class="sandbox">
       <div class="demo-pane">
         <div class="demo-head">
-          <span>DEMO FEED · t.me/s/channel</span>
+          <span>LIVE FEED · t.me/s/… (public channel markup snapshot, 2026-10-31)</span>
           <span class="spacer" style="flex:1"></span>
           <button id="btn-detect" class="btn sm" type="button">DETECT FEED</button>
         </div>
@@ -121,6 +124,22 @@
           <article class="demo-post"><div class="pt"><a href="/post/zeta-06">Perp funding normalizes after squeeze</a></div><div class="px">Basis back inside the corridor; liquidation cascade risk recedes.</div><div class="pm"><span class="m-time">13:21</span><span class="m-views">21.6K views</span><span class="m-link"><a href="/post/zeta-06">/post/zeta-06</a></span></div></article>
           <article class="demo-post"><div class="pt"><a href="/post/eta-07">Audits in flight: two patches, one redeploy</a></div><div class="px">Fix branch frozen for review; post-mortem to follow publication.</div><div class="pm"><span class="m-time">14:03</span><span class="m-views">6.2K views</span><span class="m-link"><a href="/post/eta-07">/post/eta-07</a></span></div></article>
           <article class="demo-post"><div class="pt"><a href="/post/theta-08">Data rooms: channel archiving tooling lands</a></div><div class="px">Bulk export improvements ship for research desk pipelines.</div><div class="pm"><span class="m-time">15:30</span><span class="m-views">8.9K views</span><span class="m-link"><a href="/post/theta-08">/post/theta-08</a></span></div></article>
+        </div>
+      </div>
+      <div class="demo-pane">
+        <div class="demo-head">
+          <span>PUBLIC TABLE · en.wikipedia.org/wiki/List_of_largest_banks — snapshot 2026-11-02</span>
+          <span class="spacer" style="flex:1"></span>
+        </div>
+        <div class="demo-feed" id="demo-table">
+          <div class="trow"><span class="t-rank">1</span><span class="t-bank">Industrial and Commercial Bank of China</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">7,645.80</span></div>
+          <div class="trow"><span class="t-rank">2</span><span class="t-bank">Agricultural Bank of China</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">6,974.82</span></div>
+          <div class="trow"><span class="t-rank">3</span><span class="t-bank">China Construction Bank</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">6,524.05</span></div>
+          <div class="trow"><span class="t-rank">4</span><span class="t-bank">Bank of China</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">5,484.11</span></div>
+          <div class="trow"><span class="t-rank">5</span><span class="t-bank">JPMorgan Chase</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">4,424.90</span></div>
+          <div class="trow"><span class="t-rank">6</span><span class="t-bank">HSBC</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">3,444.82</span></div>
+          <div class="trow"><span class="t-rank">7</span><span class="t-bank">Bank of America</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">3,411.74</span></div>
+          <div class="trow"><span class="t-rank">8</span><span class="t-bank">BNP Paribas</span><span class="t-dot" style="opacity:.8">April 2026, US$ bn</span><span class="t-assets">3,279.30</span></div>
         </div>
       </div>
       <div class="out-pane">
