@@ -386,24 +386,30 @@
 </script>
 
 <script>
-/* «Ввести ключ TW1» on the Pro card: same modal as the pay button, but the
-   license field is what the buyer came for, so it gets the focus. */
+/* «Уже есть ключ TW1» on the Pro card: the same modal as the pay button, but
+   the licence field is what the buyer came for, so it gets the focus.
+   unlock.js is deferred, and this inline block runs during parsing — binding
+   immediately would find window.Unlock undefined and silently do nothing. */
 (function () {
   "use strict";
-  var btn = document.getElementById("key-cta");
-  if (!btn || !window.Unlock) return;
-  btn.addEventListener("click", function () {
-    window.Unlock.open({
-      product: "audio-dub-studio",
-      price: "7",
-      name: "Audio Dub Extractor Studio",
-      sub: "Вставьте ключ TW1-… из письма магазина. Подпись проверяется в браузере, сеть не нужна."
+  function bind() {
+    var btn = document.getElementById("key-cta");
+    if (!btn || !window.Unlock || typeof window.Unlock.open !== "function") return;
+    btn.addEventListener("click", function () {
+      window.Unlock.open({
+        product: "audio-dub-studio",
+        price: "7",
+        name: "Audio Dub Extractor Studio",
+        sub: "Вставьте ключ TW1-… из письма магазина. Подпись проверяется в браузере, сеть не нужна."
+      });
+      setTimeout(function () {
+        var f = document.getElementById("unlock-hash");
+        if (f) f.focus();
+      }, 80);
     });
-    setTimeout(function () {
-      var f = document.getElementById("unlock-hash");
-      if (f) f.focus();
-    }, 80);
-  });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
 })();
 </script>
 </body>

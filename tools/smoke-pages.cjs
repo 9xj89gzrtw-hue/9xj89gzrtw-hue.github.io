@@ -101,13 +101,13 @@ const IGNORE = /Failed to load resource|net::ERR|ERR_NAME_NOT_RESOLVED|net::ERR_
 
     /* Pages with a pay/keys button must actually open the modal. */
     const hasTrigger = await page.evaluate(() =>
-      !!(document.querySelector("[data-unlock]") || document.getElementById("key-cta") ||
-         document.getElementById("key-cta-at") || document.querySelector("[data-key-cta]"))
+      !!(document.getElementById("key-cta") || document.getElementById("key-cta-at") ||
+         document.querySelector("[data-key-cta]") || document.querySelector("[data-unlock]"))
     );
     if (hasTrigger) {
       const opened = await page.evaluate(() => {
-        const el = document.querySelector("[data-unlock]") || document.getElementById("key-cta") ||
-          document.getElementById("key-cta-at") || document.querySelector("[data-key-cta]");
+        const el = document.getElementById("key-cta") || document.getElementById("key-cta-at") ||
+          document.querySelector("[data-key-cta]") || document.querySelector("[data-unlock]");
         el.click();
         const modal = document.querySelector(".modal-backdrop");
         return { present: !!modal, visible: modal ? !modal.hidden : false, hasField: !!document.getElementById("unlock-hash") };

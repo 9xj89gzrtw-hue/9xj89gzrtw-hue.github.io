@@ -78,8 +78,11 @@ function ok(name, cond, extra) {
   await page.goto(home, { waitUntil: "load" });
 
   console.log("модалка");
-  await page.click('[data-unlock][data-product="audio-dub-studio"]');
-  await page.waitForSelector(".modal-backdrop:not([hidden])");
+  /* The buyer path, not the pay button: "Уже есть ключ TW1" must open the
+     modal too, and its handler is bound on DOMContentLoaded because unlock.js
+     is deferred. */
+  await page.click("#key-cta");
+  await page.waitForSelector(".modal-backdrop:not([hidden])", { timeout: 5000 });
   const placeholder = await page.getAttribute("#unlock-hash", "placeholder");
   ok("поле принимает оба формата", /0x/.test(placeholder) && /TW1/.test(placeholder), placeholder);
   ok("мертвых ссылок на Telegram нет", !(await page.content()).includes("Shop010_bot"));

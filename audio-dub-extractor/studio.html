@@ -527,7 +527,10 @@
     }
     history.replaceState(null, "", location.pathname + location.search);
   }
-  applyHash();
+  /* unlock.js is deferred and this block runs during parsing, so the key from
+     the hash can only be redeemed after DOMContentLoaded. */
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", applyHash);
+  else applyHash();
 
   refreshMode();
   render();

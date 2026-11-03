@@ -392,7 +392,8 @@
 
 <script>
 /* Both "activate a TW1 key" buttons open the same unlock modal with the
-   licence field focused: a buyer who already paid should not hunt for it. */
+   licence field focused: a buyer who already paid should not hunt for it.
+   unlock.js is deferred, so binding happens on DOMContentLoaded. */
 (function () {
   "use strict";
   var OPEN = {
@@ -409,13 +410,17 @@
       if (f) f.focus();
     }, 80);
   }
-  ["key-cta-at"].forEach(function (id) {
-    var el = document.getElementById(id);
-    if (el) el.addEventListener("click", open);
-  });
-  Array.prototype.forEach.call(document.querySelectorAll("[data-key-cta]"), function (el) {
-    el.addEventListener("click", open);
-  });
+  function bind() {
+    ["key-cta-at"].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener("click", open);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-key-cta]"), function (el) {
+      el.addEventListener("click", open);
+    });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
 })();
 </script>
 

@@ -172,6 +172,22 @@ const MP3 = fs.readFileSync(path.join(ROOT, "tests", "fixtures", "tone.mp3"));
   ok("границы в полях in/out", cells.includes(short(stamps.in)) && cells.includes(short(stamps.out)), JSON.stringify(cells));
   await studio.screenshot({ path: path.join(SHOTS, "kombo-03-studio-queue.png") });
 
+  console.log("Studio активирует ключ из ссылки");
+  /* A buyer who pasted the key in the panel must not type it again in Studio:
+     studio.html redeems the `key=` part of the hash through unlock.js. A fresh
+     context is required — the shared one would already carry the licence. */
+  const freshCtx = await browser.newContext({ viewport: { width: 1180, height: 900 }, locale: "ru-RU" });
+  const fresh = await freshCtx.newPage();
+  await fresh.goto(base + "/audio-dub-extractor/studio.html#" + studioHref.split("#")[1] + "&key=" + encodeURIComponent(key), { waitUntil: "load" });
+  await fresh.waitForFunction(() => (document.getElementById("mode-pill").textContent || "").trim() === "Pro", null, { timeout: 8000 })
+    .catch(() => {});
+  const freshPill = (await fresh.textContent("#mode-pill")).trim();
+  ok("Studio поднял Pro из ключа в ссылке", freshPill === "Pro", freshPill);
+  const freshRows = (await fresh.textContent("#rows")).replace(/\s+/g, " ").trim();
+  ok("клипы при этом не потерялись", /часть 1/.test(freshRows), freshRows.slice(0, 80));
+  await fresh.screenshot({ path: path.join(SHOTS, "kombo-05-studio-key.png") });
+  await freshCtx.close();
+
   console.log("Pro из панели");
   await page.bringToFront();
   await page.fill("#adk-panel [data-pro] input", key);
