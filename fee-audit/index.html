@@ -391,7 +391,7 @@ function unlockUI(v) {
   const block = parseInt(v.receipt.blockNumber, 16);
   const paid = (Number(v.received) / 1e6).toFixed(2);
   const unit = `<div class="box okbox" style="margin-top:14px">
-    <div><span class="ok-ico">✓ verified on Base</span> · block ${fmt(block)} · ${paid} USDC</div>
+    <div><span class="ok-ico">verified on Base</span> · block ${fmt(block)} · ${paid} USDC</div>
     <div class="small dim mono" style="margin-top:6px;word-break:break-all">${v.hash}</div>
   </div>`;
 

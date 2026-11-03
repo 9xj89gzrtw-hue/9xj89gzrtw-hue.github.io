@@ -76,9 +76,9 @@
         <button id="btn-verify-tx" class="btn btn-primary">VERIFY PAYMENT</button>
       </div>
       <div id="tab-key" class="tabpane hidden">
-        <input id="lic-key" class="mono" type="text" placeholder="LC1…-XXXXX-… license key">
+        <input id="lic-key" class="mono" type="text" placeholder="TW1-… (card / SBP key) or LC1…-XXXXX-…">
         <button id="btn-verify-key" class="btn btn-primary">VERIFY KEY</button>
-        <p class="fine mono">Keys are verified offline with Ed25519 inside this extension.</p>
+        <p class="fine mono">TW1-… keys from the shop (card / СБП) verify offline with ECDSA P-256. LC1 keys stay valid with Ed25519.</p>
       </div>
       <div id="verify-status" class="status mono"></div>
     </div>

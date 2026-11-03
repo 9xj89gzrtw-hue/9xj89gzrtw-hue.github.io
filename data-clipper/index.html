@@ -208,17 +208,21 @@
         <span data-1click-label>PAY IN 1 CLICK — $9.00</span>
       </button>
       <p id="pay-1click-hint" style="font-size:11px; text-align:center; margin:0 0 12px; opacity:.7;">MetaMask · Rabby · Base Wallet — the wallet switches to Base and confirms the transfer</p>
+      <a class="btn primary" id="pay-card" href="https://oplata.info/asp2/pay_wm.asp?id_d=6354602&ai=1481449&lang=ru-RU" target="_blank" rel="noopener" style="width:100%; display:flex; justify-content:center; margin-bottom:6px; text-decoration:none;">
+        <span>ОПЛАТИТЬ КАРТОЙ РФ / СБП — 390 ₽ И КЛЮЧ СРАЗУ</span>
+      </a>
+      <p style="font-size:11px; text-align:center; margin:0 0 12px; opacity:.7;">Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Ключ TW1-… приходит автоматически сразу после оплаты — вставьте его в поле ниже, Pro включится без переписки.</p>
       <div class="addr"><span>TREASURY A:</span><code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
       <div class="addr"><span>TREASURY B:</span><code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
       <div class="tagrow">
         <span class="tag o">NETWORK: BASE</span><span class="tag">ASSET: USDC</span><span class="tag">AMOUNT: 9.00</span>
       </div>
-      <input id="tx-in" class="mono" type="text" placeholder="0x… transaction hash of your 9.00 USDC transfer (Base)">
+      <input id="tx-in" class="mono" type="text" placeholder="0x… hash of your 9.00 USDC transfer (Base)">
       <div style="display:flex; gap:9px; flex-wrap:wrap;">
         <button id="buy-verify-tx" class="btn primary" type="button">VERIFY TX</button>
         <button id="buy-verify-key" class="btn" type="button">VERIFY LICENSE KEY</button>
       </div>
-      <input id="key-in" class="mono" type="text" placeholder="…-XXXXX-… license key (fallback path)">
+      <input id="key-in" class="mono" type="text" placeholder="TW1-CLIP-XXXXXX-… (ключ из карточной оплаты)">
       <div class="status mono" id="tx-status">verification runs in your browser against a public Base RPC — we never see the hash</div>
     </div>
   </section>
@@ -296,6 +300,35 @@
         }, function (e) { say("rpc error: " + e.message, false); });
     });
   }
+
+  /* Card / SBP buyers get a TW1-… key from the shop's auto-delivery. This button
+     used to render without a handler, which promised a check that never ran. */
+  var keyBtn = $("buy-verify-key");
+  function verifyKey() {
+    var raw = ($("key-in") && $("key-in").value || "").trim();
+    if (!raw) { say("вставьте ключ TW1-… из выдачи заказа", false); return; }
+    if (!window.Unlock || !window.Unlock.verifyLicenseKey) {
+      say("проверщик ключей не загрузился — обновите страницу", false);
+      return;
+    }
+    say("проверяем подпись ключа…", false);
+    window.Unlock.verifyLicenseKey(raw, { product: "data-clipper" }).then(function (lic) {
+      if (!lic || !lic.valid) {
+        var map = {
+          format: "это не ключ TW1-… — скопируйте его из выдачи заказа целиком",
+          signature: "подпись не сходится: ключ скопирован не полностью или изменён",
+          product: "ключ выпущен для другого продукта — нужен ключ Data Clipper или универсальный ALL",
+          crypto: "браузер не дал проверить подпись — откройте страницу по https"
+        };
+        say(map[(lic && lic.error)] || "ключ не принят", false);
+        return;
+      }
+      window.Unlock.activate("data-clipper", { hash: "license:" + lic.key, received: 0, price: 9, kind: "license", code: lic.code, kid: lic.kid });
+      say("ключ принят: " + lic.code + " · " + lic.kid + " — Pro включён офлайн", true);
+    }, function (e) { say("ошибка проверки: " + e.message, false); });
+  }
+  if (keyBtn) keyBtn.addEventListener("click", verifyKey);
+  if ($("key-in")) $("key-in").addEventListener("keydown", function (e) { if (e.key === "Enter") verifyKey(); });
 })();
 </script>
 </body>

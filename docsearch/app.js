@@ -731,6 +731,38 @@
   async function verifyPayment() {
     const btn = $("#verifyBtn"), st = $("#payStatus");
     const hash = $("#txHash").value.trim();
+
+    /* A card / SBP buyer has a TW1-… key, not a hash. It is verified offline
+       against the ECDSA public key in assets/unlock.js — the same check the
+       shared modal runs, so the two entry points cannot drift apart. */
+    if (/^TW1-/i.test(hash)) {
+      btn.disabled = true;
+      st.className = "status busy"; st.textContent = "Проверяем подпись ключа…";
+      try {
+        if (!window.Unlock || !window.Unlock.verifyLicenseKey) {
+          throw new Error("Проверщик ключей не загрузился. Обновите страницу.");
+        }
+        const lic = await window.Unlock.verifyLicenseKey(hash, { product: "archive-studio" });
+        if (!lic.valid) {
+          const map = {
+            format: "Это не ключ TW1-… Скопируйте его из выдачи заказа целиком.",
+            signature: "Подпись ключа не сходится — ключ скопирован не полностью или изменён.",
+            product: "Ключ выпущен для другого продукта. Нужен ключ Archive Studio или универсальный ALL.",
+            crypto: "Браузер не дал проверить подпись. Откройте страницу по https и повторите."
+          };
+          throw new Error(map[lic.error] || "Ключ не принят.");
+        }
+        S.unlock.activate("license:" + lic.key);
+        st.className = "status ok";
+        st.textContent = "Ключ принят: " + lic.code + " · " + lic.kid + ". Pro включён, без запросов к сети.";
+        applyPro();
+        setTimeout(() => { closePro(); toast("Pro включён. Лимит увеличен до 10 000 документов."); }, 900);
+      } catch (e) {
+        st.className = "status err"; st.textContent = e.message;
+      } finally { btn.disabled = false; }
+      return;
+    }
+
     st.className = "status busy"; st.textContent = "Проверяем транзакцию в Base…";
     btn.disabled = true;
     try {

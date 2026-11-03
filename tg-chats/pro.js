@@ -92,14 +92,36 @@
     return data;
   }
 
-  /* Returns the decrypted catalogue once per page load. */
+  /* Returns the decrypted catalogue once per page load.
+   *
+   * Two ways in, both local: a Base transaction hash is re-read on-chain, and an
+   * offline TW1 licence key is re-checked against the ECDSA public key in
+   * assets/unlock.js. A card / SBP buyer has a key, not a hash — without this
+   * branch the page would try to read "license:TW1-…" from Base, fail, and
+   * revoke the very entitlement the buyer just paid for. */
   function ensure(hash) {
     if (cache) return Promise.resolve(cache);
     if (loading) return loading;
     if (!hash) {
-      return Promise.reject(new Error("Нет подтверждённого платежа. Откройте Pro и вставьте хеш транзакции."));
+      return Promise.reject(new Error("Нет подтверждённого платежа. Откройте Pro и вставьте хеш транзакции или ключ TW1-…"));
     }
-    loading = checkPayment(hash).then(async function (chk) {
+    var asLicense = /^license:/i.test(String(hash));
+    var gate;
+    if (asLicense) {
+      var raw = String(hash).replace(/^license:/i, "");
+      if (!root.Unlock || !root.Unlock.verifyLicenseKey) {
+        var err0 = new Error("Не загрузился проверщик ключей. Обновите страницу.");
+        err0.paymentFailed = true;
+        return Promise.reject(err0);
+      }
+      gate = root.Unlock.verifyLicenseKey(raw, { product: "tgchats" }).then(function (lic) {
+        if (lic && lic.valid) return { ok: true };
+        return { ok: false, reason: "Ключ TW1-… не подходит к этой базе (" + (lic && lic.error) + ")." };
+      });
+    } else {
+      gate = checkPayment(hash);
+    }
+    loading = gate.then(async function (chk) {
       if (!chk.ok) {
         var err = new Error(chk.reason || "Платёж не подтверждён.");
         err.paymentFailed = true;

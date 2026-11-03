@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/audio-tools/">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/verify.js"></script>
 <script src="../assets/unlock.js" defer></script>
 <style>
   .app-hero {
@@ -290,17 +291,18 @@
             </ul>
           </div>
           <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
-            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
-              Купить Pro (299 ₽) — Карты РФ / СБП
-            </a>
+            <button class="btn btn-primary" style="width: 100%;" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio" data-sub="Очередь до 200 файлов, клипы любой длины, BWF/ID3-метки, проекты">
+              Оплатить в 1 клик (USDC на Base)
+            </button>
             <div style="display: flex; gap: 8px;">
-              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
-                В Telegram
+              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="../audio-dub-extractor/">
+                Audio Dub Studio
               </a>
-              <button class="btn btn-ghost" style="flex: 1; font-size: 13px;" type="button" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-                1-Click Web3 (3 USDC)
+              <button class="btn btn-ghost" id="key-cta-at" style="flex: 1; font-size: 13px;" type="button">
+                Ввести ключ TW1
               </button>
             </div>
+            <p class="tiny muted" style="margin: 0;">Мгновенная автономная активация через Base USDC или лицензионный ключ TW1. Без ботов и ожидания.</p>
           </div>
         </div>
       </div>
@@ -309,51 +311,35 @@
       <div id="payment-details" class="pricing-block">
         <h3 style="margin-bottom: 8px;">Способы оплаты Pro-доступа</h3>
         <p class="small muted" style="margin-bottom: 20px;">
-          Все способы автоматизированы: мгновенная разблокировка без необходимости писать кому-либо в личные сообщения.
+          Все способы автоматизированы: мгновенная автономная разблокировка без ручной выдачи и ожидания.
         </p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          <!-- 1. Plati / Digiseller / Bank Cards / SBP -->
+          <!-- 1. Offline License Keys -->
           <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <b style="font-size: 15px;">1. Оплата картой РФ / СБП (299 ₽):</b>
+              <b style="font-size: 15px;">1. Лицензионный ключ TW1:</b>
               <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Карты РФ (МИР, Visa, MasterCard), СБП по QR-коду и WebMoney через официальный шлюз Plati.Market / Digiseller с мгновенной автовыдачей.
+                Мгновенная автономная покупка ключа TW1-… картой РФ / СБП. Ключ проверяется по криптографической подписи прямо в браузере.
               </p>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-              <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
-                Купить на Plati.Market (299 ₽)
-              </a>
-              <a class="btn btn-ghost" style="width: 100%; text-align: center; font-size: 13px; text-decoration: none;" href="https://oplata.info/asp2/pay_wm.asp?id_d=6326936" target="_blank" rel="noopener">
-                Прямая форма оплаты (СБП / Карты)
-              </a>
+              <button class="btn btn-primary" style="width: 100%; text-align: center;" type="button" data-key-cta>
+                Активировать ключ TW1
+              </button>
             </div>
           </div>
 
-          <!-- 2. Telegram Stars / CryptoBot -->
+          <!-- 2. Web3 Base USDC -->
           <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <b style="font-size: 15px;">2. В 1 клик в Telegram (Stars / USDT):</b>
+              <b style="font-size: 15px;">2. Криптовалюта 1-Click Web3 (USDC Base):</b>
               <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Оплата внутри мессенджера без браузерных расширений. <b>Telegram Stars</b> (⭐ 150) с любой карты или <b>CryptoBot</b> ($3 USDT/TON).
+                Оплата в сети Base. Работает в 1 клик через MetaMask, Rabby или любой кошелёк с публичной верификацией на Base.
               </p>
             </div>
-            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
-              Оплатить в Telegram (@Shop010_bot)
-            </a>
-          </div>
-
-          <!-- 3. Web3 Base USDC -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <b style="font-size: 15px;">3. Криптовалюта 1-Click Web3 (3 USDC):</b>
-              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Оплата в сети Base. Работает в 1 клик при наличии расширения <b>MetaMask</b> или <b>Rabby</b> в браузере. Либо ручной перевод по адресу.
-              </p>
-            </div>
-            <button class="btn btn-ghost" type="button" style="width: 100%;" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-              Открыть 1-Click Web3 (3 USDC)
+            <button class="btn btn-ghost" type="button" style="width: 100%;" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio" data-sub="Очередь до 200 файлов, клипы любой длины, BWF/ID3-метки, проекты">
+              Оплатить в 1 клик
             </button>
           </div>
         </div>
@@ -403,6 +389,35 @@
     <p class="small muted">Toolworks AudioTools · Независимые веб-инструменты без рекламы и сбора данных.</p>
   </div>
 </footer>
+
+<script>
+/* Both "activate a TW1 key" buttons open the same unlock modal with the
+   licence field focused: a buyer who already paid should not hunt for it. */
+(function () {
+  "use strict";
+  var OPEN = {
+    product: "audio-dub-studio",
+    price: "7",
+    name: "Audio Dub Extractor Studio",
+    sub: "Вставьте ключ TW1-… из письма магазина. Подпись проверяется в браузере, сеть не нужна."
+  };
+  function open() {
+    if (!window.Unlock || typeof window.Unlock.open !== "function") return;
+    window.Unlock.open(OPEN);
+    setTimeout(function () {
+      var f = document.getElementById("unlock-hash");
+      if (f) f.focus();
+    }, 80);
+  }
+  ["key-cta-at"].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener("click", open);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-key-cta]"), function (el) {
+    el.addEventListener("click", open);
+  });
+})();
+</script>
 
 </body>
 </html>

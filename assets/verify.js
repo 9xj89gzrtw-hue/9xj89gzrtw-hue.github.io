@@ -126,6 +126,131 @@
     return { receipt, received, tier, hash: h };
   }
 
+  /* --- offline license keys ------------------------------------------------
+   *
+   * A key is TW1-<CODE>-<KEY_ID>-<SIGNATURE>: an ECDSA P-256 / SHA-256
+   * signature (base64url over the raw 64-byte IEEE P1363 pair) of the string
+   * "TW1-<CODE>-<KEY_ID>". The public key below verifies it with crypto.subtle,
+   * so a buyer who paid by card gets Pro in the same millisecond — no server,
+   * no bot, no receipt mailed to anyone. The private key stays offline.
+   *
+   * CODE "ALL" is universal: it opens every product.
+   */
+  const LICENSE_PUBLIC_KEY = {
+    kty: "EC",
+    crv: "P-256",
+    x: "YVH3fyYkuivpkuKQjUqw02XxX3mO5FadXsxijuK52so",
+    y: "POqoRl3cMmg1UUxmwpCDBj2q3kVqwuH-EySTT3zcefQ"
+  };
+
+  /* slug (data-product, localStorage) <-> code (what is inside the key) */
+  const LICENSE_PRODUCTS = {
+    "audio-dub-studio": "AUDIO",
+    "tg-chats": "TG",
+    "docsearch": "DOC",
+    "newsflow": "NEWS",
+    "live-radar": "RADAR",
+    "data-clipper": "CLIP",
+    "base-tax-audit": "TAX",
+    "all-in-one": "ALL"
+  };
+  const LICENSE_CODE_SLUG = Object.fromEntries(
+    Object.keys(LICENSE_PRODUCTS).map(slug => [LICENSE_PRODUCTS[slug], slug])
+  );
+
+  const UNIVERSAL_CODE = "ALL";
+
+  function b64uToBytes(text) {
+    const b64 = String(text).replace(/-/g, "+").replace(/_/g, "/");
+    const pad = b64.length % 4 ? "=".repeat(4 - (b64.length % 4)) : "";
+    const bin = atob(b64 + pad);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  /** Split a key without verifying it. Never throws.
+   *  The base64url signature is case-sensitive and may contain "-", so the key
+   *  is cut from the left by a fixed-shape regex, never by lastIndexOf("-"). */
+  function parseLicense(text) {
+    const clean = String(text == null ? "" : text).trim().replace(/\s+/g, "");
+    const m = /^(TW1)-([A-Z0-9]{2,8})-([A-Z0-9]{6})-(.+)$/i.exec(clean);
+    if (!m) return { ok: false, error: "format", key: clean };
+    const signature = m[4];
+    if (!/^[A-Za-z0-9_-]{86}$/.test(signature)) return { ok: false, error: "format", key: clean };
+    const code = m[2].toUpperCase();
+    const kid = m[3].toUpperCase();
+    return {
+      ok: true,
+      version: "TW1",
+      code,
+      kid,
+      payload: "TW1-" + code + "-" + kid,
+      signature,
+      key: "TW1-" + code + "-" + kid + "-" + signature
+    };
+  }
+
+  function isLicenseKey(text) {
+    return /^TW1-/i.test(String(text == null ? "" : text).trim());
+  }
+
+  /** Does a verified code open this product? `ALL` opens everything. */
+  function licenseCovers(code, product) {
+    if (!product) return true;
+    const want = LICENSE_PRODUCTS[String(product).toLowerCase()] ||
+      (/^[A-Z0-9]{2,8}$/.test(product) ? product : null);
+    if (!want) return false;
+    return code === UNIVERSAL_CODE || code === want;
+  }
+
+  let licenseKeyPromise = null;
+  function licenseCryptoKey() {
+    if (!licenseKeyPromise) {
+      const subtle = globalThis.crypto && globalThis.crypto.subtle;
+      if (!subtle) return Promise.reject(new Error("WebCrypto is not available in this browser."));
+      licenseKeyPromise = subtle.importKey(
+        "jwk",
+        LICENSE_PUBLIC_KEY,
+        { name: "ECDSA", namedCurve: "P-256" },
+        false,
+        ["verify"]
+      );
+    }
+    return licenseKeyPromise;
+  }
+
+  /**
+   * Verify a TW1 key. Resolves (never rejects) with
+   *   { valid, code, kid, slug, key, error? }
+   * error is one of: format | signature | product | crypto.
+   */
+  async function verifyLicense(text, opts) {
+    const o = opts || {};
+    const parsed = parseLicense(text);
+    if (!parsed.ok) return { valid: false, error: "format", key: parsed.key };
+    const product = o.product == null ? null : String(o.product).toLowerCase();
+    try {
+      const key = await licenseCryptoKey();
+      const sig = b64uToBytes(parsed.signature);
+      if (sig.length !== 64) return { valid: false, error: "signature", code: parsed.code, kid: parsed.kid };
+      const ok = await globalThis.crypto.subtle.verify(
+        { name: "ECDSA", hash: "SHA-256" },
+        key,
+        sig,
+        new TextEncoder().encode(parsed.payload)
+      );
+      if (!ok) return { valid: false, error: "signature", code: parsed.code, kid: parsed.kid };
+    } catch (e) {
+      return { valid: false, error: "crypto", message: String((e && e.message) || e) };
+    }
+    const slug = LICENSE_CODE_SLUG[parsed.code] || null;
+    if (!licenseCovers(parsed.code, product)) {
+      return { valid: false, error: "product", code: parsed.code, kid: parsed.kid, slug, key: parsed.key };
+    }
+    return { valid: true, code: parsed.code, kid: parsed.kid, slug, key: parsed.key, universal: parsed.code === UNIVERSAL_CODE };
+  }
+
   /** Build the EIP-155 calldata for USDC.transfer(payTo, amount). */
   function transferCalldata(amountUnits, payTo) {
     const to = (payTo || CONFIG.PAY_TO).replace(/^0x/, "").toLowerCase();
@@ -197,6 +322,8 @@
 
   return {
     CONFIG, verify, verifyAtLeast, loadReceipt, sumUsdcIn, transferCalldata,
-    buildTransferTx, waitForReceipt, rpc, TRANSFER, pad32
+    buildTransferTx, waitForReceipt, rpc, TRANSFER, pad32,
+    LICENSE_PUBLIC_KEY, LICENSE_PRODUCTS, LICENSE_CODE_SLUG, UNIVERSAL_CODE,
+    parseLicense, isLicenseKey, licenseCovers, verifyLicense
   };
 });

@@ -118,6 +118,144 @@
   var PAY_TO = "0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a";
   var USDC_DECIMALS = 6;
 
+  /* --- offline license keys (TW1-…), verified in the browser -------------
+   *
+   * Card / SBP buyers get a key from the shop's auto-delivery: TW1-<CODE>-
+   * <KEY_ID>-<SIGNATURE>. SIGNATURE is an ECDSA P-256 / SHA-256 signature over
+   * "TW1-<CODE>-<KEY_ID>", base64url of the raw 64-byte r||s pair. The public
+   * key below checks it with crypto.subtle, so Pro opens in ~10 ms with no
+   * network, no bot and no one reading screenshots of receipts.
+   *
+   * The private key never ships: it stays offline, see tools/license.mjs.
+   * CODE "ALL" is universal. Same constants live in assets/verify.js — a test
+   * asserts the two copies and the signing key agree.
+   */
+  var LICENSE_PUBLIC_KEY = {
+    kty: "EC",
+    crv: "P-256",
+    x: "YVH3fyYkuivpkuKQjUqw02XxX3mO5FadXsxijuK52so",
+    y: "POqoRl3cMmg1UUxmwpCDBj2q3kVqwuH-EySTT3zcefQ"
+  };
+
+  var LICENSE_PRODUCTS = {
+    "audio-dub-studio": "AUDIO",
+    "tg-chats": "TG",
+    "tgchats": "TG",
+    "docsearch": "DOC",
+    "archive-studio": "DOC",
+    "newsflow": "NEWS",
+    "live-radar": "RADAR",
+    "data-clipper": "CLIP",
+    "base-tax-audit": "TAX",
+    "all-in-one": "ALL"
+  };
+
+  /* --- card / SBP checkout, for buyers who have no USDC -------------------
+   *
+   * The same four products are listed on Plati.Market (Digiseller, seller
+   * 1481449). `id` is the live listing; `rub` is the rouble price a buyer sees
+   * on the checkout page right now, read back from the shop API — not the USD
+   * price converted at an invented rate. Auto-delivery hands over a TW1-… key
+   * the second the payment clears, and the field in this modal accepts it.
+   *
+   * A slug that is not listed here simply does not render the card button.
+   */
+  var CARD_SHOP = {
+    "audio-dub-studio": { id: 6354599, rub: 299, free: "audio-dub-extractor" },
+    "tgchats": { id: 6354600, rub: 490, free: "tg-chats" },
+    "tg-chats": { id: 6354600, rub: 490, free: "tg-chats" },
+    "archive-studio": { id: 6354601, rub: 690, free: "docsearch" },
+    "docsearch": { id: 6354601, rub: 690, free: "docsearch" },
+    "data-clipper": { id: 6354602, rub: 390, free: "data-clipper" }
+  };
+  var SELLER_ID = 1481449;
+
+  function cardUrl(id) {
+    return "https://oplata.info/asp2/pay_wm.asp?id_d=" + id + "&ai=" + SELLER_ID + "&lang=ru-RU";
+  }
+  var LICENSE_CODE_SLUG = (function () {
+    var out = {};
+    for (var slug in LICENSE_PRODUCTS) {
+      if (Object.prototype.hasOwnProperty.call(LICENSE_PRODUCTS, slug)) out[LICENSE_PRODUCTS[slug]] = slug;
+    }
+    return out;
+  })();
+  var UNIVERSAL_CODE = "ALL";
+
+  function b64uToBytes(text) {
+    var b64 = String(text).replace(/-/g, "+").replace(/_/g, "/");
+    var pad = b64.length % 4 ? new Array(5 - (b64.length % 4)).join("=") : "";
+    var bin = atob(b64 + pad);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i += 1) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  /* The signature is case-sensitive base64url and may contain "-", so the key
+     is cut from the left by shape, never by lastIndexOf("-"). */
+  function parseLicenseKey(text) {
+    var clean = String(text == null ? "" : text).trim().replace(/\s+/g, "");
+    var m = /^(TW1)-([A-Z0-9]{2,8})-([A-Z0-9]{6})-(.+)$/i.exec(clean);
+    if (!m) return { ok: false, error: "format", key: clean };
+    if (!/^[A-Za-z0-9_-]{86}$/.test(m[4])) return { ok: false, error: "format", key: clean };
+    var code = m[2].toUpperCase();
+    var kid = m[3].toUpperCase();
+    return {
+      ok: true,
+      code: code,
+      kid: kid,
+      payload: "TW1-" + code + "-" + kid,
+      signature: m[4],
+      key: "TW1-" + code + "-" + kid + "-" + m[4]
+    };
+  }
+
+  function isLicenseKey(text) {
+    return /^TW1-/i.test(String(text == null ? "" : text).trim());
+  }
+
+  function licenseCovers(code, product) {
+    if (!product) return true;
+    var slug = String(product).toLowerCase();
+    var want = LICENSE_PRODUCTS[slug] || (/^[A-Z0-9]{2,8}$/i.test(product) ? String(product).toUpperCase() : null);
+    if (!want) return false;
+    return code === UNIVERSAL_CODE || code === want;
+  }
+
+  var licenseKeyPromise = null;
+  function licenseCryptoKey() {
+    if (!licenseKeyPromise) {
+      var subtle = window.crypto && window.crypto.subtle;
+      if (!subtle) return Promise.reject(new Error("crypto.subtle unavailable"));
+      licenseKeyPromise = subtle.importKey("jwk", LICENSE_PUBLIC_KEY,
+        { name: "ECDSA", namedCurve: "P-256" }, false, ["verify"]);
+    }
+    return licenseKeyPromise;
+  }
+
+  /* Never rejects: resolves {valid, code, kid, slug, key, error?}. */
+  async function verifyLicenseKey(text, opts) {
+    var o = opts || {};
+    var parsed = parseLicenseKey(text);
+    if (!parsed.ok) return { valid: false, error: "format", key: parsed.key };
+    var product = o.product == null ? null : String(o.product).toLowerCase();
+    try {
+      var key = await licenseCryptoKey();
+      var sig = b64uToBytes(parsed.signature);
+      if (sig.length !== 64) return { valid: false, error: "signature", code: parsed.code, kid: parsed.kid };
+      var ok = await window.crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, key, sig,
+        new TextEncoder().encode(parsed.payload));
+      if (!ok) return { valid: false, error: "signature", code: parsed.code, kid: parsed.kid };
+    } catch (e) {
+      return { valid: false, error: "crypto", code: parsed.code, kid: parsed.kid, message: String((e && e.message) || e) };
+    }
+    var slug = LICENSE_CODE_SLUG[parsed.code] || null;
+    if (!licenseCovers(parsed.code, product)) {
+      return { valid: false, error: "product", code: parsed.code, kid: parsed.kid, slug: slug, key: parsed.key };
+    }
+    return { valid: true, code: parsed.code, kid: parsed.kid, slug: slug, key: parsed.key, universal: parsed.code === UNIVERSAL_CODE };
+  }
+
   function key(product) { return "unlock:" + product; }
   function usedKey() { return "unlock:used"; }
 
@@ -137,7 +275,10 @@
       hash: data.hash,
       received: String(data.received),
       at: new Date().toISOString(),
-      price: data.price
+      price: data.price,
+      kind: data.kind || "chain",
+      code: data.code || null,
+      kid: data.kid || null
     }));
     var used = readJSON(usedKey(), []);
     if (used.indexOf(data.hash) === -1) used.push(data.hash);
@@ -202,8 +343,9 @@
       "Скопируйте хеш транзакции из кошелька.",
       "Вставьте его ниже. Страница читает Base напрямую и включает инструменты в этом браузере."
     ],
-    hash: "Хеш транзакции",
-    exchange: "Платите с биржи? Хеш вывода — это хеш биржи, а не перевода нам. Отправьте с кошелька или пришлите оба хеша письмом, и мы откроем доступ вручную.",
+    hash: "Хеш транзакции или лицензионный ключ",
+    exchange: "Платите картой РФ или через СБП? Магазин присылает готовый ключ TW1-… сразу после оплаты: вставьте его ниже, он проверяется в браузере и открывает Pro мгновенно — без переписки и без ручной выдачи.",
+    placeholder: "0x… (хеш Base) или TW1-… (ключ)",
     cancel: "Отмена",
     verify: "Проверить оплату",
     checking: "Проверяем в Base…",
@@ -228,8 +370,16 @@
     rejected: "Вы отклонили транзакцию в кошельке. Ничего не отправлено.",
     pending: "Транзакция ещё не подтверждена. Хеш сохранён — вставьте его ниже через минуту.",
     orManual: "или оплатите вручную",
-    manualTitle: "Ручной вариант — мобильный кошелёк или биржа",
-    oneClickUnlocked: "Pro открыт в 1 клик. Подтверждено в Base: "
+    manualTitle: "Ручной вариант — мобильный кошелёк, биржа или ключ",
+    oneClickUnlocked: "Pro открыт в 1 клик. Подтверждено в Base: ",
+    licenseUnlocked: "Ключ принят. Pro открыт офлайн, без запросов к сети: ",
+    licenseErrorFormat: "Это не ключ TW1: нужен формат TW1-<КОД>-<ID>-<ПОДПИСЬ>. Проверьте, что строка скопирована целиком.",
+    licenseErrorSignature: "Подпись ключа не сходится — вероятно, ключ скопирован не полностью или изменён. Скопируйте его из письма ещё раз.",
+    licenseErrorProduct: "Ключ выпущен для другого продукта. Для этого инструмента нужен свой ключ или универсальный ALL.",
+    licenseErrorCrypto: "Браузер не дал проверить подпись (crypto.subtle). Откройте страницу по https и повторите.",
+    cardPay: "Оплатить картой РФ / СБП — получить ключ мгновенно",
+    cardHint: "Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Ключ TW1-… выдаётся автоматически сразу после оплаты: вернитесь сюда, вставьте его в поле ниже — Pro включится без переписки.",
+    cardNote: "Ключ действует бессрочно. Он привязан к вашему заказу — не публикуйте его."
   } : {
     title: "Unlock ",
     sub: "One payment. Keeps working in this browser.",
@@ -240,8 +390,9 @@
       "Copy the transaction hash from your wallet.",
       "Paste it below. This page reads Base directly and unlocks the tools in this browser."
     ],
-    hash: "Transaction hash",
-    exchange: "Paying from an exchange? The withdrawal hash is the exchange\u2019s, not the transfer to us. Pay from a wallet, or send both hashes by mail and we will unlock it manually.",
+    hash: "Transaction hash or license key",
+    exchange: "Paying by card? The shop hands you a TW1-… key right after checkout. Paste it below: it is verified in this browser and opens Pro instantly, with nobody checking a receipt by hand.",
+    placeholder: "0x… (Base hash) or TW1-… (license key)",
     cancel: "Cancel",
     verify: "Verify payment",
     checking: "Checking Base\u2026",
@@ -266,8 +417,16 @@
     rejected: "You rejected the transaction in your wallet. Nothing was sent.",
     pending: "The transaction is not confirmed yet. The hash is kept — paste it below in a minute.",
     orManual: "or pay manually",
-    manualTitle: "Manual fallback — mobile wallet or exchange",
-    oneClickUnlocked: "Pro unlocked in one click. Confirmed on Base: "
+    manualTitle: "Manual fallback — mobile wallet, exchange or key",
+    oneClickUnlocked: "Pro unlocked in one click. Confirmed on Base: ",
+    licenseUnlocked: "Key accepted. Pro unlocked offline, with zero network calls: ",
+    licenseErrorFormat: "That is not a TW1 key. The format is TW1-<CODE>-<ID>-<SIGNATURE>; make sure the whole line is pasted.",
+    licenseErrorSignature: "The key signature does not match — it was probably copied partially or edited. Paste it again from the mail.",
+    licenseErrorProduct: "This key is issued for another product. Use that product's key, or a universal ALL key.",
+    licenseErrorCrypto: "The browser refused to check the signature (crypto.subtle). Open the page over https and retry.",
+    cardPay: "Pay by card — get the key instantly",
+    cardHint: "Card or instant bank transfer on Plati.Market. The TW1-… key is delivered automatically right after checkout: come back here, paste it below, and Pro opens with no back-and-forth.",
+    cardNote: "The key never expires. It is tied to your order, so keep it private."
   };
 
   /* verify.js speaks English because it is also a Node module under test; the
@@ -283,6 +442,17 @@
     var low = m.match(/^This transaction carried ([\d.]+) USDC, and the price is ([\d.]+)/);
     if (low) return "В транзакции " + low[1] + " USDC, а цена " + low[2] + ". Доплатите разницу и проверьте второй хеш.";
     return m;
+  }
+
+  /* A failed TW1 check never reaches the chain: the reason is local and short. */
+  function licenseMessage(lic) {
+    var map = {
+      format: T.licenseErrorFormat,
+      signature: T.licenseErrorSignature,
+      product: T.licenseErrorProduct,
+      crypto: T.licenseErrorCrypto
+    };
+    return map[lic && lic.error] || T.licenseErrorFormat;
   }
 
   /* Base mainnet, in the shape wallet_addEthereumChain expects. A wallet that
@@ -346,6 +516,11 @@
       '      <span id="unlock-1click-label">' + T.oneClick + '</span>',
       '    </button>',
       '    <p class="tiny muted pay-1click-hint" id="unlock-1click-hint">' + T.oneClickHint + '</p>',
+      '    <a class="btn pay-card" id="unlock-card" href="#" target="_blank" rel="noopener" hidden>',
+      '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
+      '      <span id="unlock-card-label">' + T.cardPay + '</span>',
+      '    </a>',
+      '    <p class="tiny muted pay-card-hint" id="unlock-card-hint" hidden>' + T.cardHint + '</p>',
       '    <div class="pay-or"><span>' + T.orManual + '</span></div>',
       '    <div class="pay-address">',
       '      <code class="mono" id="unlock-addr"></code>',
@@ -357,7 +532,7 @@
       '      <li>' + T.steps[2] + '</li>',
       '    </ol>',
       '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">' + T.manualTitle + '</label>',
-      '    <input class="field mono" id="unlock-hash" placeholder="0x…" autocomplete="off" spellcheck="false">',
+      '    <input class="field mono" id="unlock-hash" placeholder="' + T.placeholder + '" autocomplete="off" spellcheck="false">',
       '    <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
       '    <p class="tiny muted" style="margin-top:10px">' + T.exchange + '</p>',
       '  </div>',
@@ -387,6 +562,26 @@
     one.disabled = !wallet();
     one.classList.toggle("is-unavailable", !wallet());
     hint.textContent = wallet() ? T.oneClickHint : T.noWallet;
+
+    /* Card / SBP path. Only products that actually have a live listing render
+       it; the label carries the rouble price the checkout shows, so nobody has
+       to convert anything in their head. */
+    var shop = CARD_SHOP[String(opts.product || "").toLowerCase()] || null;
+    var card = modalEl.querySelector("#unlock-card");
+    var cardHint = modalEl.querySelector("#unlock-card-hint");
+    if (shop) {
+      card.href = cardUrl(shop.id);
+      card.hidden = false;
+      cardHint.hidden = false;
+      modalEl.querySelector("#unlock-card-label").textContent =
+        T.cardPay + " · " + shop.rub + " ₽";
+      card.setAttribute("data-license-code", (opts.product || "").toLowerCase());
+    } else {
+      card.hidden = true;
+      cardHint.hidden = true;
+      card.removeAttribute("href");
+    }
+
     modalEl.hidden = false;
     document.body.style.overflow = "hidden";
     setTimeout(function () { (wallet() ? one : modalEl.querySelector("#unlock-hash")).focus(); }, 30);
@@ -399,12 +594,33 @@
   }
 
   async function verifyAndUnlock(product, price, hash) {
+    var input = String(hash == null ? "" : hash).trim();
+
+    /* Licence key first: it is a local signature check, so the buyer sees Pro
+       without a round-trip and the page never touches the network. */
+    if (isLicenseKey(input)) {
+      var lic = await verifyLicenseKey(input, { product: product });
+      if (!lic.valid) throw new Error(licenseMessage(lic));
+      activate(product, {
+        hash: "license:" + lic.key,
+        received: 0,
+        price: price,
+        kind: "license",
+        code: lic.code,
+        kid: lic.kid
+      });
+      return { license: true, code: lic.code, kid: lic.kid, slug: lic.slug, received: 0n, hash: lic.key };
+    }
+
+    if (!window.DefiAudit) {
+      throw new Error("Проверка оплаты в Base не загрузилась. Обновите страницу или вставьте лицензионный ключ TW1-…");
+    }
     var used = readJSON(usedKey(), []);
-    var res = await window.DefiAudit.verifyAtLeast(hash, price, {
+    var res = await window.DefiAudit.verifyAtLeast(input, price, {
       usedHashes: used,
       config: { PAY_TO: PAY_TO }
     });
-    activate(product, { hash: res.hash, received: res.received, price: price });
+    activate(product, { hash: res.hash, received: res.received, price: price, kind: "chain" });
     return res;
   }
 
@@ -498,6 +714,16 @@
     });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
 
+    /* Enter inside the field submits: a licence key is one paste and one keypress. */
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      var field = e.target && e.target.id === "unlock-hash" ? e.target : null;
+      if (!field || modalEl.hidden) return;
+      e.preventDefault();
+      var go = modalEl.querySelector("#unlock-go");
+      if (go && !go.disabled) go.click();
+    });
+
     /* One-click pay: connect → switch to Base → send USDC.transfer → wait for
        the receipt → unlock. The buyer signs one transaction and copies nothing. */
     document.addEventListener("click", async function (e) {
@@ -540,7 +766,9 @@
       try {
         var res = await verifyAndUnlock(current.product, current.price, hash);
         close();
-        toast(T.unlocked + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + T.confirmed);
+        toast(res.license
+          ? T.licenseUnlocked + res.code + (res.universal ? " (ALL)" : "")
+          : T.unlocked + (Number(res.received) / Math.pow(10, USDC_DECIMALS)) + T.confirmed);
       } catch (ex) {
         err.textContent = localize(ex.message);
         err.hidden = false;
@@ -568,6 +796,16 @@
     verifyAndUnlock: verifyAndUnlock,
     oneClick: oneClick,
     mountOneClick: mountOneClick,
-    hasWallet: function () { return !!wallet(); }
+    hasWallet: function () { return !!wallet(); },
+    /* offline licence keys */
+    LICENSE_PUBLIC_KEY: LICENSE_PUBLIC_KEY,
+    LICENSE_PRODUCTS: LICENSE_PRODUCTS,
+    isLicenseKey: isLicenseKey,
+    parseLicenseKey: parseLicenseKey,
+    verifyLicenseKey: verifyLicenseKey,
+    /* unlock with a key from anywhere on the page, e.g. the userscript panel */
+    unlockWithLicense: async function (product, key) {
+      return verifyAndUnlock(product, 0, key);
+    }
   };
 })();

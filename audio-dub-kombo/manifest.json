@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube & VK Audio + Yandex AI-Dub Downloader",
+  "short_name": "Audio Dub Kombo",
+  "version": "2.0.0",
+  "description": "Три кнопки под видео: скачать озвучку нейроперевода Яндекса, скачать оригинальный звук (M4A/MP3) и отправить клип по таймкоду в Studio.",
+  "author": "Toolworks",
+  "homepage_url": "https://9xj89gzrtw-hue.github.io/audio-dub-extractor/",
+  "minimum_chrome_version": "111",
+  "permissions": ["downloads"],
+  "background": { "service_worker": "sw.js" },
+  "action": {
+    "default_title": "Audio Dub Kombo",
+    "default_icon": { "16": "icons/icon-16.png", "48": "icons/icon-48.png", "128": "icons/icon-128.png" }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://youtube.com/*",
+        "https://youtu.be/*",
+        "https://vk.com/*",
+        "https://vkvideo.ru/*",
+        "https://rutube.ru/*"
+      ],
+      "js": ["core.js", "panel.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://youtube.com/*",
+        "https://youtu.be/*",
+        "https://vk.com/*",
+        "https://vkvideo.ru/*",
+        "https://rutube.ru/*"
+      ],
+      "js": ["bridge.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}

@@ -525,10 +525,26 @@
   $("btn-verify-key").addEventListener("click", async function () {
     var key = $("lic-key").value;
     $("verify-status").textContent = "checking key…";
+    /* TW1-… (card / SBP shop keys) first: the freshest format is also the one
+       buyers paste. LC1-… base32 keys keep working for early buyers. */
+    if (ClipLicense.isTW1Key(key)) {
+      var tw1 = await ClipLicense.verifyTW1(key);
+      if (tw1.ok) {
+        await savePro({ mode: "key", proof: { system: "tw1", code: tw1.payload.code, kid: tw1.payload.u } });
+        $("verify-status").textContent = "TW1 key accepted (" + tw1.payload.code + " · " + tw1.payload.u + ")";
+        $("verify-status").style.color = "";
+        setTimeout(closeModal, 900);
+      } else {
+        $("verify-status").textContent = "invalid: " + tw1.reason;
+        $("verify-status").style.color = "#B04000";
+      }
+      return;
+    }
     var res = await ClipLicense.verifyLicense(key, ["dclip"]);
     if (res.ok) {
       await savePro({ mode: "key", proof: { tag: res.payload.u, exp: res.payload.e } });
       $("verify-status").textContent = "license valid (" + res.payload.u + ")";
+      $("verify-status").style.color = "";
       setTimeout(closeModal, 900);
     } else {
       $("verify-status").textContent = "invalid: " + res.reason;

@@ -82,6 +82,55 @@
     });
   });
 
+  /* ---------- TW1-… keys (card / SBP shop delivery, ECDSA P-256) ----------
+   * Demo keys issued by tools/license.mjs against the same vault pair whose
+   * public half is embedded in license.js. kids DEMOC1 / DEMOAL1 are the
+   * demo batch, same release policy as the LC1 demo keys above. */
+  var TW1_CLIP = "TW1-CLIP-DEMOC1-qCXk59Gxy2o2gRuFYJFyUPV5CNs3ApTev2wI4TvmU4UXodKmxCloiFfUXGEM9yoUEyFeYElJLu5LH8U1oDFG1w";
+  var TW1_ALL = "TW1-ALL-DEMOAL-hS-H8NVNPuApnqrVK9lbFpYqwFGvf3hfvRpgBOm4ymGjB_bWpYhTP-gtBSFo5_BEq9NZQzvgQBJm2HPfgxZ3qA";
+
+  test("tw1: valid CLIP key verifies offline, kid preserved", function () {
+    return ClipLicense.verifyTW1(TW1_CLIP).then(function (r) {
+      ok(r.ok, "ok=true for a plain vault key");
+      eq(r.payload.code, "CLIP", "code");
+      eq(r.payload.u, "DEMOC1", "kid");
+      eq(r.payload.p, "data-clipper", "product slug");
+    });
+  });
+  test("tw1: universal ALL key also verifies for this product", function () {
+    return ClipLicense.verifyTW1(TW1_ALL).then(function (r) {
+      ok(r.ok, "ok=true for the ALL key");
+      eq(r.payload.code, "ALL", "code");
+    });
+  });
+  test("tw1: key with stray spaces and newlines still verifies (signature untouched)", function () {
+    return ClipLicense.verifyTW1("  " + TW1_CLIP + " \n").then(function (r) {
+      ok(r.ok, "still ok after whitespace cleanup");
+    });
+  });
+  test("tw1: tampered signature byte is rejected", function () {
+    var bad = TW1_CLIP.slice(0, 42) + (TW1_CLIP[42] === "9" ? "8" : "9") + TW1_CLIP.slice(43);
+    return ClipLicense.verifyTW1(bad).then(function (r) {
+      ok(!r.ok, "tampered key rejected");
+      eq(r.reason, "bad signature", "reason is 'bad signature'");
+    });
+  });
+  test("tw1: truncated key is rejected with the paste-again reason", function () {
+    return ClipLicense.verifyTW1(TW1_CLIP.slice(0, 40)).then(function (r) {
+      ok(!r.ok, "truncated rejected");
+      ok(/truncated TW1 key/.test(r.reason), "reason mentions truncation: " + r.reason);
+    });
+  });
+  test("tw1: LC1-shaped garbage is never treated as TW1", function () {
+    return ClipLicense.verifyTW1(KEY_DCLIP).then(function (r) {
+      ok(!r.ok, "LC1 string not accepted by the TW1 path");
+    });
+  });
+  test("tw1: isTW1Key discriminates both formats", function () {
+    eq(ClipLicense.isTW1Key(TW1_CLIP), true, "tw1 → true");
+    eq(ClipLicense.isTW1Key(KEY_DCLIP), false, "lc1 → false");
+  });
+
   /* ---------- CSV ---------- */
   test("csv: builds header + row", function () {
     var csv = ClipCSV.buildCSV([{ a: "1", b: "2" }], ["a", "b"], { withBOM: false });

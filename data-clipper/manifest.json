@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Table & TG-Channel Clipper Pro",
   "short_name": "dclip",
-  "version": "1.0.0",
-  "description": "One-click clean CSV from any page: TG feeds, catalogs, listings, tables. Free up to 50 rows. Pro: auto-scroll, XLSX, regex filter, templates. On-chain activation - no accounts, no KYC.",
+  "version": "1.1.0",
+  "description": "One-click clean CSV from any page: TG feeds, catalogs, listings, tables. Free up to 50 rows. Pro: auto-scroll, XLSX, regex filter, templates. Activate on-chain (USDC on Base) or with a TW1-… shop key (RF card / СБП) - no accounts, no KYC.",
   "permissions": ["activeTab", "scripting", "storage"],
   "optional_host_permissions": ["https://mainnet.base.org/*"],
   "action": {

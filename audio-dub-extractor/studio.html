@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/audio-dub-extractor/studio.html">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/verify.js"></script>
 <script src="../assets/unlock.js" defer></script>
 <style>
   .studio-head { padding: 40px 0 24px; border-bottom: 1px solid var(--line); }
@@ -255,7 +256,7 @@
       del.type = "button";
       del.className = "row-btn";
       del.title = "Убрать из очереди";
-      del.textContent = "✕";
+      del.textContent = "×";
       del.addEventListener("click", function () {
         rows.splice(index, 1);
         render();
@@ -470,6 +471,63 @@
     refreshMode();
     log(isPro() ? "Pro активен: лимиты сняты." : "Pro выключен: снова лимиты Free.", isPro() ? "ok" : "");
   });
+
+  /* Handoff from the userscript / extension panel:
+     studio.html#clips=<base64url project>&key=TW1-…
+     The key is checked with the same offline signature check as the modal, so a
+     Pro buyer who pasted it in the panel when buying does not type it twice. */
+  function decodeB64uText(text) {
+    var b64 = String(text).replace(/-/g, "+").replace(/_/g, "/");
+    var pad = b64.length % 4 ? new Array(5 - (b64.length % 4)).join("=") : "";
+    var bin = atob(b64 + pad);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  async function applyHash() {
+    var raw = String(location.hash || "").replace(/^#/, "");
+    if (!raw) return;
+    var parts = raw.split("&");
+    var clips = null;
+    var key = null;
+    parts.forEach(function (part) {
+      var eq = part.indexOf("=");
+      if (eq === -1) return;
+      var name = part.slice(0, eq);
+      var value = part.slice(eq + 1);
+      if (name === "clips") clips = value;
+      if (name === "key") key = decodeURIComponent(value);
+    });
+
+    if (key && window.Unlock && window.Unlock.isLicenseKey(key)) {
+      try {
+        var res = await window.Unlock.unlockWithLicense(PRODUCT, key);
+        if (res && res.license) {
+          refreshMode();
+          log("Pro открыт ключом из скрипта: " + res.code + ".", "ok");
+        }
+      } catch (e) {
+        log("Ключ из скрипта не принят: " + e.message, "");
+      }
+    }
+
+    if (clips) {
+      try {
+        var project = JSON.parse(decodeB64uText(clips));
+        var items = S.parseProject(project, maxFiles());
+        rows = items.map(function (it) {
+          return { id: nextId++, file: null, name: it.name, duration: 0, inSec: it.in, outSec: it.out, link: it.source };
+        });
+        render();
+        log("Из скрипта: " + items.length + " клип(ов) в очереди. Добавьте файлы с теми же именами.", "ok");
+      } catch (e) {
+        log("Проект из скрипта не загружен: " + e.message + " (Free — 2 файла, Pro снимает лимит).", "");
+      }
+    }
+    history.replaceState(null, "", location.pathname + location.search);
+  }
+  applyHash();
 
   refreshMode();
   render();

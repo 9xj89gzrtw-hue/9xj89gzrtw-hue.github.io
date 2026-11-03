@@ -146,6 +146,11 @@
       <span data-1click-label>Оплатить в 1 клик</span>
     </button>
     <p class="pay-hint" id="payOneClickHint">MetaMask · Rabby · Base Wallet — кошелёк сам переключится на Base</p>
+    <a class="btn pay-card" id="payCard" href="https://oplata.info/asp2/pay_wm.asp?id_d=6354601&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>
+      <span>Оплатить картой РФ / СБП — 690 ₽ и ключ мгновенно</span>
+    </a>
+    <p class="pay-hint" id="payCardHint">Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Ключ TW1-… выдаётся автоматически сразу после оплаты — вставьте его в поле ниже, Pro включится без переписки.</p>
     <div class="pay-or"><span>или оплатите вручную</span></div>
     <div class="pay-box">
       <p class="pay-label">Адрес получателя · Base mainnet</p>
@@ -153,8 +158,8 @@
       <button class="copy-btn" id="copyAddr" type="button">Скопировать адрес</button>
     </div>
     <div class="field">
-      <label for="txHash">Хеш транзакции после оплаты</label>
-      <input id="txHash" placeholder="0x…" autocomplete="off" spellcheck="false">
+      <label for="txHash">Хеш транзакции или лицензионный ключ</label>
+      <input id="txHash" placeholder="0x… (хеш Base) или TW1-… (ключ)" autocomplete="off" spellcheck="false">
     </div>
     <button class="btn primary" id="verifyBtn" type="button">Проверить оплату и включить Pro</button>
     <p class="status" id="payStatus"></p>
@@ -188,6 +193,7 @@
 </div>
 
 <script src="demo.js"></script>
+<script src="../assets/verify.js"></script>
 <script src="../assets/unlock.js"></script>
 <script src="app.js"></script>
 </body>
