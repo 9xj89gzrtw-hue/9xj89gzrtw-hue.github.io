@@ -31,7 +31,11 @@
     collapsed: readFlag("adk:collapsed", false),
     autoOpen: readFlag("adk:autoopen", true),
     busy: "",
-    status: "",
+    /* sticky = an action's result ("Готово", "Ключ принят"). While it is false
+       the status line follows what the panel currently sees, so a stream that
+       appears two seconds after load is announced instead of staying hidden
+       behind "Панель готова". */
+    sticky: false,
     error: ""
   };
 
@@ -341,11 +345,16 @@
   }
 
   function setStatus(text, kind) {
-    state.status = text;
+    state.sticky = !!kind;
     var el = document.querySelector("#" + PANEL_ID + " [data-status]");
     if (!el) return;
     el.textContent = text;
     el.className = "adk-status" + (kind ? " adk-" + kind : "");
+  }
+
+  function idleStatus() {
+    var found = candidatesText();
+    return found ? "Найдено · " + found : LABEL.idle;
   }
 
   function candidatesText() {
@@ -463,9 +472,12 @@
       proBox.append(input, btn);
     }
 
-    if (!state.status) {
-      var now = candidatesText();
-      setStatus(now ? "Найдено · " + now : LABEL.idle);
+    if (!state.sticky) {
+      var el = panel.querySelector("[data-status]");
+      if (el) {
+        el.textContent = idleStatus();
+        el.className = "adk-status";
+      }
     }
   }
 
@@ -482,7 +494,7 @@
     list.push({ at: Number(v.currentTime) || 0, title: pageTitle() });
     setMarks(list);
     var box = document.getElementById(PANEL_ID);
-    state.status = "";
+    state.sticky = false;
     render();
 
     if (state.collapsed) {
@@ -619,7 +631,7 @@
     if (location.href !== lastHref) {
       lastHref = location.href;
       lastAutoOpen = -1;
-      state.status = "";
+      state.sticky = false;
       scheduleRender();
     }
     scanPerformance();
