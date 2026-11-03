@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio Dub Extractor Studio — нарезка клипов с таймкодами</title>
+<meta name="description" content="Очередь файлов, точные клипы по таймкоду, метаданные BWF/ID3 и экспорт без загрузки на сервер. Бесплатно — 2 файла и клипы до 30 секунд.">
+<link rel="canonical" href="https://9xj89gzrtw-hue.github.io/audio-dub-extractor/studio.html">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/unlock.js" defer></script>
+<style>
+  .studio-head { padding: 40px 0 24px; border-bottom: 1px solid var(--line); }
+  .studio-head h1 { font-size: clamp(26px, 3.6vw, 36px); letter-spacing: -0.03em; margin: 10px 0 0; }
+  .studio-head p { max-width: 680px; color: var(--ink-2); margin: 10px 0 0; line-height: 1.6; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0; }
+  .bar .spacer { flex: 1 1 auto; }
+  .drop {
+    border: 1.5px dashed var(--line); border-radius: var(--radius-lg); padding: 26px;
+    text-align: center; color: var(--muted); background: var(--bg-soft); cursor: pointer;
+  }
+  .drop.is-over { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .drop b { color: var(--ink); }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); }
+  table.queue { width: 100%; border-collapse: collapse; font-size: 13.5px; min-width: 720px; }
+  table.queue th, table.queue td { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: middle; }
+  table.queue th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; background: var(--bg-soft); }
+  table.queue tr:last-child td { border-bottom: 0; }
+  table.queue .name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  table.queue .num { width: 110px; }
+  table.queue input.tc { width: 100px; font-family: var(--mono, ui-monospace, monospace); font-size: 13px; }
+  table.queue input.link { width: 150px; font-size: 12.5px; }
+  .row-btn { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 4px 6px; }
+  .row-btn:hover { color: var(--bad, #b91c1c); }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: 999px; background: var(--line-soft); color: var(--ink-2); }
+  .pill.pro { background: var(--accent-soft); color: var(--accent); }
+  .log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; background: #0f172a; color: #e2e8f0; border-radius: var(--radius); padding: 14px 16px; min-height: 90px; max-height: 220px; overflow: auto; white-space: pre-wrap; }
+  .log .ok { color: #86efac; }
+  .log .bad { color: #fca5a5; }
+  .lock-note { border: 1px solid var(--line); background: var(--bg-soft); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: var(--ink-2); }
+  .lock-note b { color: var(--ink); }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 16px; }
+  .features div { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: var(--ink-2); background: var(--bg); }
+  .features b { display: block; color: var(--ink); margin-bottom: 4px; font-size: 13.5px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Toolworks<span class="dot"></span></a>
+    <nav class="nav">
+      <a href="./">Audio Dub Extractor</a>
+      <a href="#queue">Очередь</a>
+      <a href="#limits">Лимиты</a>
+      <a class="nav-cta" href="./#pricing">Pro — $7</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="studio-head">
+  <div class="wrap">
+    <span class="eyebrow"><span class="pulse"></span> Studio · работает в браузере, файлы никуда не уходят</span>
+    <h1>Нарезать клипы по таймкоду — очередью</h1>
+    <p>
+      Добавьте аудиофайлы (MP3, M4A, WAV, OGG), укажите начало и конец каждого клипа и выгрузите их одним
+      проходом. Free: 2 файла и клипы до 30 секунд, WAV без метаданных. Pro: до 200 файлов, клипы любой
+      длины, таймкод в BWF-заголовке WAV и ID3-метки для MP3, сохранение проекта.
+    </p>
+  </div>
+</section>
+
+<section class="section" id="queue">
+  <div class="wrap">
+
+    <div class="bar">
+      <span id="mode-pill" class="pill">Free</span>
+      <button class="btn btn-ghost btn-sm" type="button" id="add-btn">Добавить файлы</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="tone-btn">Демо-тон 3 с</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="clear-btn">Очистить</button>
+      <span class="spacer"></span>
+      <button class="btn btn-ghost btn-sm hidden" type="button" id="proj-save">Сохранить проект</button>
+      <button class="btn btn-ghost btn-sm hidden" type="button" id="proj-open">Открыть проект</button>
+      <button class="btn btn-primary btn-sm" type="button" id="export-btn">Экспортировать клипы</button>
+    </div>
+
+    <div class="drop" id="drop" role="button" tabindex="0" aria-label="Добавить аудиофайлы: перетащите или нажмите">
+      <b>Перетащите файлы сюда</b> или нажмите «Добавить файлы».<br>
+      <span class="small">Лимит Free: 2 файла. Разбирается локально — ни один байт не покидает браузер.</span>
+    </div>
+
+    <div class="table-wrap" style="margin-top: 16px;">
+      <table class="queue">
+        <thead>
+          <tr>
+            <th scope="col">Файл</th>
+            <th scope="col" class="num">Длина</th>
+            <th scope="col" class="num">Начало</th>
+            <th scope="col" class="num">Конец</th>
+            <th scope="col" class="link-col hidden">Источник</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr id="empty-row"><td colspan="6" class="small muted" style="padding: 22px 12px;">Очередь пуста.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lock-note" id="limits" style="margin-top: 18px;">
+      <b>Что даёт Pro ($7):</b> 200 файлов в очереди, клипы без ограничения длины, таймкод в BWF-заголовке,
+      ID3-метки на копию MP3, сохранение и загрузка проекта. Free остаётся бесплатным: 2 файла, клипы до
+      30 секунд, WAV без метаданных.
+      <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+        <button class="btn btn-primary btn-sm" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio" data-sub="Очередь до 200 файлов, клипы любой длины, BWF/ID3-метки, проекты">Оплатить Pro — 1-Click $7</button>
+        <a class="btn btn-ghost btn-sm" href="./#pricing" style="text-decoration: none;">Другие способы оплаты</a>
+      </div>
+    </div>
+
+    <div class="features">
+      <div><b>Клип = точный срез</b>WebAudio декодирует файл, клип режется по сэмплам: 00:01:23.450 — это ровно эта миллисекунда, а не «примерно».</div>
+      <div><b>Таймкод остаётся в файле</b>WAV получает bext-чанк EBU 3285 с TimeReference (сэмплы от полуночи), MP3 — ID3v2.3 с TXXX: TIMECODE, TIMECODE_SAMPLES, TIMECODE_RATE.</div>
+      <div><b>Ничего не уходит на сервер</b>Декодирование и запись файлов идут в браузере. Нет загрузки, нет аккаунта, нет очереди на чужом диске.</div>
+    </div>
+
+    <h2 style="font-size: 18px; margin: 30px 0 10px;">Журнал</h2>
+    <div class="log" id="log">Готово к работе. Добавьте файлы или нажмите «Демо-тон 3 с».</div>
+
+    <p class="small muted" style="margin-top: 18px;">
+      Что Studio не делает: не скачивает звук с видеосайтов и не обходит защиту. Скачивание — это два
+      расширения из <a href="./">Audio Dub Extractor</a>. Studio берёт уже сохранённый файл и доводит его
+      до клипа с метаданными.
+    </p>
+
+    <input id="file-input" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac,.flac" multiple class="hidden">
+    <input id="proj-input" type="file" accept="application/json,.json" class="hidden">
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p class="small muted">Audio Dub Extractor Studio · Toolworks. Файлы обрабатываются локально.</p>
+  </div>
+</footer>
+
+<script src="./studio-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  var S = window.AudioDubStudio;
+  var PRODUCT = "audio-dub-studio";
+  var rows = [];            // { id, file, name, duration, inSec, outSec, link }
+  var nextId = 1;
+  var audioCtx = null;
+  var logEl = document.getElementById("log");
+  var tbody = document.getElementById("rows");
+  var input = document.getElementById("file-input");
+  var drop = document.getElementById("drop");
+  var modePill = document.getElementById("mode-pill");
+  var projSave = document.getElementById("proj-save");
+  var projOpen = document.getElementById("proj-open");
+  var projInput = document.getElementById("proj-input");
+  var exportBtn = document.getElementById("export-btn");
+  var linkCols = document.querySelectorAll(".link-col");
+
+  function isPro() {
+    try {
+      var rec = JSON.parse(localStorage.getItem("unlock:" + PRODUCT) || "null");
+      return !!(rec && rec.hash);
+    } catch (e) { return false; }
+  }
+  function maxFiles() { return isPro() ? S.MAX_FILES_PRO : S.MAX_FILES_FREE; }
+
+  function log(text, kind) {
+    var line = document.createElement("div");
+    if (kind) line.className = kind;
+    line.textContent = text;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function refreshMode() {
+    var pro = isPro();
+    modePill.textContent = pro ? "Pro" : "Free";
+    modePill.className = "pill" + (pro ? " pro" : "");
+    projSave.classList.toggle("hidden", !pro);
+    projOpen.classList.toggle("hidden", !pro);
+    linkCols.forEach(function (el) { el.classList.toggle("hidden", !pro); });
+    var note = document.getElementById("limits");
+    if (note) note.style.borderColor = pro ? "var(--accent)" : "var(--line)";
+  }
+
+  function ctx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+
+  function fmtSize(bytes) {
+    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + " МБ";
+    return Math.max(1, Math.round(bytes / 1024)) + " КБ";
+  }
+
+  function render() {
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+    if (!rows.length) {
+      var tr = document.createElement("tr");
+      tr.id = "empty-row";
+      tr.innerHTML = '<td colspan="6" class="small muted" style="padding: 22px 12px;">Очередь пуста.</td>';
+      tbody.appendChild(tr);
+      return;
+    }
+    rows.forEach(function (row, index) {
+      var tr = document.createElement("tr");
+      var nameCell = document.createElement("td");
+      nameCell.className = "name";
+      nameCell.title = row.name;
+      nameCell.textContent = row.name;
+      tr.appendChild(nameCell);
+
+      var durCell = document.createElement("td");
+      durCell.className = "num mono";
+      durCell.textContent = !row.file ? "файл не приложен" : row.duration ? S.formatTimecode(row.duration, false) + " · " + fmtSize(row.file.size) : "читаем…";
+      tr.appendChild(durCell);
+
+      tr.appendChild(timeCell(row, "inSec", "in"));
+      tr.appendChild(timeCell(row, "outSec", "out"));
+
+      var linkCell = document.createElement("td");
+      linkCell.className = "link-col" + (isPro() ? "" : " hidden");
+      var linkInput = document.createElement("input");
+      linkInput.className = "field link";
+      linkInput.placeholder = "ссылка на видео";
+      linkInput.value = row.link || "";
+      linkInput.addEventListener("input", function () { row.link = linkInput.value; });
+      linkCell.appendChild(linkInput);
+      tr.appendChild(linkCell);
+
+      var actions = document.createElement("td");
+      actions.style.textAlign = "right";
+      if (isPro() && row.file && /\.mp3$/i.test(row.name)) {
+        var tagBtn = document.createElement("button");
+        tagBtn.type = "button";
+        tagBtn.className = "row-btn";
+        tagBtn.title = "Записать ID3-метку таймкода на копию MP3";
+        tagBtn.style.color = "var(--accent)";
+        tagBtn.style.fontSize = "11px";
+        tagBtn.textContent = "ID3";
+        tagBtn.addEventListener("click", function (e) { e.stopPropagation(); openId3Dialog(row); });
+        actions.appendChild(tagBtn);
+      }
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "row-btn";
+      del.title = "Убрать из очереди";
+      del.textContent = "✕";
+      del.addEventListener("click", function () {
+        rows.splice(index, 1);
+        render();
+        log("Убрано: " + row.name);
+      });
+      actions.appendChild(del);
+      tr.appendChild(actions);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function timeCell(row, key, label) {
+    var td = document.createElement("td");
+    td.className = "num";
+    var el = document.createElement("input");
+    el.className = "field tc";
+    el.inputMode = "decimal";
+    el.placeholder = label === "in" ? "0:00" : "конец";
+    el.value = row[key] == null ? "" : S.formatTimecode(row[key], false);
+    el.addEventListener("change", function () {
+      var parsed = S.parseTimecode(el.value);
+      if (parsed == null) {
+        el.value = row[key] == null ? "" : S.formatTimecode(row[key], false);
+        log("Не понял время «" + el.value + "» — нужен формат 1:23 или 01:02:03.250", "bad");
+        return;
+      }
+      row[key] = parsed;
+      el.value = S.formatTimecode(parsed, false);
+    });
+    td.appendChild(el);
+    return td;
+  }
+
+  async function addFiles(files) {
+    var list = Array.prototype.slice.call(files || []);
+    if (!list.length) return;
+    for (var i = 0; i < list.length; i++) {
+      var file = list[i];
+      if (rows.length >= maxFiles()) {
+        log("Лимит " + (isPro() ? "Pro" : "Free") + ": " + maxFiles() + " файлов. " + (isPro() ? "" : "Pro снимает лимит."), "bad");
+        break;
+      }
+      if (!/^audio\//.test(file.type) && !/\.(mp3|m4a|wav|ogg|aac|flac|opus)$/i.test(file.name)) {
+        log("Пропущено (не аудио): " + file.name, "bad");
+        continue;
+      }
+      var row = { id: nextId++, file: file, name: file.name, duration: 0, inSec: 0, outSec: null, link: "" };
+      rows.push(row);
+      render();
+      log("Добавлено: " + file.name);
+      try {
+        var buf = await file.arrayBuffer();
+        var decoded = await ctx().decodeAudioData(buf.slice(0));
+        row.duration = decoded.duration;
+        row.rate = decoded.sampleRate;
+        if (row.outSec == null) row.outSec = decoded.duration;
+        render();
+        log("Декодировано: " + S.formatTimecode(decoded.duration) + " · " + decoded.numberOfChannels + " кан. · " + decoded.sampleRate + " Гц", "ok");
+      } catch (err) {
+        log("Не удалось декодировать " + file.name + ": " + err.message, "bad");
+      }
+    }
+  }
+
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  }
+
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  async function exportClips() {
+    if (!rows.length) { log("Очередь пуста — нечего экспортировать.", "bad"); return; }
+    exportBtn.disabled = true;
+    var okCount = 0, failCount = 0;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
+      try {
+        if (!row.file) throw new Error("файл не приложен (проект загружен без аудио)");
+        if (!row.duration) throw new Error("файл ещё не декодирован");
+        var clip = S.clampClip(row.inSec, row.outSec, row.duration);
+        if (!clip) throw new Error("пустое окно клипа");
+        if (!isPro() && clip.length > S.MAX_CLIP_FREE + 0.001) {
+          throw new Error("клип " + clip.length.toFixed(1) + " с длиннее лимита Free (" + S.MAX_CLIP_FREE + " с)");
+        }
+        var buf = await row.file.arrayBuffer();
+        var audio = await ctx().decodeAudioData(buf.slice(0));
+        var chans = [];
+        for (var c = 0; c < audio.numberOfChannels; c++) chans.push(audio.getChannelData(c));
+        var cut = S.sliceChannels(chans, audio.sampleRate, clip.start, clip.end);
+        var bext = isPro() ? {
+          timeReference: Math.round(clip.start * audio.sampleRate),
+          description: row.name.slice(0, 250),
+          originator: "Audio Dub Extractor Studio",
+          originatorReference: row.link ? row.link.slice(0, 32) : ""
+        } : null;
+        var bytes = S.encodeWav({ channels: cut, sampleRate: audio.sampleRate, bext: bext });
+        download(new Blob([bytes], { type: "audio/wav" }), S.outputName(row.name, clip.start, clip.end));
+        okCount++;
+        log("Клип: " + S.outputName(row.name, clip.start, clip.end) + " · " + S.formatTimecode(clip.start) + "–" + S.formatTimecode(clip.end) + " · " + fmtSize(bytes.length) + (bext ? " · BWF" : ""), "ok");
+      } catch (err) {
+        failCount++;
+        log("Ошибка на «" + row.name + "»: " + err.message, "bad");
+      }
+      if (i < rows.length - 1) await sleep(250);
+    }
+    log("Итого: " + okCount + " клипов, " + failCount + " ошибок." + (okCount > 1 ? " Браузер может спросить разрешение на несколько загрузок." : ""), failCount ? "bad" : "ok");
+    exportBtn.disabled = false;
+  }
+
+  /** Tag a copy of an MP3 with its clip window. No re-encode, no audio change. */
+  async function openId3Dialog(row) {
+    if (!row || !row.file) { log("Сначала добавьте MP3.", "bad"); return; }
+    try {
+      var clip = S.clampClip(row.inSec, row.outSec, row.duration || 1e9);
+      if (!clip) throw new Error("пустое окно клипа");
+      var bytes = new Uint8Array(await row.file.arrayBuffer());
+      // The copy keeps its own MPEG rate; the browser's decode rate is not it.
+      var nativeRate = S.mp3SampleRate(bytes) || row.rate || 48000;
+      var tagged = S.tagMp3(bytes, {
+        title: row.name.replace(/\.[a-z0-9]+$/i, ""),
+        artist: "Audio Dub Extractor Studio",
+        comment: "Clip " + S.formatTimecode(clip.start) + "–" + S.formatTimecode(clip.end),
+        timecode: S.formatTimecode(clip.start) + "-" + S.formatTimecode(clip.end),
+        startSamples: Math.round(clip.start * nativeRate),
+        rate: nativeRate,
+        source: row.link || ""
+      });
+      var out = row.name.replace(/\.[a-z0-9]+$/i, "") + "__" + S.formatTimecode(clip.start, false).replace(/:/g, "-") + "--" + S.formatTimecode(clip.end, false).replace(/:/g, "-") + ".mp3";
+      download(new Blob([tagged], { type: "audio/mpeg" }), out);
+      log("ID3-метка на копию: " + out + " · TIMECODE " + S.formatTimecode(clip.start) + "-" + S.formatTimecode(clip.end), "ok");
+    } catch (err) {
+      log("ID3: " + err.message, "bad");
+    }
+  }
+
+  function saveProject() {
+    var proj = S.makeProject(rows.map(function (r) {
+      return { name: r.name, in: r.inSec, out: r.outSec == null ? 0 : r.outSec, source: r.link };
+    }));
+    download(new Blob([JSON.stringify(proj, null, 2)], { type: "application/json" }), "audio-dub-project.json");
+    log("Проект сохранён: " + proj.items.length + " записей.", "ok");
+  }
+
+  async function loadProject(file) {
+    try {
+      var items = S.parseProject(await file.text(), maxFiles());
+      rows = items.map(function (it) {
+        // A project stores the plan, not the audio: the row waits for a file
+        // with the same name, so a project can move between machines.
+        return { id: nextId++, file: null, name: it.name, duration: 0, inSec: it.in, outSec: it.out, link: it.source };
+      });
+      render();
+      log("Проект загружен: " + items.length + " записей. Длительность появится после добавления файлов с теми же именами.", "ok");
+    } catch (err) {
+      log("Проект не загружен: " + err.message, "bad");
+    }
+  }
+
+  function demoRow() {
+    if (rows.length >= maxFiles()) {
+      log("Лимит " + maxFiles() + " файлов — демо-тон не добавлен.", "bad");
+      return;
+    }
+    var rate = 44100, seconds = 3, frames = rate * seconds;
+    var samples = new Float32Array(frames);
+    for (var i = 0; i < frames; i++) {
+      samples[i] = 0.3 * Math.sin((2 * Math.PI * 440 * i) / rate) * Math.min(1, i / 2000) * Math.min(1, (frames - i) / 2000);
+    }
+    var wav = S.encodeWav({ channels: [samples], sampleRate: rate });
+    var file = new File([wav], "demo-tone-440.wav", { type: "audio/wav" });
+    addFiles([file]);
+  }
+
+  // wiring
+  document.getElementById("add-btn").addEventListener("click", function () { input.click(); });
+  input.addEventListener("change", function () { addFiles(input.files); input.value = ""; });
+  document.getElementById("tone-btn").addEventListener("click", demoRow);
+  document.getElementById("clear-btn").addEventListener("click", function () {
+    rows = []; render(); log("Очередь очищена.");
+  });
+  exportBtn.addEventListener("click", exportClips);
+  projSave.addEventListener("click", saveProject);
+  projOpen.addEventListener("click", function () { projInput.click(); });
+  projInput.addEventListener("change", function () {
+    if (projInput.files && projInput.files[0]) loadProject(projInput.files[0]);
+    projInput.value = "";
+  });
+
+  drop.addEventListener("click", function () { input.click(); });
+  drop.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+  });
+  ["dragenter", "dragover"].forEach(function (name) {
+    drop.addEventListener(name, function (e) { e.preventDefault(); drop.classList.add("is-over"); });
+  });
+  ["dragleave", "drop"].forEach(function (name) {
+    drop.addEventListener(name, function (e) { e.preventDefault(); drop.classList.remove("is-over"); });
+  });
+  drop.addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files) addFiles(e.dataTransfer.files);
+  });
+
+  document.addEventListener("unlock:changed", function () {
+    refreshMode();
+    log(isPro() ? "Pro активен: лимиты сняты." : "Pro выключен: снова лимиты Free.", isPro() ? "ok" : "");
+  });
+
+  refreshMode();
+  render();
+})();
+</script>
+</body>
+</html>

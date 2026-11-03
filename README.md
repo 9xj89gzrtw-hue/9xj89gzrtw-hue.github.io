@@ -33,9 +33,12 @@ under test:
 
 ```bash
 node tests/verify.test.js
+node tests/studio.test.js
 ```
 
-44 checks against a **real Base mainnet transaction**. The fixture's recipient and amount are read
+44 checks against a **real Base mainnet transaction**, plus 83 offline checks for the Audio Dub
+Extractor studio: timecode parsing, sample slicing, WAV/BWF headers, ID3v2.3 frames and project
+files (no network needed). The fixture's recipient and amount are read
 from the chain, so the suite fails loudly if the fixture stops being a USDC transfer. The one-click
 path is covered too: the exact `eth_sendTransaction` payload (contract, chain id, calldata) and the
 receipt polling loop are asserted with a stubbed RPC, so no network is needed for those.

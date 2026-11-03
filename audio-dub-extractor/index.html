@@ -3,140 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AudioTools Studio — 1-кликовое скачивание звука с видео и нейроперевода Яндекса</title>
-<meta name="description" content="Два микро-расширения для браузера: скачивание русской озвучки нейроперевода Яндекса в MP3 и сохранение чистого звука с YouTube в 1 клик. Free план + Pro безлимит.">
+<title>Audio Dub Extractor — звук видео, перевод Яндекса и клипы по таймкоду</title>
+<meta name="description" content="Два расширения для Chrome и Яндекс Браузера: русская озвучка нейроперевода Яндекса и оригинальный звук видео в MP3. Плюс Studio: очередь клипов по таймкоду с метаданными BWF/ID3. Free бесплатно, Pro $7.">
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/audio-dub-extractor/">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/base.css">
 <script src="../assets/unlock.js" defer></script>
 <style>
-  .app-hero {
-    padding: 64px 0 44px;
-    border-bottom: 1px solid var(--line);
-  }
-  .app-hero h1 {
-    max-width: 780px;
-    margin: 16px 0 0;
-    font-size: clamp(30px, 4.5vw, 48px);
-    letter-spacing: -0.035em;
-    line-height: 1.1;
-  }
-  .app-hero .lede {
-    max-width: 640px;
-    margin: 16px 0 0;
-    font-size: 16.5px;
-    line-height: 1.6;
-    color: var(--ink-2);
-  }
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 20px;
-    margin-top: 24px;
-  }
-  .tool-card {
-    border: 1px solid var(--line);
-    background: var(--bg);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 20px;
-    box-shadow: var(--shadow);
-  }
-  .tool-card:hover {
-    border-color: var(--faint);
-  }
-  .tool-head {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .tool-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
+  .app-hero { padding: 64px 0 44px; border-bottom: 1px solid var(--line); }
+  .app-hero h1 { max-width: 780px; margin: 16px 0 0; font-size: clamp(30px, 4.5vw, 48px); letter-spacing: -0.035em; line-height: 1.1; }
+  .app-hero .lede { max-width: 660px; margin: 16px 0 0; font-size: 16.5px; line-height: 1.6; color: var(--ink-2); }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-top: 24px; }
+  .tool-card { border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius-lg); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; box-shadow: var(--shadow); }
+  .tool-card:hover { border-color: var(--faint); }
+  .tool-head { display: flex; align-items: center; gap: 14px; }
+  .tool-icon { width: 44px; height: 44px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
   .icon-red { background: #fee2e2; color: #b91c1c; }
   .icon-blue { background: #dbeafe; color: #1d4ed8; }
   .tool-title h2 { font-size: 19px; line-height: 1.25; margin-bottom: 3px; }
   .tool-title p { font-size: 13px; color: var(--muted); }
-  .feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 14px 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
-    font-size: 13.5px;
-    color: var(--ink-2);
-  }
-  .feature-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .check-icon {
-    color: var(--ok);
-    font-weight: 700;
-  }
-  .pricing-block {
-    margin-top: 48px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    background: var(--bg-soft);
-  }
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-top: 24px;
-  }
-  .plan-card {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .plan-card.featured {
-    border-color: var(--accent);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12);
-  }
-  .plan-price {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    color: var(--ink);
-    margin: 8px 0 16px;
-  }
-  .plan-price small {
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--muted);
-  }
-  .step-num-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: var(--line-soft);
-    border: 1px solid var(--line);
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
+  .feature-list { list-style: none; padding: 0; margin: 14px 0 0; display: flex; flex-direction: column; gap: 9px; font-size: 13.5px; color: var(--ink-2); }
+  .feature-list li { display: flex; align-items: flex-start; gap: 8px; }
+  .check-icon { color: var(--ok); font-weight: 700; }
+  .pricing-block { margin-top: 48px; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 32px; background: var(--bg-soft); }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; }
+  .plan-card { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+  .plan-card.featured { border-color: var(--accent); box-shadow: 0 4px 16px rgba(37, 99, 235, 0.12); }
+  .plan-price { font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); margin: 8px 0 16px; }
+  .plan-price small { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .step-num-pill { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--line-soft); border: 1px solid var(--line); font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  .bookmarklet { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; line-height: 1.5; background: #0f172a; color: #e2e8f0; border-radius: var(--radius); padding: 14px 16px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+  .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
+  .panel { border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; background: var(--bg); }
+  .panel h3 { font-size: 16px; margin-bottom: 8px; }
+  .panel p { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+  .check-list { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 7px; font-size: 13px; color: var(--ink-2); }
+  .check-list li::before { content: "✓"; color: var(--ok); font-weight: 700; margin-right: 7px; }
 </style>
 </head>
 <body>
@@ -153,49 +55,49 @@
       Toolworks<span class="dot"></span>
     </a>
     <nav class="nav">
-      <a href="#tools">Инструменты</a>
+      <a href="#tools">Расширения</a>
+      <a href="#studio">Studio</a>
       <a href="#pricing">Тарифы</a>
-      <a href="#install">Установка</a>
-      <a class="nav-cta" href="#tools">Попробовать</a>
+      <a class="nav-cta" href="./studio.html">Открыть Studio</a>
     </nav>
   </div>
 </header>
 
 <main>
-  <!-- Hero Section -->
   <section class="app-hero">
     <div class="wrap">
-      <span class="eyebrow"><span class="pulse"></span> 1-кликовые микро-расширения для браузера</span>
-      <h1>Чистый звук с любого видео.<br>Прямо в ваши наушники.</h1>
+      <span class="eyebrow"><span class="pulse"></span> Звук видео · перевод Яндекса · клипы по таймкоду</span>
+      <h1>Забрать звук из видео.<br>И нарезать его по таймкоду.</h1>
       <p class="lede">
-        Два расширения для Яндекс Браузера и Chrome: перехват русской закадровой озвучки нейроперевода видео (замена отвалившемуся Skyload) и быстрое скачивание оригинального звука с YouTube в MP3.
+        Два расширения снимают аудио: русскую закадровую озвучку нейроперевода Яндекса и оригинальный
+        звук с YouTube и VK. Studio доводит файл до дела: очередь клипов, точные границы и таймкод,
+        записанный в сам файл — BWF для WAV, ID3 для MP3.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#tools">Выбрать расширение</a>
-        <a class="btn btn-ghost" href="#install">Инструкция по установке</a>
+        <a class="btn btn-primary" href="#free">Скачать бесплатно</a>
+        <a class="btn btn-ghost" href="./studio.html">Открыть Studio</a>
       </div>
       <p class="small muted" style="margin-top: 20px;">
-        Работают локально в браузере. Без рекламы, без ожидания и без сторонних вирусов.
+        Расширения работают локально из панели браузера. Studio считает клипы в браузере: файлы не
+        загружаются на сервер.
       </p>
     </div>
   </section>
 
-  <!-- Tools Grid -->
   <section id="tools" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2>Инструменты</h2>
-        <p>Каждое расширение решает одну конкретную задачу в один клик без лишних настроек.</p>
+        <h2>Расширения</h2>
+        <p>Каждое решает одну задачу в один клик. Оба входят в бесплатный набор — без лимитов и регистрации.</p>
       </div>
 
       <div class="tools-grid">
-        <!-- Tool 1: Yandex Translation -->
         <article class="tool-card">
           <div>
             <div class="tool-head">
               <div class="tool-icon icon-red"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div>
               <div class="tool-title">
-                <h2>Скачивание перевода Яндекса</h2>
+                <h2>Перевод Яндекса</h2>
                 <p>Нейросетевая озвучка · 1 клик</p>
               </div>
             </div>
@@ -203,10 +105,10 @@
               <img src="./assets/preview-yandex-voiceover.jpg" alt="Интерфейс скачивания перевода Яндекса" style="width: 100%; display: block; aspect-ratio: 10/7; object-fit: cover;">
             </div>
             <ul class="feature-list">
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Замена Skyload:</b> работает сразу после поломки старых расширений</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>1 клик:</b> перехватывает русскую аудиодорожку при просмотре</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Готовый MP3:</b> открывается на любом iPhone, Android или автомагнитоле</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Минимализм Apple:</b> строгий компактный вид, поддержка клавиши Enter</li>
+              <li><span class="check-icon">✓</span> <b>Замена Skyload:</b> перехватывает дорожку, когда старые расширения уже не работают</li>
+              <li><span class="check-icon">✓</span> <b>1 клик:</b> русская озвучка сохраняется при просмотре, без копирования ссылок</li>
+              <li><span class="check-icon">✓</span> <b>Готовый MP3:</b> открывается на iPhone, Android и в автомагнитоле</li>
+              <li><span class="check-icon">✓</span> <b>Без лимита:</b> скачиваний столько, сколько нужно</li>
             </ul>
           </div>
           <div style="margin-top: 18px;">
@@ -216,24 +118,23 @@
           </div>
         </article>
 
-        <!-- Tool 2: Original Video MP3 -->
         <article class="tool-card">
           <div>
             <div class="tool-head">
               <div class="tool-icon icon-blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
               <div class="tool-title">
-                <h2>Скачивание звука видео (MP3)</h2>
-                <p>YouTube &amp; VK · Чистый звук</p>
+                <h2>Звук видео (MP3)</h2>
+                <p>YouTube и VK · чистый звук</p>
               </div>
             </div>
             <div style="margin: 16px 0 14px; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow);">
               <img src="./assets/preview-youtube-audio.jpg" alt="Интерфейс скачивания звука видео YouTube" style="width: 100%; display: block; aspect-ratio: 10/7; object-fit: cover;">
             </div>
             <ul class="feature-list">
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Полный трек:</b> собирает всё аудио целиком, а не секундный фрагмент</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Без захламления ПК:</b> конвертация онлайн, без установки ffmpeg</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Без спама:</b> никаких всплывающих окон, баннеров и капч</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Быстро:</b> сохранение в один клик прямо из верхней панели</li>
+              <li><span class="check-icon">✓</span> <b>Полный трек:</b> сохраняет всё аудио, а не секундный фрагмент</li>
+              <li><span class="check-icon">✓</span> <b>Без ffmpeg:</b> конвертация на стороне сервиса, ничего не ставится на компьютер</li>
+              <li><span class="check-icon">✓</span> <b>Без спама:</b> никаких всплывающих окон, баннеров и капч</li>
+              <li><span class="check-icon">✓</span> <b>Значок MP3:</b> расширение само показывает, что на странице есть звук</li>
             </ul>
           </div>
           <div style="margin-top: 18px;">
@@ -246,149 +147,186 @@
     </div>
   </section>
 
-  <!-- Pricing / Commercial Section -->
-  <section id="pricing" class="section">
+  <section id="free" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2>Тарифные планы</h2>
-        <p>Попробуйте бесплатно. Если инструмент экономит вам время каждый день — переходите на Pro.</p>
+        <h2>Бесплатный набор: расширения + метки</h2>
+        <p>Расширения снимают звук. Скрипт ставит метки времени и отдаёт проект, который Studio режет по таймкоду.</p>
       </div>
 
-      <div class="pricing-grid">
-        <!-- Free Tier -->
-        <div class="plan-card">
-          <div>
-            <span class="badge">Бесплатный старт</span>
-            <div class="plan-price">0 ₽ <small>/ навсегда</small></div>
-            <p class="small muted">Идеально, чтобы попробовать и убедиться, что всё работает.</p>
-            <ul class="feature-list" style="margin-top: 18px;">
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> До 3 скачиваний в день</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Полный доступ ко всем функциям</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Формат MP3 высокого качества</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Без регистрации и аккаунтов</li>
-            </ul>
-          </div>
-          <div style="margin-top: 24px;">
-            <a class="btn btn-ghost" style="width: 100%;" href="#tools">Попробовать Free</a>
+      <div class="two-col">
+        <div class="panel">
+          <h3>1. Расширения (.ZIP)</h3>
+          <p>Две папки — два расширения. Ставятся за полминуты, работают в Chrome и Яндекс Браузере, лимитов нет.</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;">
+            <a class="btn btn-primary btn-sm" href="../downloads/yandex-translation-downloader.zip" download>Озвучка Яндекса</a>
+            <a class="btn btn-ghost btn-sm" href="../downloads/original-audio-downloader.zip" download>Звук видео</a>
           </div>
         </div>
 
-        <!-- Pro Tier -->
-        <div class="plan-card featured">
-          <div>
-            <span class="badge" style="background: var(--accent-soft); color: var(--accent); border-color: var(--accent);">PRO БЕЗЛИМИТ</span>
-            <div class="plan-price">299 ₽ <small>или 3 USDC (разово)</small></div>
-            <p class="small muted">Полный безлимит навсегда без подписок и скрытых платежей.</p>
-            <ul class="feature-list" style="margin-top: 18px;">
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> <b>Неограниченное число скачиваний</b> в день</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Приоритетная скорость онлайн-конвертации</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Вечная лицензия на все обновления</li>
-              <li><span class="check-icon"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="display:inline-block;vertical-align:-1px;"><path d="M3 8.5l3.2 3L13 4.5" stroke="#137333" stroke-width="2.2" stroke-linecap="round"/></svg></span> Мгновенная разблокировка без ожидания</li>
-            </ul>
-          </div>
-          <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
-            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
-              Купить Pro (299 ₽) — Карты РФ / СБП
-            </a>
-            <div style="display: flex; gap: 8px;">
-              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
-                В Telegram
-              </a>
-              <button class="btn btn-ghost" style="flex: 1; font-size: 13px;" type="button" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-                1-Click Web3 (3 USDC)
-              </button>
-            </div>
+        <div class="panel">
+          <h3>2. Userscript «Метки клипов»</h3>
+          <p>
+            Ставит панель на странице YouTube: клавиша <b>M</b> — начало клипа, ещё раз — конец.
+            Экспорт отдаёт JSON-проект с таймкодами, который открывает Studio.
+            Нужен Tampermonkey или Violentmonkey; сеть скрипт не трогает.
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px;">
+            <a class="btn btn-primary btn-sm" href="../downloads/audio-dub-tools.user.js" download>Скачать userscript</a>
+            <a class="btn btn-ghost btn-sm" href="https://www.tampermonkey.net/" target="_blank" rel="noopener">Что такое Tampermonkey</a>
           </div>
         </div>
       </div>
 
-      <!-- Payment details box -->
-      <div id="payment-details" class="pricing-block">
-        <h3 style="margin-bottom: 8px;">Способы оплаты Pro-доступа</h3>
-        <p class="small muted" style="margin-bottom: 20px;">
-          Все способы автоматизированы: мгновенная разблокировка без необходимости писать кому-либо в личные сообщения.
-        </p>
+      <div class="panel" style="margin-top: 20px;">
+        <h3>3. Bookmarklet — без установки</h3>
+        <p style="margin-bottom: 10px;">Если userscript ставить не хочется: перетащите ссылку в закладки и нажимайте её на странице видео. Каждое нажатие ставит метку в тот же список, что и userscript.</p>
+        <a class="btn btn-ghost btn-sm" id="bm-link" href="#" style="margin-bottom: 12px;">🎵 Метка клипа</a>
+        <div class="bookmarklet" id="bm-code"></div>
+        <button class="btn btn-ghost btn-sm" type="button" id="bm-copy" style="margin-top: 10px;">Скопировать код</button>
+      </div>
+    </div>
+  </section>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-          <!-- 1. Plati / Digiseller / Bank Cards / SBP -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <b style="font-size: 15px;">1. Оплата картой РФ / СБП (299 ₽):</b>
-              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Карты РФ (МИР, Visa, MasterCard), СБП по QR-коду и WebMoney через официальный шлюз Plati.Market / Digiseller с мгновенной автовыдачей.
-              </p>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
-              <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
-                Купить на Plati.Market (299 ₽)
-              </a>
-              <a class="btn btn-ghost" style="width: 100%; text-align: center; font-size: 13px; text-decoration: none;" href="https://oplata.info/asp2/pay_wm.asp?id_d=6326936" target="_blank" rel="noopener">
-                Прямая форма оплаты (СБП / Карты)
-              </a>
-            </div>
-          </div>
+  <section id="studio" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Studio: клипы очередью, таймкод в файле</h2>
+        <p>Платный инструмент, но пробовать можно сразу: Free — 2 файла и клипы до 30 секунд.</p>
+      </div>
 
-          <!-- 2. Telegram Stars / CryptoBot -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <b style="font-size: 15px;">2. В 1 клик в Telegram (Stars / USDT):</b>
-              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Оплата внутри мессенджера без браузерных расширений. <b>Telegram Stars</b> (⭐ 150) с любой карты или <b>CryptoBot</b> ($3 USDT/TON).
-              </p>
-            </div>
-            <a class="btn btn-primary" style="width: 100%; text-align: center; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
-              Оплатить в Telegram (@Shop010_bot)
-            </a>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Что делает</h3>
+          <ul class="check-list">
+            <li><b>Очередь:</b> перетащите MP3, M4A, WAV, OGG — до 200 файлов в Pro</li>
+            <li><b>Точные границы:</b> <span class="mono">01:23.450</span> — это ровно эта миллисекунда, срез по сэмплам</li>
+            <li><b>Таймкод в WAV:</b> bext-чанк EBU 3285, TimeReference в сэмплах от полуночи</li>
+            <li><b>Таймкод в MP3:</b> ID3v2.3, кадры TXXX: TIMECODE, TIMECODE_SAMPLES, TIMECODE_RATE</li>
+            <li><b>Проект:</b> список клипов сохраняется в JSON и переносится на другую машину</li>
+            <li><b>Локально:</b> декодирование и запись файлов идут в браузере, без загрузки на сервер</li>
+          </ul>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+            <a class="btn btn-primary btn-sm" href="./studio.html">Открыть Studio бесплатно</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio" data-sub="Очередь до 200 файлов, клипы любой длины, BWF/ID3-метки, проекты">Pro — $7</button>
           </div>
+        </div>
 
-          <!-- 3. Web3 Base USDC -->
-          <div style="border: 1px solid var(--line); background: var(--bg); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <b style="font-size: 15px;">3. Криптовалюта 1-Click Web3 (3 USDC):</b>
-              <p class="small muted" style="margin: 8px 0 16px; line-height: 1.5;">
-                Оплата в сети Base. Работает в 1 клик при наличии расширения <b>MetaMask</b> или <b>Rabby</b> в браузере. Либо ручной перевод по адресу.
-              </p>
-            </div>
-            <button class="btn btn-ghost" type="button" style="width: 100%;" data-unlock data-product="audiotools" data-price="3" data-name="AudioTools Pro" data-sub="Безлимитное скачивание MP3 и закадрового перевода Яндекса">
-              Открыть 1-Click Web3 (3 USDC)
-            </button>
-          </div>
+        <div class="panel">
+          <h3>Где Studio не помогает</h3>
+          <p>
+            Studio не скачивает звук с видеосайтов и не обходит защиту — для этого есть расширения выше.
+            Он берёт уже сохранённый файл и доводит его до клипа с метаданными. Это разделение
+            сознательное: скачивание зависит от сайта и меняется, а нарезка и метаданные — нет.
+          </p>
+          <p style="margin-top: 10px;">
+            MP3 не перекодируется: ID3-метка ставится на копию исходного файла. Если нужен именно
+            обрезанный MP3, Studio отдаст WAV без потерь — перекодировать в MP3 в браузере можно только
+            сторонней библиотекой, а обещать «MP3 без потерь» было бы неправдой.
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Step-by-Step Installation Guide -->
+  <section id="pricing" class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Тарифы</h2>
+        <p>Free — это не демо с обрезанными функциями, а рабочий набор. Pro добавляет очередь и метаданные.</p>
+      </div>
+
+      <div class="pricing-grid">
+        <div class="plan-card">
+          <div>
+            <span class="badge">Free</span>
+            <div class="plan-price">0 ₽ <small>/ навсегда</small></div>
+            <p class="small muted">Расширения и метки — без лимитов. Studio — чтобы попробовать.</p>
+            <ul class="feature-list" style="margin-top: 18px;">
+              <li><span class="check-icon">✓</span> Два расширения, скачиваний без лимита</li>
+              <li><span class="check-icon">✓</span> Userscript и bookmarklet для меток</li>
+              <li><span class="check-icon">✓</span> Studio: 2 файла, клипы до 30 секунд</li>
+              <li><span class="check-icon">✓</span> WAV 16 бит без метаданных</li>
+              <li><span class="check-icon">✓</span> Без регистрации и аккаунта</li>
+            </ul>
+          </div>
+          <div style="margin-top: 24px;">
+            <a class="btn btn-ghost" style="width: 100%; text-align: center;" href="./studio.html">Открыть Studio</a>
+          </div>
+        </div>
+
+        <div class="plan-card featured">
+          <div>
+            <span class="badge" style="background: var(--accent-soft); color: var(--accent); border-color: var(--accent);">PRO</span>
+            <div class="plan-price">$7 <small>разово, без подписки</small></div>
+            <p class="small muted">Открывается в браузере по хешу перевода USDC в сети Base. Почту не спрашиваем.</p>
+            <ul class="feature-list" style="margin-top: 18px;">
+              <li><span class="check-icon">✓</span> Очередь до 200 файлов</li>
+              <li><span class="check-icon">✓</span> Клипы любой длины</li>
+              <li><span class="check-icon">✓</span> BWF-таймкод в WAV и ID3-метки в MP3</li>
+              <li><span class="check-icon">✓</span> Сохранение и загрузка проекта</li>
+              <li><span class="check-icon">✓</span> Все будущие обновления Studio</li>
+            </ul>
+          </div>
+          <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-primary" style="width: 100%;" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio" data-sub="Очередь до 200 файлов, клипы любой длины, BWF/ID3-метки, проекты">
+              Оплатить $7 в 1 клик (USDC на Base)
+            </button>
+            <div style="display: flex; gap: 8px;">
+              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="https://plati.market/itm/6326936" target="_blank" rel="noopener">
+                Карта РФ / СБП — 299 ₽
+              </a>
+              <a class="btn btn-ghost" style="flex: 1; text-align: center; font-size: 13px; text-decoration: none;" href="https://t.me/Shop010_bot?start=prod_51" target="_blank" rel="noopener">
+                Telegram
+              </a>
+            </div>
+            <p class="tiny muted" style="margin: 0;">Карта РФ и Telegram — отдельная касса: доступ выдаётся вручную после оплаты, обычно в тот же день.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pricing-block">
+        <h3 style="margin-bottom: 8px;">Как открывается Pro</h3>
+        <p class="small muted" style="margin-bottom: 14px;">
+          Кнопка «1 клик» подключает кошелёк, переключает его на Base и отправляет 7 USDC на адрес
+          проекта. Страница сама читает чек через публичный RPC и открывает инструменты в этом браузере —
+          сервера, аккаунта и письма с ключом нет.
+        </p>
+        <div class="bookmarklet" style="background: var(--bg); color: var(--ink-2); white-space: normal; font-family: inherit; font-size: 13px; line-height: 1.6; border: 1px solid var(--line);">
+          Оплата картой РФ или через Telegram идёт через отдельную кассу: после неё пришлите чек в
+          Telegram, доступ откроют вручную. Это медленнее, зато работает без криптокошелька.
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="install" class="section">
     <div class="wrap">
       <div class="section-head">
-        <h2>Пошаговая установка за 30 секунд</h2>
-        <p>Установка не требует прав администратора и занимает ровно полминуты.</p>
+        <h2>Установка за 30 секунд</h2>
+        <p>Расширения ставятся распакованной папкой, userscript — одним файлом.</p>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px;">
-        <div style="border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--bg);">
+        <div class="panel">
           <div class="step-num-pill">1</div>
           <h3 style="font-size: 15px; margin-bottom: 6px;">Скачайте ZIP</h3>
-          <p class="small muted">Нажмите кнопку скачивания нужного расширения выше и распакуйте полученный архив в любую папку.</p>
+          <p class="small muted">Распакуйте архив нужного расширения в любую папку. Внутри — manifest.json и папка icons.</p>
         </div>
-
-        <div style="border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--bg);">
+        <div class="panel">
           <div class="step-num-pill">2</div>
-          <h3 style="font-size: 15px; margin-bottom: 6px;">Откройте браузер</h3>
-          <p class="small muted">В Яндекс Браузере вставьте в строку адрес: <code>browser://tune</code> (в Chrome: <code>chrome://extensions</code>).</p>
+          <h3 style="font-size: 15px; margin-bottom: 6px;">Откройте расширения</h3>
+          <p class="small muted">В Яндекс Браузере: <code>browser://tune</code>. В Chrome: <code>chrome://extensions</code>.</p>
         </div>
-
-        <div style="border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--bg);">
+        <div class="panel">
           <div class="step-num-pill">3</div>
           <h3 style="font-size: 15px; margin-bottom: 6px;">Режим разработчика</h3>
-          <p class="small muted">Включите тумблер «Режим разработчика» в правом верхнем углу страницы браузера.</p>
+          <p class="small muted">Включите тумблер «Режим разработчика» в правом верхнем углу.</p>
         </div>
-
-        <div style="border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--bg);">
+        <div class="panel">
           <div class="step-num-pill">4</div>
           <h3 style="font-size: 15px; margin-bottom: 6px;">Загрузите папку</h3>
-          <p class="small muted">Нажмите кнопку «Загрузить распакованное расширение» и выберите распакованную папку. Готово!</p>
+          <p class="small muted">«Загрузить распакованное расширение» → выберите папку. Для userscript: Tampermonkey → «Создать новый скрипт» → вставить файл.</p>
         </div>
       </div>
     </div>
@@ -401,5 +339,31 @@
   </div>
 </footer>
 
+<script>
+(function () {
+  "use strict";
+  // Bookmarklet: one mark per click, same storage key the userscript reads, so
+  // the two tools feed one list instead of two.
+  var code = "javascript:(function(){try{var v=document.querySelector('video');if(!v){alert('Плеер не найден');return}var id=new URLSearchParams(location.search).get('v')||location.pathname;var K='audio-dub-marks:v1';var all={};try{all=JSON.parse(localStorage[K]||'{}')}catch(e){}var l=Array.isArray(all[id])?all[id]:[];l.push({at:Number(v.currentTime)||0,title:document.title});all[id]=l;localStorage[K]=JSON.stringify(all);alert('Метка '+v.currentTime.toFixed(3)+' c · всего '+l.length+(l.length%2?' (начало клипа)':' (конец клипа)'))}catch(e){alert('Не получилось: '+e.message)}})()";
+  var link = document.getElementById("bm-link");
+  var codeEl = document.getElementById("bm-code");
+  if (link) link.setAttribute("href", code);
+  if (codeEl) codeEl.textContent = code;
+  var copyBtn = document.getElementById("bm-copy");
+  if (copyBtn) copyBtn.addEventListener("click", function () {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code).then(function () { copyBtn.textContent = "Скопировано"; setTimeout(function () { copyBtn.textContent = "Скопировать код"; }, 1800); });
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = code;
+      ta.style.cssText = "position:fixed;opacity:0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); copyBtn.textContent = "Скопировано"; } catch (e) { copyBtn.textContent = "Выделите код вручную"; }
+      ta.remove();
+    }
+  });
+})();
+</script>
 </body>
 </html>
