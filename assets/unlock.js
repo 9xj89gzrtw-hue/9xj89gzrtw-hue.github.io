@@ -953,7 +953,15 @@
           el.hidden = false;
           var rub = lot.rub ? " · " + lot.rub + " ₽" : "";
           var label = el.querySelector("[data-shop-label]") || el;
-          label.textContent = (label.getAttribute("data-shop-idle") || label.textContent).replace(/\s*·.*$/, "") + rub + " — ключ TW1 сразу";
+          /* Idempotent baseline: strip any price or "ключ TW1" tail the markup
+             already carries, so re-binding never doubles the suffix. */
+          var base = String(label.getAttribute("data-shop-idle") || label.textContent || "")
+            .trim()
+            .replace(/\s*[·—,]\s*[^·—,]*₽[\s\S]*$/, "")
+            .replace(/\s*[·—,]\s*ключ\s+TW1[\s\S]*$/i, "")
+            .replace(/\s*[·—,]\s*ключ\s+сразу[\s\S]*$/i, "")
+            .trim();
+          label.textContent = base + rub + (label.getAttribute("data-shop-note") || " — ключ TW1 сразу");
         } else {
           el.hidden = true;
         }
