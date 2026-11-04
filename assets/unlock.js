@@ -953,15 +953,21 @@
           el.hidden = false;
           var rub = lot.rub ? " · " + lot.rub + " ₽" : "";
           var label = el.querySelector("[data-shop-label]") || el;
-          /* Idempotent baseline: strip any price or "ключ TW1" tail the markup
-             already carries, so re-binding never doubles the suffix. */
-          var base = String(label.getAttribute("data-shop-idle") || label.textContent || "")
-            .trim()
-            .replace(/\s*[·—,]\s*[^·—,]*₽[\s\S]*$/, "")
-            .replace(/\s*[·—,]\s*ключ\s+TW1[\s\S]*$/i, "")
-            .replace(/\s*[·—,]\s*ключ\s+сразу[\s\S]*$/i, "")
-            .trim();
-          label.textContent = base + rub + (label.getAttribute("data-shop-note") || " — ключ TW1 сразу");
+          /* The baseline is captured once, before the first price is written,
+             so re-binding on unlock:changed never doubles the price or the
+             "TW1 key" tail the markup already carries. */
+          var base = label.getAttribute("data-shop-base");
+          if (base == null) {
+            base = String(label.getAttribute("data-shop-idle") || label.textContent || "")
+              .trim()
+              .replace(/\s*[·—,]\s*[^·—,]*₽[\s\S]*$/, "")
+              .replace(/\s*[·—,]\s*(?:ключ|TW1|key)[\s\S]*$/i, "")
+              .trim();
+            label.setAttribute("data-shop-base", base);
+          }
+          var note = label.getAttribute("data-shop-note");
+          if (note == null) note = /TW1|ключ|key/i.test(base) ? "" : " — ключ TW1 сразу";
+          label.textContent = base + rub + note;
         } else {
           el.hidden = true;
         }
