@@ -1,5 +1,0 @@
-{
-  "type": "module",
-  "private": true,
-  "//": "Node reads the .js files in this folder as ES modules. Browsers ignore this file."
-}
