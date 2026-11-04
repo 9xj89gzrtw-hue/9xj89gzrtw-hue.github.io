@@ -12,7 +12,10 @@
     state: null,
     jobId: null,      // selected job id
     cards: [],        // pipeline op ids
-    tickerIdx: 0
+    tickerIdx: 0,
+    /* Pro telemetry: session counters for the analytics panel and the
+       exportable simulation report. Never leaves the browser. */
+    telemetry: { runs: 0, accepted: 0, rejected: 0, credits: 0, durations: [], last: null, stress: null }
   };
   root.AT.ui = ui;
   root.AT.TestHooks = {
@@ -156,21 +159,33 @@
   function runPipeline() {
     var j = jobById(ui.jobId);
     if (!j) return;
+    var t0 = (root.performance && root.performance.now) ? root.performance.now() : Date.now();
     var r = G.attempt(ui.state, j, ui.cards);
+    var ms = Math.max(0, ((root.performance && root.performance.now) ? root.performance.now() : Date.now()) - t0);
+    var tm = ui.telemetry;
+    tm.runs += 1;
+    tm.durations.push(Math.round(ms * 1000) / 1000);
+    if (tm.durations.length > 200) tm.durations.shift();
+    tm.last = { job: j.id, ok: !!r.ok, ms: Math.round(ms * 1000) / 1000, at: new Date().toISOString() };
     if (r.ok && !G.isJobSolved(ui.state, j.id)) {
       ui.state.credits += r.payout;
       G.markSolved(ui.state, j.id);
       S.save(ui.state);
+      tm.accepted += 1;
+      tm.credits = Math.round((tm.credits + r.payout) * 100) / 100;
       $("verdict").textContent = "ACCEPTED · +" + fmt(r.payout) + " cr";
       $("verdict").className = "verdict mono ok";
       renderJobs(); renderHud(); renderResearch();
     } else if (r.ok) {
+      tm.accepted += 1;
       $("verdict").textContent = "correct again — payout already collected";
       $("verdict").className = "verdict mono ok";
     } else {
+      tm.rejected += 1;
       $("verdict").textContent = "REJECTED · " + r.reason;
       $("verdict").className = "verdict mono warn";
     }
+    renderTelemetry();
   }
 
   /* ---------- research ---------- */
@@ -269,8 +284,34 @@
 
   function verifyKey() {
     var el = $("pro-status");
+    var raw = ($("key-in").value || "").trim();
+    /* TW1-… is the card/SBP key every other page sells. It is verified by the
+       shared ECDSA layer (assets/unlock.js), and an ALL key grants every tool.
+       The legacy LC1/Ed25519 path below still works for old source-pack buyers. */
+    if (/^TW1-/i.test(raw)) {
+      if (!window.Unlock || !window.Unlock.verifyLicenseKey) {
+        el.textContent = "TW1 verifier did not load — reload the page";
+        return;
+      }
+      el.textContent = "checking TW1 signature…";
+      window.Unlock.verifyLicenseKey(raw, { product: "algo-tycoon" }).then(function (lic) {
+        if (lic && lic.valid) {
+          reflectionSet("pro");
+          el.textContent = "TW1 key accepted (" + lic.code + " · " + lic.kid + ") — unlocked offline";
+        } else {
+          var map = {
+            format: "not a TW1 key — paste the whole line from the order",
+            signature: "signature mismatch — the key was truncated or edited",
+            product: "this key belongs to another product; use an ALL key for the pass",
+            crypto: "the browser refused the signature check — open the page over https"
+          };
+          el.textContent = "TW1 key rejected: " + (map[lic && lic.error] || "unknown error");
+        }
+      }, function (e) { el.textContent = "TW1 check failed: " + e.message; });
+      return;
+    }
     el.textContent = "checking key…";
-    P.verifyLicense($("key-in").value).then(function (r) {
+    P.verifyLicense(raw).then(function (r) {
       if (r.ok) {
         reflectionSet("pro");
         el.textContent = "license valid (" + r.payload.u + ")";
@@ -287,7 +328,7 @@
 
   function applyEntitlements() {
     document.body.classList.toggle("pro", !!ui.state.pro);
-    renderHud(); renderPipeline(); renderJobs();
+    renderHud(); renderPipeline(); renderJobs(); renderTelemetry();
   }
 
   /* ---------- sandbox + editor (Pro) ---------- */
@@ -316,9 +357,133 @@
     }, null, 1);
   }
 
+  /* ---------- Pro: telemetry, report, stress scenarios ---------- */
+  function renderTelemetry() {
+    var tm = ui.telemetry;
+    function set(id, value) { var el = $(id); if (el) el.textContent = value; }
+    var avg = tm.durations.length
+      ? (tm.durations.reduce(function (a, b) { return a + b; }, 0) / tm.durations.length).toFixed(2) + " ms"
+      : "—";
+    set("tm-runs", String(tm.runs));
+    set("tm-accepted", String(tm.accepted));
+    set("tm-rejected", String(tm.rejected));
+    set("tm-credits", fmt(tm.credits));
+    set("tm-avg", avg);
+    set("tm-last", tm.last ? tm.last.job + " · " + (tm.last.ok ? "OK" : "REJECT") + " · " + tm.last.ms + " ms" : "—");
+    var solved = ui.state ? ui.state.solved.length : 0;
+    set("tm-solved", String(solved));
+  }
+
+  function download(name, text, mime) {
+    var blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  }
+
+  function sessionSnapshot() {
+    return {
+      generatedAt: new Date().toISOString(),
+      product: "algo-tycoon",
+      engine: "deterministic op-card pipeline",
+      state: {
+        credits: ui.state.credits,
+        solved: ui.state.solved.slice(),
+        research: ui.state.research.slice(),
+        compilers: ui.state.compilers,
+        pro: !!ui.state.pro,
+        sourcePro: !!ui.state.sourcePro
+      },
+      session: {
+        selectedJob: ui.jobId,
+        pipeline: ui.cards.slice(),
+        slots: G.slots(ui.state),
+        actsCleared: G.actsCleared(ui.state),
+        earnableLeft: G.totalEarnable(ui.state)
+      },
+      telemetry: ui.telemetry
+    };
+  }
+
+  function exportReport() {
+    if (!ui.state.pro) { openPro(); return; }
+    download("algo-tycoon-report-" + Date.now() + ".json", JSON.stringify(sessionSnapshot(), null, 2), "application/json");
+    $("pro-status").textContent = "full simulation report exported (JSON, local only)";
+  }
+
+  function exportTelemetryCsv() {
+    if (!ui.state.pro) { openPro(); return; }
+    var rows = [["run", "duration_ms"]];
+    ui.telemetry.durations.forEach(function (d, i) { rows.push([i + 1, String(d)]); });
+    rows.push(["total_runs", String(ui.telemetry.runs)]);
+    rows.push(["accepted", String(ui.telemetry.accepted)]);
+    rows.push(["rejected", String(ui.telemetry.rejected)]);
+    rows.push(["credits_earned", String(ui.telemetry.credits)]);
+    download("algo-tycoon-telemetry-" + Date.now() + ".csv", rows.map(function (r) { return r.join(","); }).join("\n"), "text/csv;charset=utf-8");
+    $("pro-status").textContent = "telemetry exported (CSV, local only)";
+  }
+
+  /* A stress scenario is a seed range against a fixed op pipeline: the buyer
+     picks the window, the desk reports the distribution instead of a single
+     target hit. Runs entirely on the deterministic RNG in js/rng.js. */
+  function runStress() {
+    if (!ui.state.pro) { openPro(); return; }
+    var from = Math.max(1, Math.min(1e9, Number($("stress-from").value) || 1));
+    var to = Math.max(from, Math.min(from + 500, Number($("stress-to").value) || from + 20));
+    var n = Math.max(1, Math.min(64, Number($("stress-n").value) || 8));
+    var opsIds = ($("stress-ops").value || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    var out = $("stress-out");
+    if (!opsIds.length) { out.textContent = "add at least one op id"; out.className = "out-block mono warn-text"; return; }
+    var vals = [];
+    var errors = 0;
+    var t0 = (root.performance && root.performance.now) ? root.performance.now() : Date.now();
+    for (var seed = from; seed <= to; seed += 1) {
+      try {
+        var stream = R.genStream(seed, n);
+        var res = PL.compile(opsIds, stream, 64);
+        var v = res[0];
+        if (typeof v === "number" && isFinite(v)) vals.push(v); else errors += 1;
+      } catch (e) { errors += 1; }
+    }
+    var ms = ((root.performance && root.performance.now) ? root.performance.now() : Date.now()) - t0;
+    if (!vals.length) {
+      out.textContent = "all " + (to - from + 1) + " scenarios failed — check op ids";
+      out.className = "out-block mono warn-text";
+      return;
+    }
+    var min = Math.min.apply(null, vals);
+    var max = Math.max.apply(null, vals);
+    var mean = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+    var sd = Math.sqrt(vals.reduce(function (a, b) { return a + Math.pow(b - mean, 2); }, 0) / vals.length);
+    ui.telemetry.stress = {
+      seeds: [from, to], n: n, ops: opsIds, count: vals.length, errors: errors,
+      min: min, max: max, mean: mean, sd: sd, ms: Math.round(ms * 100) / 100,
+      at: new Date().toISOString()
+    };
+    out.textContent = [
+      "scenarios " + vals.length + " (errors " + errors + ") · " + Math.round(ms) + " ms",
+      "min " + min.toFixed(6),
+      "max " + max.toFixed(6),
+      "mean " + mean.toFixed(6),
+      "sd " + sd.toFixed(6)
+    ].join("\n");
+    out.className = "out-block mono ok-text";
+    renderTelemetry();
+  }
+
   /* ---------- boot ---------- */
   function __boot() {
     ui.state = S.load();
+    /* A TW1-ALL key (or the All-in-One pass) grants Pro here too, without a
+       second purchase: assets/unlock.js mirrors the universal record. */
+    if (!ui.state.pro && window.Unlock && window.Unlock.isPro("algo-tycoon")) {
+      ui.state.pro = true;
+      S.save(ui.state);
+    }
     var off = S.offlineEarnings(ui.state);
     if (off.credits > 0) {
       ui.state.credits += off.credits;
@@ -339,6 +504,16 @@
     wireOneClick();
     $("sb-run").addEventListener("click", sandboxRun);
     $("ed-export").addEventListener("click", editorExport);
+    if ($("tm-export")) $("tm-export").addEventListener("click", exportReport);
+    if ($("tm-csv")) $("tm-csv").addEventListener("click", exportTelemetryCsv);
+    if ($("stress-run")) $("stress-run").addEventListener("click", runStress);
+    document.addEventListener("unlock:changed", function () {
+      if (!ui.state.pro && window.Unlock && window.Unlock.isPro("algo-tycoon")) {
+        ui.state.pro = true;
+        S.save(ui.state);
+        applyEntitlements();
+      }
+    });
     applyEntitlements();
     renderHud();
   }

@@ -23,7 +23,17 @@ const MP3 = fs.readFileSync(path.join(ROOT, "tests", "fixtures", "tone.mp3"));
 function unpack() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "adk-ext-"));
   execFileSync("unzip", ["-q", path.join(ROOT, "downloads", "audio-dub-kombo-ext.zip"), "-d", dir]);
-  return path.join(dir, "audio-dub-kombo");
+  const ext = path.join(dir, "audio-dub-kombo");
+  /* The shipped manifest only matches the real video hosts, so the fixture on
+     127.0.0.1 would never receive the content scripts. Add the local origin to
+     the unpacked copy (test copy only — the distributed zip stays untouched). */
+  const manifestPath = path.join(ext, "manifest.json");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  for (const cs of manifest.content_scripts || []) {
+    cs.matches = (cs.matches || []).concat(["http://127.0.0.1/*", "http://localhost/*"]);
+  }
+  fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+  return ext;
 }
 
 function serve() {
@@ -58,6 +68,10 @@ const ok = (name, cond, extra) => {
     acceptDownloads: true,
     downloadsPath: downloads,
     args: [
+      /* The dub path is only recognised on a Yandex host, so the media origin
+         is aliased to one and answered by the local fixture server. No DNS,
+         no network: Chromium resolves the alias itself. */
+      "--host-resolver-rules=MAP audio.yandex.ru 127.0.0.1",
       "--disable-extensions-except=" + extPath,
       "--load-extension=" + extPath
     ]
@@ -98,7 +112,7 @@ const ok = (name, cond, extra) => {
   /* The stream URL lives on the media server, and the panel must pick it up
      from a real fetch() while the page is alive. */
   const status = await page.evaluate(async () => {
-    const url = "http://127.0.0.1:" + (Number(location.port) + 1) + "/dub/audio.mp3?mime=audio%2Fmpeg";
+    const url = "http://audio.yandex.ru:" + (Number(location.port) + 1) + "/dub/audio.mp3?mime=audio%2Fmpeg";
     await fetch(url).then(r => r.arrayBuffer());
     const C = window.AudioDubCore;
     const list = C.rank([{ url: url }]);
@@ -107,6 +121,10 @@ const ok = (name, cond, extra) => {
   ok("поток поймал сам расширенный fetch-хук", status.best && status.best.kind === "dub", JSON.stringify(status));
 
   const before = fs.readdirSync(downloads).length;
+  /* Playwright stores CDP downloads under a generated name, so the name the
+     extension chose is read from the download event (and from the panel). */
+  let suggested = "";
+  page.on("download", d => { suggested = d.suggestedFilename(); });
   await page.click("#adk-panel [data-dub]");
   let got = null;
   for (let i = 0; i < 40 && !got; i += 1) {
@@ -118,7 +136,6 @@ const ok = (name, cond, extra) => {
   if (got) {
     const size = fs.statSync(path.join(downloads, got)).size;
     ok("файл не пустой и совпадает с потоком", size === MP3.length, size + " vs " + MP3.length);
-    ok("имя файла с расширением mp3", /\.mp3$/.test(got), got);
   }
 
   await page.waitForFunction(
@@ -128,6 +145,8 @@ const ok = (name, cond, extra) => {
   ).catch(() => {});
   const text = (await page.textContent("#adk-panel [data-status]")).trim();
   ok("панель отчиталась о готовом файле", /Готово/.test(text), text);
+  const named = suggested || (text.match(/Готово:\s*(.+?)\s*(?:·|$)/) || [])[1] || "";
+  ok("имя файла с расширением mp3", /\.mp3$/i.test(named), named || "no name");
   await page.screenshot({ path: path.join(SHOTS, "ext-01-chrome-download.png") });
 
   await ctx.close();

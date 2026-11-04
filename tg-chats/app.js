@@ -12,11 +12,35 @@
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 
   var DATA = window.CHAT_CATALOG || { count: 0, chats: [], generated_at: "", total: 0 };
-  var TOTAL = DATA.total || DATA.count || DATA.chats.length;  var TOPICS = ["Все", "Разработка", "Данные и ИИ", "Дизайн и продукт", "Маркетинг", "Бизнес", "Работа и карьера", "Образование", "Город и соседи", "Общение"];
+  var TOTAL = DATA.total || DATA.count || DATA.chats.length;
+  var TOPICS = [
+    "Все",
+    "Закупки/Опт",
+    "Маркетплейсы WB/Ozon",
+    "IT/Фриланс",
+    "Недвижимость/Ремонт",
+    "Логистика/Карго",
+    "Локальные услуги/Города",
+    "Крипто/Web3",
+    "Образование/Школы",
+    "Авто/Спецтехника"
+  ];
 
   var state = { topic: "Все", city: "", query: "", sort: "members", view: "base", checking: false };
 
   function isPro() { return !!(window.Unlock && window.Unlock.isPro(PRODUCT)); }
+
+  /* The demo must not decrypt the paid pack: `isPro()` is true for the 60 s
+     preview, but the AES key is only reachable after a real entitlement. */
+  function hasRealPro() {
+    var rec = window.Unlock && window.Unlock.state(PRODUCT);
+    return !!(rec && rec.hash);
+  }
+  function canLoadPack() {
+    if (!isPro()) return false;
+    if (window.Unlock && window.Unlock.isPreview && window.Unlock.isPreview(PRODUCT) && !hasRealPro()) return false;
+    return true;
+  }
   function toast(msg, bad) { if (window.Unlock) window.Unlock.toast(msg, bad); }
   function esc(s) { return String(s == null ? "" : s); }
   function fmt(n) { return Number(n || 0).toLocaleString("ru-RU"); }
@@ -404,7 +428,7 @@
     renderCities();
     renderTopics();
     renderRows();
-    if (isPro()) loadPro();
+    if (canLoadPack()) loadPro();
 
     $("#q").addEventListener("input", function (e) { state.query = e.target.value; renderRows(); });
     $("#city").addEventListener("change", function (e) { state.city = e.target.value; renderRows(); });
@@ -435,7 +459,7 @@
       download("xlsx");
     });
 
-    document.addEventListener("unlock:changed", function () { renderRows(); if (isPro()) loadPro(); });
+    document.addEventListener("unlock:changed", function () { renderRows(); if (canLoadPack()) loadPro(); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

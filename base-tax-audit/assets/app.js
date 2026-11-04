@@ -994,18 +994,83 @@ function init() {
   $('#modal-cancel').addEventListener('click', closePay);
   $('#modal-verify').addEventListener('click', () => unlockWith($('#txhash').value.trim()));
   $('#modal-pay').addEventListener('click', payWithWallet);
+
+  /* Card / SBP and universal keys: a TW1-… signature is checked locally by
+     assets/unlock.js, which also mirrors the entitlement into unlock:*.
+     Nothing is sent anywhere and the key is never stored in bwg.license.v1,
+     because that record is re-checked against Base on every load. */
+  const keyBtn = $('#modal-verify-key');
+  if (keyBtn) keyBtn.addEventListener('click', async () => {
+    const raw = ($('#tw1key').value || '').trim();
+    if (!raw) { toast('Вставьте ключ TW1-… из выдачи заказа.'); return; }
+    if (!window.Unlock || !window.Unlock.verifyLicenseKey) {
+      toast('Проверщик ключей не загрузился — обновите страницу.');
+      return;
+    }
+    keyBtn.disabled = true;
+    keyBtn.textContent = 'Проверяем подпись…';
+    try {
+      const lic = await window.Unlock.verifyLicenseKey(raw, { product: 'base-tax-audit' });
+      if (!lic.valid) {
+        const map = {
+          format: 'Это не ключ TW1-…: скопируйте строку из выдачи целиком.',
+          signature: 'Подпись не сходится — ключ изменён или скопирован частично.',
+          product: 'Ключ выпущен для другого продукта. Нужен TAX или универсальный ALL.',
+          crypto: 'Браузер не дал проверить подпись — откройте страницу по https.'
+        };
+        toast(map[lic.error] || 'Ключ не принят.');
+        return;
+      }
+      state.pro = true;
+      state.license = { license: lic.key, code: lic.code, kid: lic.kid };
+      applyLicense();
+      closePay();
+      toast('Ключ принят: ' + lic.code + ' · ' + lic.kid + '. Pro открыт офлайн.');
+    } catch (e) {
+      toast('Ошибка проверки: ' + (e.message || ''));
+    } finally {
+      keyBtn.disabled = false;
+      keyBtn.textContent = 'Unlock with a TW1 key';
+    }
+  });
+  if ($('#tw1key')) $('#tw1key').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); if (keyBtn) keyBtn.click(); }
+  });
+
+  /* Card button appears only when a Digiseller lot exists (assets/shop.js). */
+  const cardBtn = $('#pay-card-tax');
+  if (cardBtn && window.Unlock && window.Unlock.shopEntry) {
+    const lot = window.Unlock.shopEntry('base-tax-audit');
+    if (lot && lot.id) {
+      cardBtn.href = window.Unlock.cardUrl(lot.id);
+      cardBtn.hidden = false;
+      cardBtn.textContent = 'Карта РФ / СБП — ' + (lot.rub ? lot.rub + ' ₽' : 'ключ TW1') + ', ключ сразу';
+    }
+  }
+
+  document.addEventListener('unlock:changed', () => {
+    if (!state.pro && window.Unlock && window.Unlock.isPro('base-tax-audit')) {
+      state.pro = true;
+      applyLicense();
+      toast('Pro unlocked: TW1 key accepted offline.');
+    }
+  });
+
   $('#paymodal').addEventListener('click', (e) => {
     if (e.target.id === 'paymodal') closePay();
   });
 
   // restore a licence, then re-check it against Base
+  /* An offline TW1 key (or a universal ALL grant) is checked before the chain
+     record: it needs no network and must survive a failed revalidation. */
+  if (window.Unlock && window.Unlock.isPro('base-tax-audit')) state.pro = true;
   const saved = pay.loadLicense();
   if (saved && saved.txHash) {
     state.pro = true;
     state.license = saved;
     applyLicense();
     pay.revalidate(saved).then((ok) => {
-      if (!ok) {
+      if (!ok && !(window.Unlock && window.Unlock.isPro('base-tax-audit'))) {
         state.pro = false;
         pay.clearLicense();
         applyLicense();

@@ -778,9 +778,21 @@
 
   function init() {
     S.unlock = ProUnlock.create({ priceUnits: 14000000n, storageKey: "live-radar:pro" });
-    S.pro = S.unlock.isPro();
+    /* Universal TW1-ALL is mirrored into live-radar:pro by assets/unlock.js;
+       the extra isPro() check covers the same-tab demo and a fresh grant. */
+    S.pro = S.unlock.isPro() || !!(window.Unlock && window.Unlock.isPro("live-radar"));
     $("#payAddr").textContent = S.unlock.PAY_TO;
+    document.addEventListener("unlock:changed", function () {
+      if (!S.pro && window.Unlock && window.Unlock.isPro("live-radar")) {
+        S.pro = true;
+        syncProUI();
+        renderTable();
+      }
+    });
     wireOneClick();
+
+    /* A returning Pro buyer must see Pro, not a "Pro" button that asks again. */
+    if (S.pro) { syncProUI(); renderTable(); }
 
     renderGifts();
     calc();

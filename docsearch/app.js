@@ -959,8 +959,14 @@
 
   function boot() {
     S.unlock = ProUnlock.create({ priceUnits: 15000000n, storageKey: "archive-studio:pro" });
-    S.pro = S.unlock.isPro();
+    /* Universal TW1-ALL grants live in unlock:universal (and are mirrored to
+       archive-studio:pro), so a buyer who paid once on another page lands here
+       already in Pro. Preview is memory-only and never writes that key. */
+    S.pro = S.unlock.isPro() || !!(window.Unlock && window.Unlock.isPro("docsearch"));
     if (S.pro) { $("#proPill").classList.remove("hidden"); $("#proBtn").textContent = "Pro активен"; }
+    document.addEventListener("unlock:changed", () => {
+      if (!S.pro && window.Unlock && window.Unlock.isPro("docsearch")) applyPro();
+    });
     wireOneClick();
     // Saved index wins over the demo; a first visit opens the demo so the page
     // is useful before the visitor finds a file.

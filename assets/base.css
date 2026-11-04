@@ -241,11 +241,17 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
   box-shadow: 0 24px 64px -16px rgba(15, 23, 42, 0.32);
   border: 1px solid var(--line);
   overflow: hidden;
+  /* The All-in-One block made the dialog taller than a laptop viewport.
+     Head and footer stay put; only the body scrolls. */
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
 }
-.modal-head { display: flex; align-items: flex-start; gap: 16px; padding: 20px 22px 0; }
+.modal-head { display: flex; align-items: flex-start; gap: 16px; padding: 20px 22px 0; flex: none; }
 .modal-head h3 { font-size: 17px; }
-.modal-body { padding: 14px 22px 4px; }
-.modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px 20px; }
+.modal-body { padding: 14px 22px 4px; overflow-y: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
+.modal-foot { display: flex; gap: 10px; justify-content: flex-end; padding: 16px 22px 20px; flex: none; }
 .close-x { margin-left: auto; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 4px; border-radius: 6px; }
 .close-x:hover { background: var(--bg-soft); color: var(--ink); }
 
@@ -327,3 +333,11 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .unlock-error { color: var(--bad); margin-top: 8px; font-size: 12.8px; line-height: 1.5; }
 .export-row { display: flex; gap: 8px; margin-top: 16px; }
 .export-row .btn { flex: 1; }
+
+/* All-in-One Pro Pass inside the shared payment modal. Sits under the card
+   button, deliberately one notch quieter than the product's own price so the
+   bundle is an upsell, not a bait-and-switch. */
+.pay-bundle[hidden] { display: none; }
+.pay-bundle .btn { width: 100%; }
+.pay-bundle #unlock-bundle-card[hidden] { display: none; }
+.pay-bundle #unlock-bundle-note[hidden] { display: none; }

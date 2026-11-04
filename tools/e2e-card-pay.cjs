@@ -42,7 +42,7 @@ const CASES = [
     open: '[data-unlock][data-product="tgchats"]',
     card: "#unlock-card", cardLabel: "#unlock-card-label", cardHint: "#unlock-card-hint",
     field: "#unlock-hash", submit: "#unlock-go", error: "#unlock-error",
-    storage: "unlock:tgchats"
+    storage: "unlock:tg-chats"
   },
   {
     page: "docsearch", product: "archive-studio", id: 6354601, rub: 690,
@@ -96,6 +96,27 @@ function ok(name, cond, extra) {
   else { fail++; console.log("  FAIL " + name + (extra !== undefined ? "  -> " + extra : "")); }
 }
 
+/* The label must print the price the cash desk actually charges, so the
+   expected value comes from the generated shop file, not from a constant. */
+const SHOP = (() => {
+  try {
+    const src = fs.readFileSync(path.join(ROOT, "assets", "shop.js"), "utf8");
+    return JSON.parse(src.slice(src.indexOf("{"), src.lastIndexOf("}") + 1));
+  } catch (e) { return null; }
+})();
+function liveRub(c) {
+  const alias = { tgchats: "tg-chats", "archive-studio": "docsearch" };
+  const slug = alias[c.product] || c.product;
+  const entry = SHOP && SHOP.products ? SHOP.products[slug] : null;
+  const rub = entry && Number(entry.price_rub) ? Number(entry.price_rub) : c.rub;
+  /* The cash desk may charge kopecks while the label prints whole rubles,
+     so both spellings of the same live price are acceptable. */
+  const forms = [Number.isInteger(rub) ? String(rub) : rub.toFixed(2)];
+  const rounded = String(Math.round(rub));
+  if (!forms.includes(rounded)) forms.push(rounded);
+  return forms;
+}
+
 async function unlocked(ctx, storage) {
   return ctx.pages()[0].evaluate(k => localStorage.getItem(k), storage).catch(() => null);
 }
@@ -121,7 +142,7 @@ async function unlocked(ctx, storage) {
     ok("кнопка карты видна рядом с однокликом",
       href === `https://oplata.info/asp2/pay_wm.asp?id_d=${c.id}&ai=1481449&lang=ru-RU`, href);
     const label = (await page.textContent(c.cardLabel)).trim();
-    ok("в подписи ровно та цена, что берёт касса", label.includes(c.rub + " ₽"), label);
+    ok("в подписи ровно та цена, что берёт касса", liveRub(c).some(v => label.includes(v + " ₽")), label);
     if (c.cardHint) {
       const hint = (await page.textContent(c.cardHint)).trim();
       ok("подсказка про автоматическую выдачу ключа", /ключ/i.test(hint) && /TW1|автомат/i.test(hint), hint.slice(0, 80));

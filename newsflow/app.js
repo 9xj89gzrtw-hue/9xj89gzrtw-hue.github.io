@@ -941,6 +941,14 @@
     collect();
     setInterval(runScheduler, 45000);
     setTimeout(runScheduler, 4000);
+
+    /* Pro can arrive from the shared modal, the demo pill or a TW1-ALL key
+       pasted on another page: refresh the gate without a reload. */
+    document.addEventListener("unlock:changed", function () {
+      renderQuota();
+      renderStories();
+      renderFilter();
+    });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
