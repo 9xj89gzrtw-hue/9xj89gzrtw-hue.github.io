@@ -1,89 +1,89 @@
 {
   "source": "gemini/agent2_out/digiseller_tw1_stock.json",
-  "updated": "2026-11-04T15:57:02.950Z",
+  "updated": "2026-11-05T18:39:33.388Z",
   "seller_id": 1481449,
   "currency_note": "price_rub is what the checkout shows; price_usd is what the page charges in USDC on Base",
   "products": {
     "audio-dub-studio": {
       "id": 6354599,
-      "price_rub": 298.83,
+      "price_rub": 299.07,
       "price_usd": 7,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354599&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6354599",
-      "title": "Audio Dub Studio Pro — 2 расширения + студия клипов по таймкоду (TW1-AUDIO)"
+      "card_url": "https://plati.market/itm/download-yandex-ai-dub-and-youtube-vk-audio-to-mp3-timecode-clip-studio/6354599",
+      "title": "Скачать озвучку перевода Яндекса и звук YouTube/VK в MP3 + Нарезка по таймкоду (TW1-A"
     },
     "tg-chats": {
       "id": 6354600,
-      "price_rub": 490.05,
+      "price_rub": 490.44,
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354600&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6354600",
-      "title": "TG Chat Validator Pro — база открытых чатов Telegram + проверка ссылок (TW1-TG)"
+      "card_url": "https://plati.market/itm/1000-public-telegram-chats-2026-wb-ozon-wholesale-it-link-validator-to-excel/6354600",
+      "title": "База 1000+ открытых чатов Telegram 2026 (WB/Ozon/Опт/IT) + Валидатор ссылок в Excel ("
     },
     "docsearch": {
       "id": 6354601,
-      "price_rub": 689.92,
+      "price_rub": 690.46,
       "price_usd": 15,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354601&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6354601",
-      "title": "Archive Studio DocSearch Pro — поиск по письмам .eml/.mbox без облака (TW1-DOC)"
+      "card_url": "https://plati.market/itm/search-contracts-vat-ids-and-invoices-in-eml-mbox-mail-archives-locally/6354601",
+      "title": "Поиск договоров, ИНН и счетов в архивах почты (.eml/.mbox/txt/csv) локально на ПК (TW"
     },
     "data-clipper": {
       "id": 6354602,
-      "price_rub": 390.13,
+      "price_rub": 390.42,
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354602&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6354602",
-      "title": "Table &amp; TG-Channel Clipper Pro — таблицы и ленты Telegram в CSV/Excel (TW1-CLIP)"
+      "card_url": "https://plati.market/itm/parser-for-site-tables-and-telegram-channel-posts-into-clean-excel-csv-in-one-click/6354602",
+      "title": "Парсер таблиц с сайтов и постов Telegram-каналов в чистый Excel / CSV в 1 клик (TW1-C"
     },
     "newsflow": {
       "id": 6358143,
-      "price_rub": 390.13,
+      "price_rub": 390.42,
       "price_usd": 12,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358143&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358143",
-      "title": "NewsFlow Studio Pro — дайджест из RSS и Telegram-каналов в один пост (TW1-NEWS)"
+      "card_url": "https://plati.market/itm/auto-digest-builder-from-telegram-channels-and-rss-for-tg-vk-no-duplicates/6358143",
+      "title": "Авто-сборщик дайджестов и постов из Telegram-каналов и RSS для ТГ/ВК без дублей (TW1-"
     },
     "live-radar": {
       "id": 6358155,
-      "price_rub": 390.13,
+      "price_rub": 390.42,
       "price_usd": 14,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358155&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358155",
-      "title": "Live Radar Pro — рынки Polymarket и Fragment: скор, спред, импульс (TW1-RADAR)"
+      "card_url": "https://plati.market/itm/real-time-scanner-of-arbitrage-spreads-and-momentum-on-polymarket-telegram-gifts/6358155",
+      "title": "Сканер вилок, спредов и импульсов Polymarket + Telegram Gifts в реальном времени (TW1"
     },
     "base-tax-audit": {
       "id": 6358164,
-      "price_rub": 490.05,
+      "price_rub": 490.44,
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358164&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358164",
-      "title": "Base Tax &amp; Allowance Audit Pro — аудит approvals и выгрузка в CSV/Excel (TW1-TAX)"
+      "card_url": "https://plati.market/itm/base-wallet-dangerous-approval-revoke-scanner-transactions-export-to-excel-csv/6358164",
+      "title": "Сканер опасных разрешений (Revoke) кошелька Base + Выгрузка транзакций в Excel/CSV (T"
     },
     "algo-tycoon": {
-      "id": null,
-      "price_rub": null,
-      "price_usd": null,
-      "stocked": 0,
-      "pay_url": null,
-      "card_url": null,
-      "title": null
+      "id": 6365339,
+      "price_rub": 249.08,
+      "price_usd": 2.49,
+      "stocked": 100,
+      "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6365339&ai=1481449&lang=ru-RU",
+      "card_url": "https://plati.market/itm/algo-tycoon-pro-algo-trading-and-pipeline-simulator-with-sandbox/6365339",
+      "title": "Algo Tycoon Pro — Симулятор алгоритмического трейдинга и пайплайнов + Песочница"
     }
   },
   "bundle": {
     "id": 6326936,
-    "price_rub": 1290.46,
+    "price_rub": 1289.55,
     "price_usd": 14.99,
     "stocked": 100,
     "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6326936&ai=1481449&lang=ru-RU",
-    "card_url": "https://plati.market/itm/6326936",
+    "card_url": "https://plati.market/itm/8-in-1-bundle-pro-2026-1000-telegram-chats-table-parser-youtube-vk-audio-one-k/6326936",
     "title": "All-in-One Pro Pass — все 8 инструментов, один ключ TW1-ALL-…"
   }
 }

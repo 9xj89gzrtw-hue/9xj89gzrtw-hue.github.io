@@ -1,3 +1,5 @@
 build/pack-secrets.json
 __pycache__/
 *.pyc
+tools/.cover-shots/
+build/itch/

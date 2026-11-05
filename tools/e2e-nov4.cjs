@@ -407,10 +407,16 @@ let SHOP_FIXTURE = null;
     await goto(live.page, "/algo-tycoon/index.html");
     const algoLive = await live.page.evaluate(() => {
       const a = document.querySelector('[data-shop-product="algo-tycoon"]');
-      return { shown: !!a && !a.hidden, href: a ? a.getAttribute("href") : "" };
+      const lot = window.SHOP && window.SHOP.products && window.SHOP.products["algo-tycoon"];
+      return {
+        shown: !!a && !a.hidden,
+        href: a ? a.getAttribute("href") : "",
+        lot: lot && lot.id ? "id_d=" + lot.id : ""
+      };
     });
-    check("algo (живой shop.js): невыставленный лот не даёт ссылку на 404",
-      !algoLive.shown && !/id_d=/.test(algoLive.href), JSON.stringify(algoLive));
+    check("algo (живой shop.js): карта показывает только существующий лот",
+      algoLive.lot ? algoLive.shown && algoLive.href.includes(algoLive.lot) : !algoLive.shown,
+      JSON.stringify(algoLive));
     for (const p of [
       { name: "newsflow", url: "/newsflow/index.html", slug: "newsflow", open: '[data-unlock][data-product="newsflow"]', sel: "#unlock-card", modal: true },
       { name: "radar", url: "/live-radar/index.html", slug: "live-radar", sel: '[data-shop-product="live-radar"]' },
@@ -435,6 +441,129 @@ let SHOP_FIXTURE = null;
     }
     check("живой shop.js: без JS-ошибок", live.errors.length === 0, live.errors.join(" | "));
     await live.page.context().close();
+  }
+
+  /* ---------- 8: geometry — nothing floats over the content ---------- */
+  console.log("\n6. геометрия: ни один слой не накрывает контент");
+
+  /* In-page probe: returns every visible fixed/sticky box and every visible
+     content box that overlaps it, measured with getBoundingClientRect().
+     Runs at several scroll offsets so a bar pinned to the top is caught even
+     when the element it hides only scrolls under it half-way down the page. */
+  const geometryProbe = () => {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const visible = (el) => {
+      const cs = getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden" || Number(cs.opacity) === 0) return false;
+      if (cs.contentVisibility === "hidden") return false;
+      if (el.closest("[hidden]")) return false;
+      /* A closed <details> keeps the layout of its panel but paints nothing;
+         that content must not count as covering anything. */
+      const closed = el.closest("details:not([open])");
+      if (closed && closed !== el && !el.closest("summary")) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    };
+    const box = (el) => {
+      const r = el.getBoundingClientRect();
+      return { el, r, top: Math.max(0, r.top), left: Math.max(0, r.left),
+        bottom: Math.min(vh, r.bottom), right: Math.min(vw, r.right) };
+    };
+    const inView = (b) => b.bottom > 0 && b.top < vh && b.right > 0 && b.left < vw;
+
+    const labels = (el) => (el.tagName.toLowerCase() +
+      (el.id ? "#" + el.id : "") +
+      (el.className && typeof el.className === "string" && el.className.trim()
+        ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".")
+        : ""));
+
+    /* Overlays: anything the browser pins over the flow. */
+    const overlays = [];
+    document.querySelectorAll("body *").forEach((el) => {
+      const cs = getComputedStyle(el);
+      if (cs.position !== "fixed" && cs.position !== "sticky") return;
+      if (!visible(el)) return;
+      const b = box(el);
+      if (!inView(b)) return;
+      overlays.push({ el, b, pos: cs.position });
+    });
+
+    /* Content: headings, copy, controls, cards. */
+    const contentSel = "h1,h2,h3,h4,p,li,td,th,label,input,select,textarea,button,a.btn,.btn,.card,.panel,.product,.job,.slot,.rnode,.kpi";
+    const content = [];
+    document.querySelectorAll(contentSel).forEach((el) => {
+      if (!visible(el)) return;
+      const b = box(el);
+      if (!inView(b)) return;
+      content.push({ el, b });
+    });
+
+    const hits = [];
+    const isAncestor = (a, b) => a !== b && a.contains(b);
+    overlays.forEach((o) => {
+      content.forEach((c) => {
+        if (isAncestor(o.el, c.el) || isAncestor(c.el, o.el)) return;
+        if (c.el.contains(o.el)) return;
+        const ix = Math.min(o.b.right, c.b.right) - Math.max(o.b.left, c.b.left);
+        const iy = Math.min(o.b.bottom, c.b.bottom) - Math.max(o.b.top, c.b.top);
+        if (ix <= 1 || iy <= 1) return;
+        hits.push(`${o.pos} ${labels(o.el)} × ${labels(c.el)} (${Math.round(ix)}×${Math.round(iy)})`);
+      });
+    });
+
+    /* Two interactive boxes must never sit on top of each other either:
+       that is the classic "floating button covers the card CTA" bug. */
+    const controls = [];
+    document.querySelectorAll("a.btn,.btn,button,input,select,textarea").forEach((el) => {
+      if (!visible(el)) return;
+      const b = box(el);
+      if (!inView(b)) return;
+      controls.push({ el, b });
+    });
+    const controlHits = [];
+    for (let i = 0; i < controls.length; i += 1) {
+      for (let j = i + 1; j < controls.length; j += 1) {
+        const a = controls[i], c = controls[j];
+        if (isAncestor(a.el, c.el) || isAncestor(c.el, a.el)) continue;
+        const ix = Math.min(a.b.right, c.b.right) - Math.max(a.b.left, c.b.left);
+        const iy = Math.min(a.b.bottom, c.b.bottom) - Math.max(a.b.top, c.b.top);
+        if (ix <= 1 || iy <= 1) continue;
+        /* Ignore controls that share a wrapper and are drawn side by side. */
+        controlHits.push(`${labels(a.el)} × ${labels(c.el)} (${Math.round(ix)}×${Math.round(iy)})`);
+      }
+    }
+    return { hits: hits.slice(0, 6), controlHits: controlHits.slice(0, 6), overlays: overlays.length };
+  };
+
+  for (const width of [390, 1440]) {
+    const context = await browser.newContext({
+      viewport: { width, height: width === 390 ? 844 : 900 },
+      locale: "ru-RU"
+    });
+    for (const p of PAGES) {
+      const { page } = await newPage(context);
+      await goto(page, p.url);
+      const docH = await page.evaluate(() => document.documentElement.scrollHeight);
+      const steps = Math.min(7, Math.max(1, Math.ceil(docH / (width === 390 ? 700 : 800))));
+      let overlayHits = [];
+      let controlHits = [];
+      let overlayCount = 0;
+      for (let s = 0; s < steps; s += 1) {
+        await page.evaluate((y) => window.scrollTo(0, y), s * (width === 390 ? 700 : 800));
+        await page.waitForTimeout(90);
+        const r = await page.evaluate(geometryProbe);
+        overlayCount = Math.max(overlayCount, r.overlays);
+        overlayHits = overlayHits.concat(r.hits);
+        controlHits = controlHits.concat(r.controlHits);
+      }
+      check(`${p.name} @${width}: fixed/sticky не накрывает заголовки, карточки и кнопки`,
+        overlayHits.length === 0, overlayHits.join(" | "));
+      check(`${p.name} @${width}: интерактивные элементы не перекрывают друг друга`,
+        controlHits.length === 0, Array.from(new Set(controlHits)).slice(0, 3).join(" | "));
+      await page.close();
+    }
+    await context.close();
   }
 
   await browser.close();

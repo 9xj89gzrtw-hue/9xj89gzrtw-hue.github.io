@@ -147,6 +147,7 @@
     "live-radar": "RADAR",
     "data-clipper": "CLIP",
     "base-tax-audit": "TAX",
+    "algo-tycoon": "ALGO",
     "all-in-one": "ALL"
   };
 
@@ -173,7 +174,7 @@
     "newsflow": { id: 6358143, rub: 390.13 },
     "live-radar": { id: 6358155, rub: 390.13 },
     "base-tax-audit": { id: 6358164, rub: 490.05 },
-    "algo-tycoon": { id: null, rub: null },
+    "algo-tycoon": { id: 6365339, rub: 249.08 },
     "all-in-one": { id: 6326936, rub: 1290.46 }
   };
   var SELLER_ID = 1481449;
@@ -991,7 +992,7 @@
         if (lot && lot.id) {
           el.href = cardUrl(lot.id);
           el.hidden = false;
-          var rub = lot.rub ? " · " + lot.rub + " ₽" : "";
+          var rub = lot.rub ? " · " + Math.round(lot.rub) + " ₽" : "";
           var label = el.querySelector("[data-shop-label]") || el;
           /* The baseline is captured once, before the first price is written,
              so re-binding on unlock:changed never doubles the price or the

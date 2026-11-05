@@ -1,0 +1,7 @@
+{
+  "name": "Table & TG Channel Clipper — CSV export (free 50 rows)",
+  "name_ru": "Таблицы и Telegram-каналы → CSV/Excel в 1 клик (Free 50 строк)",
+  "version": "1.0.0",
+  "description": "One click exports the largest HTML table or a public t.me/s channel to clean CSV. Free tier stops at 50 rows; a TW1-CLIP key removes the limit offline.",
+  "description_ru": "Один клик выгружает самую большую таблицу на странице или публичную ленту t.me/s в чистый CSV. Бесплатно до 50 строк; ключ TW1-CLIP снимает лимит офлайн, без сервера."
+}

@@ -110,7 +110,11 @@
   transform: rotate(42deg);
 }
 .price-card .btn { margin-top: auto; width: 100%; }
-.price-fine { margin-top: 10px; }
+.price-rub { font-size: 30px; font-weight: 650; letter-spacing: -0.035em; color: var(--ink); }
+.price-actions { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 4px; }
+.price-actions .btn { margin-top: 0; white-space: normal; line-height: 1.28; }
+.price-actions .btn-ghost { font-size: 13px; }
+.price-fine { margin-top: 10px; line-height: 1.5; }
 
 .section { padding: 72px 0 0; }
 .section > .wrap > h2 { margin-bottom: 20px; }

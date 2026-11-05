@@ -29,6 +29,8 @@ const HEADER = `// ==UserScript==
 // @author       Toolworks
 // @homepageURL  https://9xj89gzrtw-hue.github.io/audio-dub-extractor/
 // @supportURL   https://9xj89gzrtw-hue.github.io/audio-dub-extractor/#pricing
+// @downloadURL  https://9xj89gzrtw-hue.github.io/downloads/audio-dub-tools.user.js
+// @updateURL    https://9xj89gzrtw-hue.github.io/downloads/audio-dub-tools.user.js
 // @match        https://www.youtube.com/*
 // @match        https://youtube.com/*
 // @match        https://youtu.be/*

@@ -33,6 +33,7 @@ export const PRODUCTS = [
   { code: "RADAR", slug: "live-radar", name: "Live Radar", price: "$9 / 399 ₽" },
   { code: "CLIP", slug: "data-clipper", name: "Data Clipper", price: "$9 / 399 ₽" },
   { code: "TAX", slug: "base-tax-audit", name: "Base Tax Audit", price: "$29 / 1190 ₽" },
+  { code: "ALGO", slug: "algo-tycoon", name: "Algo Tycoon Pro", price: "249 ₽" },
   { code: "ALL", slug: "all-in-one", name: "All Products (universal key)", price: "$49 / 1990 ₽" }
 ];
 

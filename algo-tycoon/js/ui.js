@@ -37,14 +37,14 @@
     $("hud-credits").textContent = fmt(ui.state.credits);
     $("tier-chip").textContent = ui.state.pro ? "PRO" : "FREE";
     $("tier-chip").className = "chip mono" + (ui.state.pro ? " chip-pro" : "");
-    $("slot-cap").textContent = ui.cards.length + "/" + G.slots(ui.state) + " CARDS";
+    $("slot-cap").textContent = ui.cards.length + "/" + G.slots(ui.state) + " КАРТ";
   }
 
   /* ---------- job board ---------- */
   function renderJobs() {
     var wrap = $("jobs");
     wrap.textContent = "";
-    var acts = { 1: "ACT I — PILOT", 2: "ACT II — VOLUME", 3: "ACT III — PLAYBOOK" };
+    var acts = { 1: "АКТ I — ПИЛОТ", 2: "АКТ II — ОБЪЁМ", 3: "АКТ III — ПЛАН" };
     var keys = [1, 2, 3];
     keys.forEach(function (a) {
       var visible = L.JOBS.filter(function (j) {
@@ -65,7 +65,7 @@
         row.innerHTML =
           "<span class='jpay mono'>" + fmt(G.creditFor(ui.state, j)) + " cr</span>" +
           "<span class='jtitle'>" + j.id.toUpperCase() + " · " + j.rtl + "</span>" +
-          (solved ? "<span class='jmark mono'>DONE</span>" : "");
+          (solved ? "<span class='jmark mono'>ГОТОВО</span>" : "");
         if (unlocked) row.addEventListener("click", function () { selectJob(j.id); });
         wrap.appendChild(row);
       });
@@ -73,8 +73,14 @@
     if (L.act23Error) {
       var note = document.createElement("div");
       note.className = "act-head mono warn";
-      note.textContent = "ACT II/III unlock error: " + L.act23Error;
+      note.textContent = "Ошибка распаковки актов II/III: " + L.act23Error;
       wrap.appendChild(note);
+    }
+    /* The folded summary always names the contract that is on the desk. */
+    var cur = ui.jobId ? jobById(ui.jobId) : null;
+    if ($("board-summary") && cur) {
+      var total = L.JOBS.filter(function (j) { return j.act === cur.act; }).length;
+      $("board-summary").textContent = cur.id.toUpperCase() + " · " + G.actsCleared(ui.state)[cur.act] + "/" + total + " закрыто";
     }
   }
 
@@ -83,10 +89,15 @@
     ui.cards = [];
     var j = jobById(id);
     $("job-title").textContent = j.id.toUpperCase() + " · " + j.rtl;
-    $("job-brief").textContent = j.brief + " stream seed " + j.seed + ", " + j.n + " values · target " + j.target;
+    $("job-brief").textContent = j.brief + " Поток от сида " + j.seed + ", " + j.n + " значений · цель " + j.target;
+    if ($("job-pay")) $("job-pay").textContent = fmt(G.creditFor(ui.state, j)) + " cr за сдачу";
+    if ($("act-label")) {
+      var names = { 1: "АКТ I · ПИЛОТ", 2: "АКТ II · ОБЪЁМ", 3: "АКТ III · ПЛАН" };
+      $("act-label").textContent = names[j.act] || ("АКТ " + j.act);
+    }
     renderStream(j);
     renderPipeline();
-    $("verdict").textContent = "build the pipeline, then RUN";
+    $("verdict").textContent = "соберите пайплайн и нажмите «Запустить поток заказов»";
     $("verdict").className = "verdict mono";
     renderJobs();
     renderHud();
@@ -103,7 +114,7 @@
       c.textContent = (v > 0 ? "+" : "") + v.toFixed(1);
       box.appendChild(c);
     });
-    $("target").textContent = "TARGET " + j.target;
+    $("target").textContent = j.target;
   }
 
   /* ---------- pipeline ---------- */
@@ -135,13 +146,14 @@
   function renderLibrary() {
     var wrap = $("library");
     wrap.textContent = "";
+    if ($("lib-count")) $("lib-count").textContent = String(OPS.list.length);
     OPS.list.forEach(function (op) {
       var b = document.createElement("button");
       b.className = "card";
       b.textContent = op.label;
       b.addEventListener("click", function () {
         if (ui.cards.length >= G.slots(ui.state)) {
-          flash("pipeline is full — remove a card or research WIDE PIPELINE");
+          flash("пайплайн заполнен — уберите карту или откройте WIDE PIPELINE");
           return;
         }
         ui.cards.push(op.id);
@@ -156,9 +168,36 @@
     $("verdict").className = "verdict mono warn";
   }
 
+  /* RUN is the one action on the page, so it shows the work: every filled slot
+     fires left to right, then the desk answers with accepted / rejected. The
+     engine call itself stays instant and synchronous. */
+  var running = false;
+
   function runPipeline() {
     var j = jobById(ui.jobId);
-    if (!j) return;
+    if (!j || !ui.cards.length || running) return;
+    running = true;
+    var btn = $("run");
+    btn.disabled = true;
+    var slots = Array.prototype.slice.call(document.querySelectorAll("#pipeline .slot.filled"));
+    slots.forEach(function (s, i) {
+      s.classList.remove("firing");
+      /* restart the animation on a repeated run */
+      void s.offsetWidth;
+      s.style.animationDelay = (i * 130) + "ms";
+      s.classList.add("firing");
+    });
+    $("verdict").textContent = "поток заказов идёт: " + ui.cards.length + " карт…";
+    $("verdict").className = "verdict mono";
+    var settle = 180 + slots.length * 130;
+    setTimeout(function () {
+      slots.forEach(function (s) { s.classList.remove("firing"); s.style.animationDelay = ""; });
+      running = false;
+      evaluate(j);
+    }, settle);
+  }
+
+  function evaluate(j) {
     var t0 = (root.performance && root.performance.now) ? root.performance.now() : Date.now();
     var r = G.attempt(ui.state, j, ui.cards);
     var ms = Math.max(0, ((root.performance && root.performance.now) ? root.performance.now() : Date.now()) - t0);
@@ -173,44 +212,50 @@
       S.save(ui.state);
       tm.accepted += 1;
       tm.credits = Math.round((tm.credits + r.payout) * 100) / 100;
-      $("verdict").textContent = "ACCEPTED · +" + fmt(r.payout) + " cr";
+      $("verdict").textContent = "ПРИНЯТО · +" + fmt(r.payout) + " cr. Заказ закрыт, следующий уже на столе.";
       $("verdict").className = "verdict mono ok";
       renderJobs(); renderHud(); renderResearch();
     } else if (r.ok) {
       tm.accepted += 1;
-      $("verdict").textContent = "correct again — payout already collected";
+      $("verdict").textContent = "верно снова — выплата за этот заказ уже получена";
       $("verdict").className = "verdict mono ok";
     } else {
       tm.rejected += 1;
-      $("verdict").textContent = "REJECTED · " + r.reason;
+      $("verdict").textContent = "ОТКЛОНЕНО · " + r.reason;
       $("verdict").className = "verdict mono warn";
     }
     renderTelemetry();
+    $("run").disabled = ui.cards.length === 0;
   }
 
   /* ---------- research ---------- */
   function renderResearch() {
     var wrap = $("research");
     wrap.textContent = "";
+    var ownedCount = 0;
     L.RESEARCH.forEach(function (node) {
       var owned = ui.state.research.indexOf(node.id) !== -1;
+      if (owned) ownedCount += 1;
       var b = document.createElement("button");
       b.className = "rnode" + (owned ? " owned" : "");
       b.innerHTML = "<span class='rlabel'>" + node.label + "</span>" +
         "<span class='rdesc'>" + node.desc + "</span>" +
-        "<span class='rcost mono'>" + (owned ? "INSTALLED" : fmt(node.cost) + " cr") + "</span>";
+        "<span class='rcost mono'>" + (owned ? "УСТАНОВЛЕНО" : fmt(node.cost) + " cr") + "</span>";
       if (!owned) b.addEventListener("click", function () {
         if (G.doResearch(ui.state, node)) {
-          $("verdict").textContent = "research installed: " + node.label;
+          $("verdict").textContent = "исследование установлено: " + node.label;
           $("verdict").className = "verdict mono ok";
           S.save(ui.state); sortResearchOrder();
           renderResearch(); renderHud(); renderPipeline();
         } else {
-          flash("not enough credits for " + node.label);
+          flash("не хватает кредитов на " + node.label);
         }
       });
       wrap.appendChild(b);
     });
+    if ($("research-summary")) {
+      $("research-summary").textContent = ownedCount + " из " + L.RESEARCH.length + " установлено";
+    }
   }
 
   /* keep XYZ order stable; cosmetic */
@@ -494,6 +539,13 @@
     /* start screen opens straight onto the live board: first unsolved job (fresh save = J01) */
     var first = L.JOBS[G.unlockedIndex(ui.state)] || L.JOBS[0];
     selectJob(first.id);
+    /* A brand-new desk starts with a working two-card pipeline on J01:
+       REV then SUM is the same sum, so the first tap of RUN is a win. */
+    if (!ui.state.solved.length && first.id === "j01") {
+      ui.cards = ["reverse", "sum"];
+      renderPipeline();
+      renderHud();
+    }
     tickTicker(); setInterval(tickTicker, 4000);
     $("run").addEventListener("click", runPipeline);
     $("chip-pro-zone").addEventListener("click", openPro);

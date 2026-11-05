@@ -16,6 +16,8 @@
   if (!C) return;
 
   var SITE = C.siteOf(window.location);
+  /* Card/SBP checkout for the same product the key unlocks. */
+  var PRO_URL = "https://plati.market/itm/download-yandex-ai-dub-and-youtube-vk-audio-to-mp3-timecode-clip-studio/6354599";
   if (!SITE) return;
   if (window.__adkPanelLoaded) return;
   window.__adkPanelLoaded = true;
@@ -457,6 +459,14 @@
       var hint = document.createElement("span");
       hint.textContent = LABEL.proFree + " · Pro $7 / 299 ₽:";
       proBox.appendChild(hint);
+      var buy = document.createElement("a");
+      buy.className = "adk-btn adk-link";
+      buy.href = PRO_URL;
+      buy.target = "_blank";
+      buy.rel = "noopener";
+      buy.textContent = "Открыть Pro — 299 ₽ картой РФ / СБП";
+      buy.style.marginTop = "6px";
+      proBox.appendChild(buy);
       var input = document.createElement("input");
       input.type = "text";
       input.placeholder = "TW1-…";
