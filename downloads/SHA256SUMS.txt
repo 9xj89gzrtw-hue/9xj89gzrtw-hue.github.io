@@ -1,0 +1,4 @@
+1114af839c70f4e3affc4012fd7ac34c69bbc4a8274ae172e34f7ec197682eac  audio-dub-tools.user.js
+6f2976f17f8bfe243bf8a8d9ab3133abeaa57dff7dc0814b28683bf4df035019  table-tg-clipper.user.js
+ac1a8436a5f5348847e674341c430ffe52fc314607eccf0bc3b9e6410831fc70  algo-tycoon-itch-web.zip
+06efccc9610fb064c0236d7cd9e027aed77254f1e4ee83e3f5645ea56c461451  audio-dub-kombo-ext.zip
