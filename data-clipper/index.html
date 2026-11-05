@@ -104,6 +104,7 @@
     </div>
     <span class="spacer"></span>
     <a class="nav" href="#sandbox">sandbox</a>
+    <a class="nav" href="#unitcalc">unit-калькулятор</a>
     <a class="nav" href="#install">install</a>
     <a class="nav" href="#pro">pro&nbsp;$9</a>
     <a class="nav" href="#faq">faq</a>
@@ -231,6 +232,51 @@
         <div class="out-foot"><span class="kicker">CSV</span><span id="csv-preview">— run DETECT FEED first —</span></div>
       </div>
     </div>
+  </section>
+
+  <!-- unit economics studio -->
+  <section class="block" id="unitcalc">
+    <div class="block-head"><span class="kicker">03</span><h2>Unit-калькулятор WB / Ozon — маржа, ROI, точка безубыточности</h2></div>
+    <p style="max-width: 72ch; color:#3a3a35; margin-top:0;">Вставьте выгрузку каталога, HTML-таблицу с ценами и закупом, CSV/JSON из парсера или заявок Telegram — студия мгновенно считает <b>чистую прибыль на штуку</b>, маржу, ROI и точку безубыточности с учётом комиссии категории, логистики, СПП, упаковки, возвратов и налога УСН (профили 2026 года: WB, Ozon, прямой прайс). Красная/жёлтая/зелёная матрица показывает убыточные SKU до того, как вы их закупите. Данные не покидают браузер.</p>
+    <div class="sandbox">
+      <div class="demo-pane">
+        <div class="demo-head">
+          <span>ВХОД · HTML-таблица, CSV/TSV («;» или «,») или JSON</span>
+          <span class="spacer" style="flex:1"></span>
+          <select id="uc-preset" class="mono" style="max-width:220px">
+            <option value="wb">WB · типовой FBO 2026</option>
+            <option value="ozon">Ozon · типовой FBO 2026</option>
+            <option value="telegram">TG / прямой прайс · без комиссии</option>
+          </select>
+        </div>
+        <textarea id="uc-input" class="mono" rows="8" style="width:100%; background:#0d0d0c; color:#e8e8e2; border:1px solid #2a2a28; padding:10px; font-size:11.5px;" placeholder="товар;цена;закуп;комиссия%;логистика&#10;Чашка керамика;990;260;22;60&#10;Шнур USB-C;540;120;18;55"></textarea>
+        <div class="tagrow" style="margin-top:8px;">
+          <button id="uc-run" class="btn sm" type="button">РАСЧЁТ</button>
+          <button id="uc-example" class="btn sm" type="button">ПРИМЕР WB</button>
+          <span class="tag" id="uc-cols-info">Столбцы распознаются автоматически</span>
+        </div>
+        <div class="demo-head" style="margin-top:10px;">
+          <span>ПАРАМЕТРЫ · всё правится руками, %-и от цены</span>
+        </div>
+        <div id="uc-params" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:6px; font-size:11.5px;"></div>
+      </div>
+      <div class="out-pane">
+        <div class="out-head">
+          <span id="uc-out-title">МАТРИЦА · нет данных</span>
+          <span class="spacer" style="flex:1"></span>
+          <button id="uc-csv" class="btn sm" type="button">DOWNLOAD CSV</button>
+          <button id="uc-xlsx" class="btn sm" type="button">XLSX-отчёт · PRO</button>
+        </div>
+        <div class="out-body" style="max-height:420px; overflow:auto;">
+          <table class="out-table" id="uc-table"></table>
+          <div id="uc-status" class="mono" style="font-size:11px; color:#6b6b66; margin-top:8px;"></div>
+        </div>
+        <div class="out-foot"><span class="kicker">FREE до 50 артикулов</span><span id="uc-sum">— вставьте данные и нажмите РАСЧЁТ —</span></div>
+      </div>
+    </div>
+    <details class="faq" style="margin-top:10px;"><summary>Как считается прибыль и что означают колонки</summary>
+      <p>Чистая прибыль/шт = цена − комиссия категории − налог УСН − реклама − логистика (с вычетом СПП, если задана) − доля возвратов (возвратный логистический вычет + обработка возврата) − упаковка − закуп. ROI считается от закупа, точка безубыточности — сколько штук в месяц покрывает фиксированные расходы. «Мин. цена» — порог, ниже которого SKU уходит в минус; матрица: зелёный ≥ 10 % маржи, жёлтый — прибыль есть, но узко, красный — минус.</p>
+    </details>
   </section>
 
   <!-- install -->

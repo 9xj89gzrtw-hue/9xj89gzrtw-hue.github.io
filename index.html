@@ -180,24 +180,79 @@
 
 <main>
   <section class="home-hero">
-    <div class="wrap">
-      <span class="eyebrow"><span class="pulse"></span> Восемь инструментов · оплата один раз</span>
-      <h1>Рабочие инструменты для звука, Telegram, данных и рынков.</h1>
-      <p class="lede">
-        Каждый инструмент решает одну задачу: снять звук с видео и нарезать его по таймкоду, найти
-        живой чат, собрать дайджест, отыскать договор в архиве писем, увидеть движение на рынке,
-        забрать таблицу в CSV, разобрать пайплайн, собрать отчёт по кошельку Base. Бесплатные версии
-        открываются сразу, без аккаунта и установки.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#tools">Смотреть каталог</a>
-        <a class="btn btn-ghost" href="#pricing">Сравнить тарифы</a>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="pulse"></span> 8 инструментов · 615 чатов · оплата один раз</span>
+        <h1>Инструменты, которые делают работу. Без подписки и регистрации.</h1>
+        <p class="lede">
+          Звук из видео, живые чаты Telegram, дайджесты, архив писем, рынки, таблицы,
+          пайплайны и налоговый отчёт по Base. Бесплатная версия — это не демо на скриншотах:
+          откройте и работайте. Pro снимает лимит и стоит один раз.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#tools">Выбрать инструмент</a>
+          <a class="btn btn-ghost" href="#pricing">Цены: от 299 ₽</a>
+        </div>
+        <div class="hero-facts">
+          <span><b>615</b> проверенных чатов</span>
+          <span><b>0</b> аккаунтов и подписок</span>
+          <span><b>0 ₽</b> за бесплатный уровень</span>
+          <span>Ключ TW1 — сразу после оплаты</span>
+        </div>
       </div>
-      <div class="hero-facts">
-        <span><b>8</b> инструментов в каталоге</span>
-        <span><b>0</b> аккаунтов и подписок</span>
-        <span><b>$0</b> за бесплатный уровень</span>
-        <span>Pro — один платёж в USDC на Base</span>
+
+      <!-- Live demo, in the document flow: no floating button over the page. -->
+      <div class="hero-lab" id="hero-lab">
+        <div class="lab-head">
+          <span class="lab-live"><span class="pulse"></span> работает здесь и сейчас</span>
+          <b>Попробуйте без перехода</b>
+        </div>
+        <div class="lab-tabs" role="tablist" aria-label="Мини-инструменты">
+          <button class="lab-tab" type="button" role="tab" aria-selected="true" data-lab="tg">Telegram-чат</button>
+          <button class="lab-tab" type="button" role="tab" aria-selected="false" data-lab="table">Таблица → CSV</button>
+          <button class="lab-tab" type="button" role="tab" aria-selected="false" data-lab="bundle">Экономия</button>
+        </div>
+
+        <div class="lab-pane" data-pane="tg">
+          <label class="lab-label" for="lab-link">Вставьте ссылку <span class="mono">t.me/…</span> или ник</label>
+          <div class="lab-inline">
+            <input class="field mono" id="lab-link" type="text" placeholder="t.me/python" autocomplete="off" spellcheck="false">
+            <button class="btn btn-primary btn-sm" type="button" id="lab-check-btn">Проверить</button>
+          </div>
+          <div class="lab-check" id="lab-check" aria-live="polite">
+            <span class="lab-muted">Проверим формат и найдём ник в бесплатной части базы.</span>
+          </div>
+          <div class="lab-inline lab-search">
+            <input class="field" id="lab-q" type="search" placeholder="Python, Казань, родители…" autocomplete="off" aria-label="Поиск по бесплатным чатам">
+            <span class="lab-count" id="lab-count">615 в базе</span>
+          </div>
+          <ul class="lab-list" id="lab-list">
+            <li class="lab-muted">Загружаем 30 бесплатных чатов…</li>
+          </ul>
+          <p class="lab-foot">Бесплатно: 30 чатов и 10 проверок. Pro открывает все 615, CSV и пакетную проверку.</p>
+        </div>
+
+        <div class="lab-pane" data-pane="table" hidden>
+          <label class="lab-label" for="lab-table-in">Скопируйте таблицу в Excel или Google Sheets и вставьте сюда</label>
+          <textarea class="field lab-area" id="lab-table-in" rows="5" spellcheck="false" placeholder="Товар&#9;Цена&#9;Город&#10;Куртка&#9;4900&#9;Казань"></textarea>
+          <div class="lab-row">
+            <button class="btn btn-primary btn-sm" type="button" id="lab-csv">Скачать CSV</button>
+            <span class="lab-muted" id="lab-rows">0 строк · 0 колонок</span>
+          </div>
+          <pre class="lab-pre" id="lab-table-out">Здесь появится готовый CSV.</pre>
+          <p class="lab-foot">Разделители, кавычки и переносы строк расставляются автоматически. В Pro — Excel, автоскролл длинных страниц и 5 000 строк.</p>
+        </div>
+
+        <div class="lab-pane" data-pane="bundle" hidden>
+          <div class="lab-calc">
+            <div class="lab-calc-row"><span>Семь Pro-лицензий по отдельности</span><b id="lab-sum">3 139 ₽</b></div>
+            <div class="lab-calc-row lab-calc-total"><span>All-in-One Pro Pass</span><b id="lab-bundle-price">1 290 ₽</b></div>
+            <div class="lab-bar"><span id="lab-bar-fill"></span></div>
+            <div class="lab-calc-row lab-calc-save"><span>Экономия</span><b id="lab-save">1 849 ₽</b></div>
+          </div>
+          <a class="btn btn-primary btn-sm lab-bundle-cta" href="#bundle-all">Посмотреть All-in-One</a>
+          <p class="lab-foot" id="lab-calc-note">Считаем по ценам открытых лотов Plati.Market. Восьмой инструмент, Algo Tycoon, пока продаётся отдельно за $5.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -211,7 +266,7 @@
 
       <div class="product-grid">
 
-        <article class="product">
+        <article class="product" id="card-tg">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -220,24 +275,23 @@
               </svg>
             </span>
             <div>
-              <div class="product-title"><h3>TG Chat Validator</h3></div>
-              <p class="product-kicker">Telegram · поиск и проверка</p>
+              <div class="product-title"><h3>TG Chat Validator</h3><span class="badge badge-ok">615 чатов</span></div>
+              <p class="product-kicker">Telegram · найти живой чат и проверить ссылку</p>
             </div>
           </div>
-          <p class="benefit">Находит открытые чаты Telegram по теме и городу и проверяет ссылки <span class="mono">t.me</span> перед тем, как вы их куда-то вставите.</p>
-          <p class="detail">В карточке чата: число участников, тема, город и дата последней проверки. Валидатор показывает, чат это, канал или ссылка уже мертва.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>25 строк</b> и 10 проверок</span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$9</b></span>
+          <p class="benefit">Найдите чат по теме или городу и проверьте ссылку <span class="mono">t.me</span> до того, как отправите её клиенту.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 30 чатов · 10 проверок</span>
+            <span class="pp pp-pro"><b>Pro</b> все 615 · CSV и Excel</span>
           </div>
+          <div class="product-price"><span class="pr-rub">490 ₽</span><span class="pr-usd">$9</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./tg-chats/">Открыть бесплатно</a>
-            <a class="pro-link" href="./tg-chats/#pricing">Что даёт Pro</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tg-chats" data-price="9" data-name="TG Chat Validator">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-newsflow">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -248,23 +302,22 @@
             </span>
             <div>
               <div class="product-title"><h3>NewsFlow Studio</h3></div>
-              <p class="product-kicker">RSS и каналы · дайджесты</p>
+              <p class="product-kicker">RSS и Telegram · один пост вместо десяти</p>
             </div>
           </div>
-          <p class="benefit">Собирает дайджест из RSS-лент и каналов Telegram, убирает дубли и раскладывает посты по платформам.</p>
-          <p class="detail">Один материал — три формата: длинный пост, версия для VK и короткая заметка. Источники объединяются в одну ленту, повторы схлопываются.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>5 постов</b> в день</span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$12</b></span>
+          <p class="benefit">Соберите дайджест из RSS и каналов, уберите повторы и получите три версии поста: Telegram, VK и короткую заметку.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 5 постов в день · 5 источников</span>
+            <span class="pp pp-pro"><b>Pro</b> 50 источников · расписание</span>
           </div>
+          <div class="product-price"><span class="pr-rub">390 ₽</span><span class="pr-usd">$12</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./newsflow/">Открыть бесплатно</a>
-            <a class="pro-link" href="./newsflow/#pricing">Что даёт Pro</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="newsflow" data-price="12" data-name="NewsFlow Studio">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-docsearch">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -276,23 +329,22 @@
             </span>
             <div>
               <div class="product-title"><h3>Archive Studio</h3></div>
-              <p class="product-kicker">Почта · реквизиты и договоры</p>
+              <p class="product-kicker">Почта · договоры и реквизиты</p>
             </div>
           </div>
-          <p class="benefit">Ищет по архиву писем <span class="mono">.eml</span> и <span class="mono">.mbox</span> и вытаскивает из переписки ИНН, КПП и номера договоров.</p>
-          <p class="detail">Файлы читаются в браузере и никуда не уходят. На выходе — таблица найденных реквизитов со ссылкой на письмо-источник.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>25 документов</b></span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$15</b></span>
+          <p class="benefit">Найдите договор, ИНН или сумму в архиве писем <span class="mono">.eml</span> и <span class="mono">.mbox</span>. Файлы не покидают браузер.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 25 документов</span>
+            <span class="pp pp-pro"><b>Pro</b> 10 000 писем · XLSX</span>
           </div>
+          <div class="product-price"><span class="pr-rub">690 ₽</span><span class="pr-usd">$15</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./docsearch/">Открыть бесплатно</a>
-            <a class="pro-link" href="./docsearch/">Подробнее</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="docsearch" data-price="15" data-name="Archive Studio">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-radar">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -303,23 +355,22 @@
             </span>
             <div>
               <div class="product-title"><h3>Live Radar</h3></div>
-              <p class="product-kicker">Рынки · реальное время</p>
+              <p class="product-kicker">Рынки · Polymarket и подарки</p>
             </div>
           </div>
-          <p class="benefit">Держит перед глазами два рынка сразу: вероятности Polymarket и цены Telegram-подарков, с обновлением на месте.</p>
-          <p class="detail">Сортировка по движению и объёму, фильтры по категориям, отметка резких сдвигов. Без установки и без входа.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>топ-10</b> рынков</span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$14</b></span>
+          <p class="benefit">Держите перед глазами вероятности Polymarket и цены Telegram-подарков. Видно, что двинулось сильнее всего.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> топ-10 рынков</span>
+            <span class="pp pp-pro"><b>Pro</b> все рынки · CSV · алерты</span>
           </div>
+          <div class="product-price"><span class="pr-rub">390 ₽</span><span class="pr-usd">$14</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./live-radar/">Открыть бесплатно</a>
-            <a class="pro-link" href="./live-radar/">Подробнее</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="live-radar" data-price="14" data-name="Live Radar">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-clipper">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -329,23 +380,22 @@
             </span>
             <div>
               <div class="product-title"><h3>Table &amp; TG-Channel Clipper</h3></div>
-              <p class="product-kicker">Расширение · CSV и Excel</p>
+              <p class="product-kicker">Таблицы · чистый CSV и Excel</p>
             </div>
           </div>
-          <p class="benefit">Забирает таблицу со страницы или ленту канала Telegram и отдаёт чистым CSV или Excel — в один клик.</p>
-          <p class="detail">Колонки выравниваются по заголовкам, лишние блоки отбрасываются, файл сохраняется локально. Работает на страницах с длинными списками.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>50 строк</b> за выгрузку</span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$9</b></span>
+          <p class="benefit">Заберите таблицу со страницы или ленту Telegram-канала и получите файл без лишних колонок и склеенных строк.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 50 строк за выгрузку</span>
+            <span class="pp pp-pro"><b>Pro</b> 5 000 строк · автоскролл</span>
           </div>
+          <div class="product-price"><span class="pr-rub">390 ₽</span><span class="pr-usd">$9</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./data-clipper/">Открыть бесплатно</a>
-            <a class="pro-link" href="./data-clipper/#pro">Что даёт Pro</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="data-clipper" data-price="9" data-name="Data Clipper">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-algo">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -355,24 +405,23 @@
               </svg>
             </span>
             <div>
-              <div class="product-title"><h3>Algo Tycoon</h3></div>
-              <p class="product-kicker">Симулятор · пайплайны</p>
+              <div class="product-title"><h3>Algo Tycoon</h3><span class="badge">игра</span></div>
+              <p class="product-kicker">Симулятор · пайплайны заказов</p>
             </div>
           </div>
-          <p class="benefit">Собирает алгоритмические пайплайны из карточек-операций и показывает, где система теряет заказы.</p>
-          <p class="detail">Первый акт бесплатный: заказы идут потоком, пайплайн нужно довести до стабильной прибыли. Pro открывает песочницу и редактор уровней.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>Акт I</b></span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$5</b></span>
+          <p class="benefit">Соберите поток заказов из карточек-операций и увидите, где пайплайн теряет деньги. Первый контракт запускается одной кнопкой.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> Акт I · 6 карточек</span>
+            <span class="pp pp-pro"><b>Pro</b> 11 карточек · песочница</span>
           </div>
+          <div class="product-price"><span class="pr-rub">390 ₽</span><span class="pr-usd">$5</span><span class="pr-note">USDC сейчас · карта готовится</span></div>
           <div class="product-actions">
-            <a class="btn btn-primary btn-sm" href="./algo-tycoon/">Открыть бесплатно</a>
-            <a class="pro-link" href="./algo-tycoon/">Подробнее</a>
+            <a class="btn btn-primary btn-sm" href="./algo-tycoon/">Играть бесплатно</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="algo-tycoon" data-price="5" data-name="Algo Tycoon">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-audio">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -384,20 +433,19 @@
               <p class="product-kicker">Звук видео · клипы по таймкоду</p>
             </div>
           </div>
-          <p class="benefit">Два расширения снимают русскую озвучку нейроперевода и оригинальный звук видео. Studio режет файл на клипы по таймкоду и пишет метаданные в сам файл.</p>
-          <p class="detail">Очередь файлов, границы с точностью до миллисекунды, BWF-таймкод в WAV и ID3-метки в MP3. Всё считается в браузере: файлы никуда не загружаются.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>2 расширения + userscript</b></span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$7</b></span>
+          <p class="benefit">Снимите русскую озвучку и оригинальный звук видео, затем нарежьте файл на клипы по таймкоду — с метками в самом файле.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 2 файла в Studio</span>
+            <span class="pp pp-pro"><b>Pro</b> очередь 200 · BWF/ID3</span>
           </div>
+          <div class="product-price"><span class="pr-rub">299 ₽</span><span class="pr-usd">$7</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./audio-dub-extractor/">Скачать бесплатно</a>
-            <a class="pro-link" href="./audio-dub-extractor/#pricing">Что даёт Pro</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Studio">Купить Pro</button>
           </div>
         </article>
 
-        <article class="product">
+        <article class="product" id="card-tax">
           <div class="product-top">
             <span class="product-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -410,16 +458,15 @@
               <p class="product-kicker">Base · approvals и налоговый CSV</p>
             </div>
           </div>
-          <p class="benefit">Находит все бессрочные approve на кошельке Base и выгружает историю транзакций в CSV или XLSX для налоговой.</p>
-          <p class="detail">Кошелёк читается через публичный RPC в браузере: ключи и подписи не нужны, история не уходит на сервер. В отчёте — даты, суммы, контрагенты и отозванные разрешения.</p>
-          <div class="product-meta">
-            <span class="tier">Free: <b>экспресс-скан 25 транзакций</b></span>
-            <span class="sep">·</span>
-            <span class="tier">Pro: <b>$9</b></span>
+          <p class="benefit">Проверьте, какие контракты могут списывать токены с кошелька Base, и выгрузите историю операций в CSV или XLSX.</p>
+          <div class="product-preview">
+            <span class="pp pp-free"><b>Бесплатно</b> 25 транзакций</span>
+            <span class="pp pp-pro"><b>Pro</b> 10 000 · FIFO · Koinly</span>
           </div>
+          <div class="product-price"><span class="pr-rub">490 ₽</span><span class="pr-usd">$9</span><span class="pr-note">разово, навсегда</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./base-tax-audit/">Открыть бесплатно</a>
-            <a class="pro-link" href="./base-tax-audit/">Подробнее</a>
+            <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="base-tax-audit" data-price="9" data-name="Base Tax Audit">Купить Pro</button>
           </div>
         </article>
 
@@ -430,8 +477,8 @@
   <section class="section" id="pricing">
     <div class="wrap">
       <div class="section-head">
-        <h2>Тарифы</h2>
-        <p>Бесплатно — навсегда и без регистрации. Pro — разовый платёж в USDC на Base, доступ остаётся в браузере.</p>
+        <h2>Сколько это стоит</h2>
+        <p>Бесплатная версия остаётся бесплатной навсегда. Pro покупается один раз: картой РФ, через СБП или в USDC на Base. Ключ приходит сразу, подписка не оформляется.</p>
       </div>
       <table class="price-table">
         <thead>
@@ -444,59 +491,61 @@
         <tbody>
           <tr>
             <td class="name"><a href="./tg-chats/">TG Chat Validator</a></td>
-            <td class="free">25 строк каталога, 10 проверок ссылок</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tg-chats" data-price="9" data-name="TG Chat Validator">1-Click Pay ($9)</button></td>
+            <td class="free">30 чатов, 10 проверок</td>
+            <td class="pro"><span class="pro-rub">490 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tg-chats" data-price="9" data-name="TG Chat Validator">Купить · $9</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./newsflow/">NewsFlow Studio</a></td>
             <td class="free">5 постов в день, 5 источников</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="newsflow" data-price="12" data-name="NewsFlow Studio">1-Click Pay ($12)</button></td>
+            <td class="pro"><span class="pro-rub">390 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="newsflow" data-price="12" data-name="NewsFlow Studio">Купить · $12</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./docsearch/">Archive Studio</a></td>
             <td class="free">25 документов в индексе</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="docsearch" data-price="15" data-name="Archive Studio">1-Click Pay ($15)</button></td>
+            <td class="pro"><span class="pro-rub">690 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="docsearch" data-price="15" data-name="Archive Studio">Купить · $15</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./live-radar/">Live Radar</a></td>
             <td class="free">топ-10 рынков</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="live-radar" data-price="14" data-name="Live Radar">1-Click Pay ($14)</button></td>
+            <td class="pro"><span class="pro-rub">390 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="live-radar" data-price="14" data-name="Live Radar">Купить · $14</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./data-clipper/">Table &amp; TG-Channel Clipper</a></td>
             <td class="free">50 строк за выгрузку</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="data-clipper" data-price="9" data-name="Data Clipper">1-Click Pay ($9)</button></td>
+            <td class="pro"><span class="pro-rub">390 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="data-clipper" data-price="9" data-name="Data Clipper">Купить · $9</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./algo-tycoon/">Algo Tycoon</a></td>
-            <td class="free">Акт I</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="algo-tycoon" data-price="5" data-name="Algo Tycoon">1-Click Pay ($5)</button></td>
+            <td class="free">Акт I, 6 карточек</td>
+            <td class="pro"><span class="pro-rub">390 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="algo-tycoon" data-price="5" data-name="Algo Tycoon">Купить · $5</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./base-tax-audit/">Base Tax Audit</a></td>
-            <td class="free">Экспресс-скан до 25 транзакций</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="base-tax-audit" data-price="9" data-name="Base Tax Audit">1-Click Pay ($9)</button></td>
+            <td class="free">25 транзакций</td>
+            <td class="pro"><span class="pro-rub">490 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="base-tax-audit" data-price="9" data-name="Base Tax Audit">Купить · $9</button></td>
           </tr>
           <tr>
             <td class="name"><a href="./audio-dub-extractor/">Audio Dub Extractor</a></td>
-            <td class="free">2 расширения, userscript, 2 файла в Studio</td>
-            <td class="pro"><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio">1-Click Pay ($7)</button></td>
+            <td class="free">2 файла в Studio, расширения</td>
+            <td class="pro"><span class="pro-rub">299 ₽</span><button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="audio-dub-studio" data-price="7" data-name="Audio Dub Extractor Studio">Купить · $7</button></td>
           </tr>
         </tbody>
       </table>
-      <div class="bundle" id="bundle-all" style="margin-top:18px;padding:18px 20px;border:1px solid var(--line);border-radius:14px;background:var(--bg-soft);display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-        <div style="min-width:240px;flex:1">
-          <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Лучшая цена</div>
-          <h3 style="margin:2px 0 4px;font-size:19px">All-in-One Pro Pass — $14.99</h3>
-          <p style="margin:0;max-width:60ch;color:var(--ink-2);font-size:13.5px">Все 8 инструментов одним ключом <code class="mono">TW1-ALL-…</code>: вставьте его на любой странице — Pro откроется везде и навсегда. Дешевле, чем два Pro по отдельности.</p>
+
+      <div class="bundle" id="bundle-all">
+        <div class="bundle-copy">
+          <div class="bundle-kicker">Лучшая цена</div>
+          <h3>All-in-One Pro Pass — 1 290 ₽ <span class="bundle-usd">$14.99</span></h3>
+          <p>Все восемь инструментов одним ключом <code class="mono">TW1-ALL-…</code>. Вставьте его на любой странице — Pro откроется везде и останется навсегда. Семь отдельных лицензий стоят 3 139 ₽, пасс — 1 290 ₽.</p>
+          <p class="bundle-fine">Карта РФ / СБП или USDC на Base. Ключ выдаётся автоматически, регистрация не нужна.</p>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;min-width:230px">
-          <button class="btn btn-primary" type="button" data-unlock data-product="all-in-one" data-price="14.99" data-name="All-in-One Pro Pass" data-sub="Все 8 инструментов одним ключом TW1-ALL-…, бессрочно">Base USDC · $14.99 в 1 клик</button>
-          <a class="btn" id="bundle-card" data-shop-product="all-in-one" href="#" target="_blank" rel="noopener" hidden>Карта РФ / СБП · ключ TW1-ALL-… сразу</a>
-          <span class="tiny muted" id="bundle-note" style="font-size:11px;line-height:1.45">Ключ TW1-ALL-… из автовыдачи принимается на любой странице витрины.</span>
+        <div class="bundle-actions">
+          <a class="btn btn-primary" id="bundle-card" data-shop-product="all-in-one" href="#" target="_blank" rel="noopener" hidden>Купить картой РФ / СБП · ключ сразу</a>
+          <button class="btn btn-ghost" type="button" data-unlock data-product="all-in-one" data-price="14.99" data-name="All-in-One Pro Pass" data-sub="Все 8 инструментов одним ключом TW1-ALL-…, бессрочно">Оплатить в 1 клик Base USDC ($14.99)</button>
+          <span class="tiny muted" id="bundle-note">Ключ <code class="mono">TW1-ALL-…</code> принимается на любой странице витрины.</span>
         </div>
       </div>
-      <p class="price-note">Оплата проверяется по блокчейну Base прямо в браузере: хеш транзакции подтверждает перевод USDC. Почту не спрашиваем, аккаунт не создаём.</p>
+      <p class="price-note">Оплата USDC проверяется по блокчейну Base прямо в браузере. Почту не спрашиваем, аккаунт не создаём. Цены в рублях — те, что показывает касса Plati.Market на момент оплаты.</p>
     </div>
   </section>
 

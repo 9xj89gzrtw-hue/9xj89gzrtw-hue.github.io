@@ -95,7 +95,7 @@ a{color:var(--accent-ink)}
 .main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
 .topbar{
   height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;
-  padding:0 26px;background:rgba(251,250,247,.92);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10;
+  padding:0 26px;background:#fbfaf7;position:relative;z-index:10;
 }
 .search-wrap{flex:1;max-width:720px;position:relative}
 .search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}

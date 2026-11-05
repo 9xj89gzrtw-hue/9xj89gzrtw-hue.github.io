@@ -13,7 +13,7 @@ button,input,select{font:inherit;color:inherit}
 a{color:var(--accent)}
 ::selection{background:#dce4ec}
 
-.header{position:sticky;top:0;z-index:20;background:rgba(251,250,247,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.header{position:relative;z-index:20;background:#fbfaf7;border-bottom:1px solid var(--line)}
 .header-in{max-width:1320px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;gap:18px}
 .logo{display:flex;align-items:center;gap:9px;font-weight:650;letter-spacing:-.2px;font-size:14.5px}
 .logo-mark{width:28px;height:28px;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center}

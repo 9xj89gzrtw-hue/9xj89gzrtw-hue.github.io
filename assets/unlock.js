@@ -536,8 +536,8 @@
       "Вставьте его ниже. Страница читает Base напрямую и включает инструменты в этом браузере."
     ],
     hash: "Хеш транзакции или лицензионный ключ",
-    exchange: "Платите картой РФ или через СБП? Магазин присылает готовый ключ TW1-… сразу после оплаты: вставьте его ниже, он проверяется в браузере и открывает Pro мгновенно — без переписки и без ручной выдачи.",
-    placeholder: "0x… (хеш Base) или TW1-… (ключ)",
+    exchange: "Если платили переводом, хеш транзакции тоже подходит: страница сама прочитает квитанцию в Base.",
+    placeholder: "TW1-… (ключ) или 0x… (хеш Base)",
     cancel: "Отмена",
     verify: "Проверить оплату",
     checking: "Проверяем в Base…",
@@ -551,9 +551,9 @@
     noTransfer: "В транзакции нет перевода USDC на наш адрес. Если платили с биржи, хеш вывода — это хеш биржи: найдите перевод, который он создал.",
     redeemed: "Этот хеш уже использован в этом браузере.",
     badHash: "Это не хеш транзакции: нужны 0x и 64 шестнадцатеричных символа.",
-    oneClick: "Оплатить в 1 клик",
+    oneClick: "Оплатить в 1 клик Base USDC",
     oneClickHint: "MetaMask · Rabby · Base Wallet — кошелёк сам переключится на Base и подтвердит перевод",
-    noWallet: "Кошелёк в браузере не найден. Оплатите вручную по адресу ниже или откройте страницу внутри MetaMask, Rabby или Base Wallet.",
+    noWallet: "Кошелёк в браузере не найден. Оплатите картой или ключом выше — или откройте страницу в MetaMask, Rabby или Base Wallet.",
     connecting: "Подключаем кошелёк…",
     switching: "Переключаемся на Base…",
     sending: "Подтвердите перевод в кошельке…",
@@ -561,18 +561,22 @@
     verifying: "Проверяем перевод…",
     rejected: "Вы отклонили транзакцию в кошельке. Ничего не отправлено.",
     pending: "Транзакция ещё не подтверждена. Хеш сохранён — вставьте его ниже через минуту.",
-    orManual: "или оплатите вручную",
-    manualTitle: "Ручной вариант — мобильный кошелёк, биржа или ключ",
+    orManual: "Перевод USDC на Base вручную",
+    manualTitle: "Хеш транзакции или уже купленный ключ",
     oneClickUnlocked: "Pro открыт в 1 клик. Подтверждено в Base: ",
     licenseUnlocked: "Ключ принят. Pro открыт офлайн, без запросов к сети: ",
     licenseErrorFormat: "Это не ключ TW1: нужен формат TW1-<КОД>-<ID>-<ПОДПИСЬ>. Проверьте, что строка скопирована целиком.",
     licenseErrorSignature: "Подпись ключа не сходится — вероятно, ключ скопирован не полностью или изменён. Скопируйте его из письма ещё раз.",
     licenseErrorProduct: "Ключ выпущен для другого продукта. Для этого инструмента нужен свой ключ или универсальный ALL.",
     licenseErrorCrypto: "Браузер не дал проверить подпись (crypto.subtle). Откройте страницу по https и повторите.",
-    cardPay: "Оплатить картой РФ / СБП — получить ключ мгновенно",
-    cardHint: "Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Итог в рублях касса считает по своему курсу на момент оплаты, поэтому он может отличаться от подписи на пару рублей. Ключ TW1-… выдаётся автоматически сразу после оплаты: вернитесь сюда, вставьте его в поле ниже — Pro включится без переписки.",
+    cardPay: "Купить Pro — Карта РФ / СБП",
+    cardHint: "Карта РФ, СБП или СберБанк Онлайн на Plati.Market. Ключ TW1-… выдаётся автоматически сразу после оплаты: вернитесь сюда, вставьте его ниже — Pro включится без переписки.",
+    human: "Мгновенная автовыдача: сразу после оплаты СБП/картой или USDC вы получаете бессрочный ключ вида TW1-…, который открывает полную версию прямо в браузере — без регистрации, подписок и установки.",
+    keyTitle: "Уже есть ключ?",
+    keyHint: "Вставьте ключ TW1-… или хеш перевода USDC — Pro включится в этом браузере.",
+    keyBtn: "Активировать ключ",
     cardNote: "Ключ действует бессрочно. Он привязан к вашему заказу — не публикуйте его.",
-    cardPending: "Лот для оплаты картой ещё не открыт: сейчас доступны Base USDC в 1 клик и универсальный ключ TW1-…",
+    cardPending: "Оплата картой для этого инструмента ещё не открыта. USDC на Base и ключ TW1-… работают уже сейчас.",
     bundleTitle: "All-in-One Pro Pass — $14.99",
     bundleSub: "Все 8 инструментов одним ключом TW1-ALL-…, бессрочно. Один платёж вместо восьми.",
     bundlePay: "Всё за $14.99 в 1 клик",
@@ -590,8 +594,8 @@
       "Paste it below. This page reads Base directly and unlocks the tools in this browser."
     ],
     hash: "Transaction hash or license key",
-    exchange: "Paying by card? The shop hands you a TW1-… key right after checkout. Paste it below: it is verified in this browser and opens Pro instantly, with nobody checking a receipt by hand.",
-    placeholder: "0x… (Base hash) or TW1-… (license key)",
+    exchange: "If you paid by transfer, the transaction hash works too: this page reads the Base receipt itself.",
+    placeholder: "TW1-… (key) or 0x… (Base hash)",
     cancel: "Cancel",
     verify: "Verify payment",
     checking: "Checking Base\u2026",
@@ -605,9 +609,9 @@
     noTransfer: "",
     redeemed: "",
     badHash: "",
-    oneClick: "Pay in 1 Click",
+    oneClick: "Pay in 1 Click — Base USDC",
     oneClickHint: "MetaMask · Rabby · Base Wallet — the wallet switches to Base and confirms the transfer itself",
-    noWallet: "No browser wallet found. Pay manually to the address below, or open this page inside MetaMask, Rabby or Base Wallet.",
+    noWallet: "No browser wallet found. Pay by card or with a key above, or open this page inside MetaMask, Rabby or Base Wallet.",
     connecting: "Connecting wallet…",
     switching: "Switching to Base…",
     sending: "Confirm the transfer in your wallet…",
@@ -615,18 +619,22 @@
     verifying: "Checking the transfer…",
     rejected: "You rejected the transaction in your wallet. Nothing was sent.",
     pending: "The transaction is not confirmed yet. The hash is kept — paste it below in a minute.",
-    orManual: "or pay manually",
-    manualTitle: "Manual fallback — mobile wallet, exchange or key",
+    orManual: "USDC transfer on Base, manually",
+    manualTitle: "Transaction hash or a key you already bought",
     oneClickUnlocked: "Pro unlocked in one click. Confirmed on Base: ",
     licenseUnlocked: "Key accepted. Pro unlocked offline, with zero network calls: ",
     licenseErrorFormat: "That is not a TW1 key. The format is TW1-<CODE>-<ID>-<SIGNATURE>; make sure the whole line is pasted.",
     licenseErrorSignature: "The key signature does not match — it was probably copied partially or edited. Paste it again from the mail.",
     licenseErrorProduct: "This key is issued for another product. Use that product's key, or a universal ALL key.",
     licenseErrorCrypto: "The browser refused to check the signature (crypto.subtle). Open the page over https and retry.",
-    cardPay: "Pay by card — get the key instantly",
-    cardHint: "Card or instant bank transfer on Plati.Market. The rouble total is computed by the checkout at its own rate on the day, so it can differ from the label by a rouble or two. The TW1-… key is delivered automatically right after checkout: come back here, paste it below, and Pro opens with no back-and-forth.",
+    cardPay: "Buy Pro — card / instant transfer",
+    cardHint: "Card or instant bank transfer on Plati.Market. The TW1-… key is delivered automatically right after checkout: come back here, paste it below, and Pro opens with no back-and-forth.",
+    human: "Instant delivery: right after a card, bank-transfer or USDC payment you get a lifetime TW1-… key that opens the full version in this browser — no account, no subscription, no install.",
+    keyTitle: "Already have a key?",
+    keyHint: "Paste a TW1-… key or a USDC transfer hash — Pro opens in this browser.",
+    keyBtn: "Activate key",
     cardNote: "The key never expires. It is tied to your order, so keep it private.",
-    cardPending: "This card listing is not live yet: Base USDC in one click and a universal TW1-… key work right now.",
+    cardPending: "This card listing is not live yet. Base USDC in one click and a TW1-… key work right now.",
     bundleTitle: "All-in-One Pro Pass — $14.99",
     bundleSub: "All eight tools with one TW1-ALL-… key, forever. One payment instead of eight.",
     bundlePay: "Get everything for $14.99",
@@ -716,47 +724,56 @@
       '    </button>',
       '  </div>',
       '  <div class="modal-body">',
-      '    <div class="pay-amount"><span id="unlock-price"></span><span class="small muted">' + T.onBase + '</span></div>',
-      '    <button class="btn btn-primary pay-1click" type="button" id="unlock-1click" data-method="eth_sendTransaction">',
+      '    <div class="pay-price"><b id="unlock-price"></b><span id="unlock-price-alt" class="pay-price-alt"></span></div>',
+      '    <p class="pay-human" id="unlock-human">' + T.human + '</p>',
+      '    <a class="btn pay-primary" id="unlock-card" href="#" target="_blank" rel="noopener" hidden>',
+      '      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
+      '      <span id="unlock-card-label">' + T.cardPay + '</span>',
+      '    </a>',
+      '    <p class="tiny muted pay-card-hint" id="unlock-card-hint" hidden>' + T.cardHint + '</p>',
+      '    <div class="pay-or"><span>' + T.orManual + '</span></div>',
+      '    <button class="btn pay-usdc" type="button" id="unlock-1click" data-method="eth_sendTransaction">',
       '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg>',
       '      <span id="unlock-1click-label">' + T.oneClick + '</span>',
       '    </button>',
       '    <p class="tiny muted pay-1click-hint" id="unlock-1click-hint">' + T.oneClickHint + '</p>',
-      '    <a class="btn pay-card" id="unlock-card" href="#" target="_blank" rel="noopener" hidden>',
-      '      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
-      '      <span id="unlock-card-label">' + T.cardPay + '</span>',
-      '    </a>',
-      '    <p class="tiny muted pay-card-hint" id="unlock-card-hint" hidden>' + T.cardHint + '</p>',
-      '    <div class="pay-bundle" id="unlock-bundle" style="margin-top:14px;padding:12px;border:1px solid var(--line,#e2e8f0);border-radius:12px;background:var(--panel,#f8fafc);display:grid;gap:7px">',
-      '      <b id="unlock-bundle-title" style="font-size:13.5px">' + T.bundleTitle + '</b>',
+      '    <div class="pay-bundle" id="unlock-bundle" hidden>',
+      '      <b id="unlock-bundle-title" class="pay-bundle-title">' + T.bundleTitle + '</b>',
       '      <span class="tiny muted" id="unlock-bundle-sub">' + T.bundleSub + '</span>',
-      '      <button class="btn pay-1click" type="button" id="unlock-bundle-pay">',
-      '        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg>',
-      '        <span id="unlock-bundle-pay-label">' + T.bundlePay + '</span>',
-      '      </button>',
-      '      <a class="btn pay-card" id="unlock-bundle-card" href="#" target="_blank" rel="noopener" hidden>',
+      '      <a class="btn pay-bundle-card" id="unlock-bundle-card" href="#" target="_blank" rel="noopener" hidden>',
+      '        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
       '        <span id="unlock-bundle-card-label">' + T.bundleCard + '</span>',
       '      </a>',
+      '      <button class="btn pay-bundle-usdc" type="button" id="unlock-bundle-pay">',
+      '        <span id="unlock-bundle-pay-label">' + T.bundlePay + '</span>',
+      '      </button>',
       '      <p class="tiny muted" id="unlock-bundle-note" hidden>' + T.bundleSoon + '</p>',
       '    </div>',
-      '    <div class="pay-or"><span>' + T.orManual + '</span></div>',
-      '    <div class="pay-address">',
-      '      <code class="mono" id="unlock-addr"></code>',
-      '      <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>' + T.copy + '</button>',
+      '    <div class="pay-key">',
+      '      <label class="pay-key-title" for="unlock-hash">' + T.keyTitle + '</label>',
+      '      <p class="tiny muted pay-key-hint">' + T.keyHint + '</p>',
+      '      <div class="pay-key-row">',
+      '        <input class="field mono" id="unlock-hash" placeholder="' + T.placeholder + '" autocomplete="off" spellcheck="false">',
+      '        <button class="btn" type="button" id="unlock-go">' + T.keyBtn + '</button>',
+      '      </div>',
+      '      <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
       '    </div>',
-      '    <ol class="pay-steps">',
-      '      <li>' + T.steps[0] + '</li>',
-      '      <li>' + T.steps[1] + '</li>',
-      '      <li>' + T.steps[2] + '</li>',
-      '    </ol>',
-      '    <label class="small" for="unlock-hash" style="display:block;margin:14px 0 6px;color:var(--ink-2)">' + T.manualTitle + '</label>',
-      '    <input class="field mono" id="unlock-hash" placeholder="' + T.placeholder + '" autocomplete="off" spellcheck="false">',
-      '    <p class="unlock-error small" id="unlock-error" role="alert" hidden></p>',
-      '    <p class="tiny muted" style="margin-top:10px">' + T.exchange + '</p>',
+      '    <details class="pay-manual" id="unlock-manual">',
+      '      <summary>' + T.orManual + '</summary>',
+      '      <div class="pay-address">',
+      '        <code class="mono" id="unlock-addr"></code>',
+      '        <button class="btn btn-ghost btn-sm" type="button" data-copy-addr>' + T.copy + '</button>',
+      '      </div>',
+      '      <ol class="pay-steps">',
+      '        <li>' + T.steps[0] + '</li>',
+      '        <li>' + T.steps[1] + '</li>',
+      '        <li>' + T.steps[2] + '</li>',
+      '      </ol>',
+      '      <p class="tiny muted" style="margin-top:8px">' + T.exchange + '</p>',
+      '    </details>',
       '  </div>',
       '  <div class="modal-foot">',
-      '    <button class="btn btn-ghost" type="button" data-close>' + T.cancel + '</button>',
-      '    <button class="btn" type="button" id="unlock-go">' + T.verify + '</button>',
+      '    <button class="btn btn-ghost" type="button" data-close>' + T.close + '</button>',
       '  </div>',
       '</div>'
     ].join("");
@@ -771,30 +788,48 @@
     if (!modalEl) modalEl = buildModal();
     modalEl.querySelector("#unlock-title").textContent = T.title + (opts.name || "Pro");
     modalEl.querySelector("#unlock-sub").textContent = opts.sub || T.sub;
-    modalEl.querySelector("#unlock-price").textContent = "$" + opts.price;
+
+    /* Rouble price first for a buyer with a Russian card; the USDC figure is
+       the same purchase, not a footnote. Falls back to dollars when the lot is
+       not live, so the two never disagree. */
+    var slug = String(opts.product || "").toLowerCase();
+    var shop = shopEntry(slug);
+    var priceNode = modalEl.querySelector("#unlock-price");
+    var priceAlt = modalEl.querySelector("#unlock-price-alt");
+    if (RU && shop && shop.rub) {
+      priceNode.textContent = Math.round(shop.rub) + " ₽";
+      priceAlt.textContent = "$" + opts.price + " · USDC на Base";
+    } else {
+      priceNode.textContent = "$" + opts.price;
+      priceAlt.textContent = T.onBase;
+    }
+
     modalEl.querySelector("#unlock-addr").textContent = PAY_TO;
     modalEl.querySelector("#unlock-hash").value = "";
     modalEl.querySelector("#unlock-error").hidden = true;
+    var manual = modalEl.querySelector("#unlock-manual");
+    if (manual) manual.open = false;
+
     var one = modalEl.querySelector("#unlock-1click");
     var hint = modalEl.querySelector("#unlock-1click-hint");
+    var oneLabel = modalEl.querySelector("#unlock-1click-label");
     one.disabled = !wallet();
     one.classList.toggle("is-unavailable", !wallet());
+    oneLabel.textContent = T.oneClick + " ($" + opts.price + ")";
     hint.textContent = wallet() ? T.oneClickHint : T.noWallet;
 
-    /* Card / SBP path. Only products with a live listing render it; the label
-       carries the rouble price the checkout shows, so nobody has to convert
-       anything in their head. A missing lot is stated, never faked. */
-    var slug = String(opts.product || "").toLowerCase();
-    var shop = shopEntry(slug);
+    /* Card / SBP path — the primary button for a Russian-speaking buyer. Only
+       products with a live listing render it; the label carries the rouble
+       price the checkout shows. A missing lot is stated, never faked. */
     var card = modalEl.querySelector("#unlock-card");
     var cardHint = modalEl.querySelector("#unlock-card-hint");
     var cardLabel = modalEl.querySelector("#unlock-card-label");
     if (shop && shop.id) {
       card.href = cardUrl(shop.id);
       card.hidden = false;
-      cardHint.hidden = false;
-      cardHint.textContent = T.cardHint;
-      cardLabel.textContent = T.cardPay + (shop.rub ? " · " + shop.rub + " ₽" : "");
+      cardHint.hidden = true;
+      cardLabel.textContent = T.cardPay +
+        (shop.rub ? " (" + Math.round(shop.rub) + " ₽ · ключ TW1 сразу на экране)" : "");
       card.setAttribute("data-license-code", slug);
     } else {
       card.hidden = true;
@@ -818,7 +853,7 @@
         bcard.hidden = false;
         bnote.hidden = true;
         modalEl.querySelector("#unlock-bundle-card-label").textContent =
-          T.bundleCard + (bshop.rub ? " · " + bshop.rub + " ₽" : "");
+          T.bundleCard + (bshop.rub ? " · " + Math.round(bshop.rub) + " ₽" : "");
       } else {
         bcard.hidden = true;
         bnote.hidden = false;
@@ -827,7 +862,12 @@
 
     modalEl.hidden = false;
     document.body.style.overflow = "hidden";
-    setTimeout(function () { (wallet() ? one : modalEl.querySelector("#unlock-hash")).focus(); }, 30);
+    /* Without a wallet the only actionable path is the key field: put the
+       cursor there, but never force a hidden details block open. */
+    setTimeout(function () {
+      var target = wallet() ? one : modalEl.querySelector("#unlock-hash");
+      if (target) target.focus();
+    }, 30);
   }
 
   function close() {
@@ -1026,7 +1066,7 @@
         err.textContent = localize(msg);
         err.hidden = false;
       } finally {
-        label.textContent = T.oneClick;
+        label.textContent = T.oneClick + (current ? " ($" + current.price + ")" : "");
         btn.disabled = !wallet();
         go.disabled = false;
       }

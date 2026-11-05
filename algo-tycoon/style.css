@@ -31,7 +31,7 @@ button { font: inherit; cursor: pointer; }
 .bar {
   display: flex; gap: 14px; align-items: center;
   background: var(--panel2); border-bottom: 1px solid var(--line);
-  padding: 10px 16px; position: sticky; top: 0; z-index: 20;
+  padding: 10px 16px; position: relative; z-index: 20;
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 750; }
 .brand .mark { width: 20px; height: 20px; background: var(--orange); position: relative; border: 1px solid var(--ink); }
