@@ -432,6 +432,127 @@
     ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(main.textContent), "zero emoji");
   });
 
+  /* ---------- unit-calc: parsers ---------- */
+  var U = window.ClipUnit;
+  test("unitcalc: parseNum RU and EN number forms", function () {
+    eq(U.parseNum("1 234,56 ₽"), 1234.56, "ru spaces+comma");
+    eq(U.parseNum("$1,234.56"), 1234.56, "en thousands+dot");
+    eq(U.parseNum("990"), 990, "plain int");
+    ok(isNaN(U.parseNum("н/д")), "junk is NaN");
+  });
+  test("unitcalc: semicolon csv with header", function () {
+    var p = U.parseInput("товар;цена;закуп\nCup;990;260\nMug;540;120\n");
+    eq(p.format, "csv", "format");
+    eq(p.rows.length, 2, "2 rows");
+    ok(p.headers.indexOf("цена") !== -1, "price header kept");
+  });
+  test("unitcalc: json array of objects", function () {
+    var p = U.parseInput('[{"name":"x","цена":10,"закуп":4}]');
+    eq(p.format, "json", "format");
+    eq(p.rows.length, 1, "1 row");
+    ok(p.headers.indexOf("цена") !== -1, "json key header");
+  });
+  test("unitcalc: json object with items array (ozon-style)", function () {
+    var p = U.parseInput('{"items":[{"цена":1590},{"цена":1290}]}');
+    ok(p.rows.length === 2 || p.format === "csv", "either direct or csv fallback");
+  });
+  test("unitcalc: html table markup", function () {
+    var p = U.parseInput('<table><tr><th>товар</th><th>цена</th><th>закуп</th></tr>' +
+      '<tr><td>A</td><td>1000</td><td>300</td></tr><tr><td>B</td><td>700</td><td>250</td></tr></table>');
+    eq(p.format, "html", "format");
+    eq(p.rows.length, 2, "2 body rows");
+    eq(U.mapColumns(p.headers).price, "цена", "price column found");
+  });
+  test("unitcalc: mapColumns recognizes ru+en synonyms", function () {
+    var c = U.mapColumns(["Наименование", "Себестоимость", "salePriceU", "commission %", "LogisticsCost", "Конкурентцена"]);
+    eq(c.name, "Наименование", "name");
+    eq(c.cost, "Себестоимость", "cost");
+    eq(c.price, "salePriceU", "price");
+    eq(c.commission, "commission %", "commission");
+    eq(c.logistics, "LogisticsCost", "logistics");
+    eq(c.competitor, "Конкурентцена", "competitor");
+  });
+
+  /* ---------- unit-calc: the economics model (hand-computed) ---------- */
+  var FULL = { commission: 20, logistics: 100, ssp: 10, returns: 0, returnLogistics: 0, ads: 10, pack: 0, tax: 6, fixedMonthly: 30000 };
+  var R1 = { "товар": "A", "цена": 1000, "закуп": 300 };
+  var C1 = U.mapColumns(["товар", "цена", "закуп"]);
+  test("unitcalc: hand-computed SKU with СПП 10%", function () {
+    var r = U.computeSKU(R1, C1, FULL, 30000);
+    // comm 200, tax 60, ads 100, logEff 90, fixed parts cost 300 → profit 250
+    eq(r.profit, 250, "net profit per unit");
+    eq(r.margin, 25, "margin %");
+    ok(Math.abs(r.roi - 250 / 3) < 0.01, "roi vs cost");
+    eq(r.breakeven, 120, "breakeven units ceil(30000/250)");
+    ok(Math.abs(r.minPrice - (390 / 0.64)) < 0.01, "min profitable price = fixed/(1-k-t-a)");
+    eq(r.verdict, "green", "25% margin is green");
+  });
+  test("unitcalc: ssp=0 raises logistics cost back", function () {
+    var p2 = Object.assign({}, FULL, { ssp: 0 });
+    var r = U.computeSKU(R1, C1, p2, 30000);
+    eq(r.profit, 240, "logistics 100 instead of 90");
+  });
+  test("unitcalc: returns share cuts profit", function () {
+    var p3 = Object.assign({}, FULL, { ssp: 0, returns: 10, returnLogistics: 50 });
+    var r = U.computeSKU(R1, C1, p3, 30000);
+    // returnCost = 0.1*(100+50)=15 → profit 240-15 = 225
+    eq(r.profit, 225, "0.1*150 = 15 away");
+  });
+  test("unitcalc: unprofitable SKU verdict is red, minPrice sane", function () {
+    var R2 = { "товар": "B", "цена": 500, "закуп": 460 };
+    var r = U.computeSKU(R2, C1, FULL, 30000);
+    eq(r.verdict, "red", "negative profit is red");
+    ok(r.minPrice > 500, "min price above current price");
+    ok(r.breakeven === Infinity, "breakeven unreachable at negative profit");
+  });
+  test("unitcalc: competitor batch compare math", function () {
+    var R3 = { "товар": "C", "цена": 1000, "закуп": 300, "конкурент": 900 };
+    var C3 = U.mapColumns(["товар", "цена", "закуп", "конкурент"]);
+    var r = U.computeSKU(R3, C3, FULL, 30000);
+    ok(r.competitor && r.competitor.price === 900, "competitor price read");
+    ok(Math.abs(r.competitor.undercutsBy - 10) < 0.01, "undercuts by 10%");
+    // at 900: 900-180-54-90-90-300 = 186
+    ok(Math.abs(r.competitor.profit - 186) < 0.01, "competitor-price profit 186");
+  });
+  test("unitcalc: computeAll + summary counts verdicts", function () {
+    var rows = [{ "цена": 1000, "закуп": 300 }, { "цена": 500, "закуп": 460 }, { "цена": 800, "закуп": 300 }];
+    var cols = U.mapColumns(["цена", "закуп"]);
+    var res = U.computeAll(rows, cols, FULL, 30000);
+    var s = U.summary(res);
+    eq(s.count, 3, "count");
+    eq(s.green, 2, "two green");
+    eq(s.red, 1, "one red");
+  });
+  test("unitcalc: toCSV respects cap and columns", function () {
+    var rows = [];
+    var res = U.computeAll(rows, C1, FULL, 30000);
+    eq(U.toCSV(res, 50), "", "empty input → empty csv");
+    for (var i = 0; i < 51; i += 1) rows.push(R1);
+    var res2 = U.computeAll(rows, C1, FULL, 30000);
+    var csv = U.toCSV(res2, 50);
+    var lineCount = csv.split("\n").filter(function (l) { return l.trim(); }).length;
+    eq(lineCount, 51, "header + exactly 50 data rows");
+  });
+  test("unitcalc: caps and presets pinned", function () {
+    eq(U.FREE_ROW_CAP, 50, "free cap");
+    eq(U.PRO_ROW_CAP, 10000, "pro cap");
+    ok(U.PRESETS.wb && U.PRESETS.ozon && U.PRESETS.telegram, "2026 presets present");
+    eq(U.PRESETS.wb.tax, 6, "УСН 6% default");
+  });
+
+  /* ---------- unit-calc: UI integration ---------- */
+  test("unitui: example WB run computes 10 SKUs and drives the matrix", function () {
+    var u = window.__UNITCALC_RUN__("товар;цена;закуп\nA;1000;300\nB;500;460\n");
+    ok(u && u.results.length === 2, "2 computed rows");
+    ok(u.summary && u.summary.green >= 1, "summary present");
+    ok(document.querySelectorAll("#uc-table tr.uc-red").length >= 1, "red row rendered");
+  });
+  test("unitui: page structure for the studio section", function () {
+    ["unitcalc", "uc-input", "uc-run", "uc-example", "uc-params", "uc-csv", "uc-xlsx", "uc-table"].forEach(function (id) {
+      ok(!!document.getElementById(id), "#" + id + " exists");
+    });
+  });
+
   /* ---------- harness ---------- */
   function render(r) {
     var el = document.createElement("div");

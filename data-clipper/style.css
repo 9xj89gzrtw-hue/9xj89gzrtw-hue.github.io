@@ -224,3 +224,11 @@ body.testing #tests { display: block; padding: 20px 0 40px; }
 #tests .case { font-family: var(--mono); font-size: 10.5px; padding: 3px 0; border-bottom: 1px dashed var(--panel); }
 #tests .case.pass::before { content: "PASS "; color: var(--ok); font-weight: 700; }
 #tests .case.fail::before { content: "FAIL "; color: var(--warn); font-weight: 700; }
+
+/* unit-economics matrix verdicts (unitui.js) */
+.out-table tr.uc-green td { background: rgba(44,107,79,.14); }
+.out-table tr.uc-yellow td { background: rgba(176,128,0,.14); }
+.out-table tr.uc-red td { background: rgba(160,42,42,.14); }
+.out-table tr.uc-green td:first-child { box-shadow: inset 3px 0 0 var(--ok,#2c6b4f); }
+.out-table tr.uc-yellow td:first-child { box-shadow: inset 3px 0 0 #b08000; }
+.out-table tr.uc-red td:first-child { box-shadow: inset 3px 0 0 #a02a2a; }

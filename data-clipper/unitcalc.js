@@ -147,7 +147,15 @@
     if (/^\[|^\{/.test(t)) {
       try {
         var j = JSON.parse(t);
-        var list = Array.isArray(j) ? j : [j];
+        var list = Array.isArray(j) ? j : (function unwrap(o) {
+          // common one-key wrappers: {"items":[…]} / {"data":[…]} / {"rows":[…]}
+          var K = ["items", "data", "rows", "list", "results", "cards", "products"];
+          for (var i = 0; i < K.length; i += 1) {
+            if (o.hasOwnProperty(K[i]) && Array.isArray(o[K[i]]) &&
+                o[K[i]].length && typeof o[K[i]][0] === "object") return o[K[i]];
+          }
+          return [o];
+        })(j);
         if (list.length && typeof list[0] === "object") {
           var jsonParsed = rowsFromObjList(list);
           jsonParsed.format = "json";
