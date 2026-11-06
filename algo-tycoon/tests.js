@@ -1,376 +1,454 @@
 /*
- * tests.js — Algo Tycoon in-page battery (?test=1).
- * Covers: RNG determinism, every op-card unit, pipeline compile & tolerance,
- * a solver pass over all 14 jobs with payout > 0, save/offline math,
- * license verification (valid/wrong/expired/tampered), tx RPC mocks,
- * base32 vectors, page structure. Writes window.__RESULTS__.
+ * tests.js — батарея проверок AI & Market Tycoon (?test=1).
+ *
+ * Проверяем не «красиво ли», а цифры: старт, оплату, нагрузку, главы,
+ * апгрейды, кризисы, песочницу, сохранение и наличие всех узлов интерфейса,
+ * на которые опирается js/app.js. Результат печатается в #t-cases и кладётся
+ * в window.__RESULTS__.
  */
 (function () {
   "use strict";
   if (location.search.indexOf("test=1") === -1) return;
-  document.body.classList.add("testing");
 
   var AT = window.AT;
-  var cases = [];
+  var E = AT.economy;
+  var C = AT.content;
   var results = [];
-  var t0 = null;
+  var groups = 0;
+  var queue = [];
 
-  function test(name, fn) { cases.push({ name: name, fn: fn }); }
   function ok(cond, msg) {
     results.push({ ok: !!cond, msg: msg });
     if (!cond) throw new Error("assert failed: " + msg);
   }
-  function eq(a, b, msg) { ok(a === b, msg + " (got " + JSON.stringify(a) + ", want " + JSON.stringify(b) + ")"); }
-  function near(a, b, msg) { ok(Math.abs(a - b) <= 1e-9, msg + " (got " + a + ", want " + b + ")"); }
-
-  var V = function (s) { return s.split(",").map(Number); };
-
-  /* ---------- Acts II–III content gate (WebCrypto AES-GCM) ---------- */
-  test("crypt: acts II–III decrypt into the full job list", async function () {
-    var r = await AT.crypt.ready();
-    ok(r.loaded === true, "act2/3 decrypted (error: " + (r.error || "none") + ")");
-    eq(AT.levels.JOBS.length, 14, "14 jobs after decrypt");
-  });
-
-  /* ---------- RNG ---------- */
-  test("rng: mulberry32 deterministic per seed", function () {
-    var a = AT.rng.mulberry32(2026), b = AT.rng.mulberry32(2026);
-    for (var i = 0; i < 12; i += 1) eq(a(), b(), "same sequence");
-  });
-  test("rng: different seeds diverge", function () {
-    var a = AT.rng.mulberry32(1), b = AT.rng.mulberry32(2);
-    var d = false;
-    for (var i = 0; i < 20; i += 1) if (a() !== b()) { d = true; break; }
-    ok(d, "sequences diverge");
-  });
-  test("rng: genStream shape and parity", function () {
-    var s = AT.rng.genStream(101, 8);
-    eq(s.length, 8, "length 8");
-    s.forEach(function (v) { ok(v >= -9.9 && v <= 9.9, "in range: " + v); });
-    eq(JSON.stringify(AT.rng.genStream(101, 8)), JSON.stringify(s), "reproducible");
-  });
-
-  /* ---------- every op, one by one ---------- */
-  test("op: MAP ×2", function () { deepEq(AT.ops.apply("map2", V("1,-2.5,0")), [2, -5, 0], "doubled"); });
-  test("op: MAP ×3", function () { deepEq(AT.ops.apply("map3", V("2,-1")), [6, -3], "tripled"); });
-  test("op: ABS", function () { deepEq(AT.ops.apply("abs", V("-3,2.5")), [3, 2.5], "abs"); });
-  test("op: FLOOR", function () { deepEq(AT.ops.apply("floor", V("2.9,-2.1,5")), [2, -3, 5], "floor"); });
-  test("op: NEG", function () { deepEq(AT.ops.apply("neg", V("4,-0.5")), [-4, 0.5], "negated"); });
-  test("op: EVEN keeps even integers only", function () {
-    deepEq(AT.ops.apply("even", V("2,3,4.0,0.4,-6")), [2, 4, -6], "evens");
-  });
-  test("op: ODD", function () { deepEq(AT.ops.apply("odd", V("2,3,4.0,0.4")), [3, 0.4], "odds (non-even)"); });
-  test("op: POS", function () { deepEq(AT.ops.apply("pos", V("-1,0,2.2")), [2.2], "strictly positive"); });
-  test("op: SORT ↑", function () { deepEq(AT.ops.apply("sortAsc", V("3,-1,2")), [-1, 2, 3], "asc"); });
-  test("op: SORT ↓", function () { deepEq(AT.ops.apply("sortDesc", V("3,-1,2")), [3, 2, -1], "desc"); });
-  test("op: REV", function () { deepEq(AT.ops.apply("reverse", V("1,2,3")), [3, 2, 1], "reversed"); });
-  test("op: DEDUPE keeps first occurrences", function () {
-    deepEq(AT.ops.apply("dedupe", V("1,2,1,3,2")), [1, 2, 3], "dedup");
-  });
-  test("op: CHUNK-2 pairs sums, keeps leftover", function () {
-    deepEq(AT.ops.apply("chunk2", V("1,2,3,4,5")), [3, 7, 5], "pairs");
-  });
-  test("op: ZIGZAG reorder evens then odds", function () {
-    deepEq(AT.ops.apply("zigzag", V("1,2,3,4,5")), [1, 3, 5, 2, 4], "zigzag");
-  });
-  test("op: ROT-L", function () { deepEq(AT.ops.apply("rotateL", V("1,2,3")), [2, 3, 1], "rotated"); });
-  test("op: TAKE-2", function () { deepEq(AT.ops.apply("take2", V("9,8,7,6")), [9, 8], "first two"); });
-  test("op: SKIP-1", function () { deepEq(AT.ops.apply("skip1", V("9,8,7")), [8, 7], "drop first"); });
-  test("op: TAIL drops the last element", function () { deepEq(AT.ops.apply("tail", V("1,2,3")), [1, 2], "tail"); });
-  test("op: SUM collapses to single value", function () { near(AT.ops.apply("sum", V("1.5,2,-0.5"))[0], 3, "sum"); });
-  test("op: PROD Π", function () { near(AT.ops.apply("product", V("2,-3,4"))[0], -24, "product"); });
-  test("op: MIN / MAX", function () {
-    near(AT.ops.apply("min", V("4,-2,9"))[0], -2, "min");
-    near(AT.ops.apply("max", V("4,-2,9"))[0], 9, "max");
-  });
-  test("op: unknown op rejected", function () {
-    var threw = false;
-    try { AT.ops.apply("does-not-exist", [1]); } catch (e) { threw = true; }
-    ok(threw, "throws on unknown op");
-  });
-  function deepEq(a, b, msg) {
-    ok(JSON.stringify(a) === JSON.stringify(b), msg + " (got " + JSON.stringify(a) + ", want " + JSON.stringify(b) + ")");
+  function eq(a, b, msg) {
+    ok(a === b, msg + " (получено " + JSON.stringify(a) + ", ожидалось " + JSON.stringify(b) + ")");
+  }
+  function near(a, b, tol, msg) {
+    ok(Math.abs(a - b) <= tol, msg + " (получено " + a + ", ожидалось " + b + "±" + tol + ")");
+  }
+  function group(name, fn) {
+    queue.push({ name: name, fn: fn });
   }
 
-  /* ---------- pipeline compile & matching ---------- */
-  test("pipeline: map2 then sum", function () {
-    var out = AT.pipeline.compile(["map2", "sum"], V("1,2,3"));
-    near(out[0], 12, "(1+2+3)*2");
-  });
-  test("pipeline: chain of 5 composes in order", function () {
-    var out = AT.pipeline.compile(["abs", "sortAsc", "skip1", "take2", "max"], V("8.6,6.1,-3.1,0.2"));
-    eq(out.length, 1, "collapsed to scalar");
-  });
-  test("pipeline: cap limits op count", function () {
-    var out = AT.pipeline.compile(["map2", "abs", "map2", "abs", "map2", "abs", "map2", "abs", "map2", "abs"], V("1"), 3);
-    near(out[0], 4, "only 3 of 10 applied: 1→×2→abs→×2 = 4");
-  });
-  test("pipeline: scalar target needs scalar output", function () {
-    var m = AT.pipeline.match([1, 2], 1);
-    ok(!m.ok, "vector output rejected against scalar");
-    ok(String(m.reason).indexOf("scalar") !== -1, "reason names a scalar card: " + m.reason);
-  });
-  test("pipeline: tolerance is 1e-9", function () {
-    ok(AT.pipeline.match([1 + 5e-10], 1).ok, "inside tolerance passes");
-    ok(!AT.pipeline.match([1 + 1e-7], 1).ok, "outside tolerance fails");
-    eq(AT.pipeline.TOL, 1e-9, "documented tolerance");
+  /* ---------- содержание ---------- */
+  group("содержание: 3 главы, 16 заказов, 4 апгрейда", function () {
+    eq(C.CHAPTERS.length, 3, "три главы");
+    eq(C.CHAPTERS.filter(function (c) { return c.free; }).length, 2, "две бесплатные главы");
+    eq(C.CHAPTERS[2].free, false, "третья глава — Pro");
+    ok(C.CHAPTERS[0].goal < C.CHAPTERS[1].goal, "цель второй главы выше первой");
+    eq(C.ORDERS.length, 16, "шестнадцать заказов");
+    eq(C.UPGRADES.length, 4, "четыре апгрейда");
+    eq(C.CRISES.length, 3, "три кризиса");
+
+    var ids = {};
+    C.ORDERS.forEach(function (o) {
+      ok(!ids[o.id], "id заказа уникален: " + o.id);
+      ids[o.id] = 1;
+      ok(o.rub > 0, "оплата > 0: " + o.id);
+      ok(o.load > 0 && o.load <= 1000, "нагрузка в разумных пределах: " + o.id);
+      ok(o.sec > 0, "время > 0: " + o.id);
+      ok(o.chapter >= 1 && o.chapter <= 3, "глава заказа существует: " + o.id);
+    });
+    ok(C.ORDERS.some(function (o) { return /Спарсить 100 карточек WB/.test(o.title); }), "есть заказ на 100 карточек WB");
+    ok(C.ORDERS.some(function (o) { return /Озвучить ролик нейросетью/.test(o.title); }), "есть заказ на озвучку");
+    ok(C.ORDERS.some(function (o) { return /арбитражную сделку/.test(o.title); }), "есть арбитражный заказ");
   });
 
-  /* ---------- jobs: solver passes every one, payout > 0 ---------- */
-  test("jobs: 14 jobs across 3 acts", function () {
-    eq(AT.levels.JOBS.length, 14, "14 jobs");
-    var byAct = { 1: 0, 2: 0, 3: 0 };
-    AT.levels.JOBS.forEach(function (j) { byAct[j.act] += 1; });
-    eq(byAct[1], 4, "act 1");
-    eq(byAct[2], 4, "act 2");
-    eq(byAct[3], 6, "act 3");
-  });
-  test("jobs: every canonical op exists", function () {
-    AT.levels.JOBS.forEach(function (j) {
-      j.canonical.forEach(function (id) {
-        ok(!!AT.ops.get(id), j.id + " op exists: " + id);
-      });
-    });
-  });
-  test("jobs: seeded stream reproduces the exact target for every job", function () {
-    AT.levels.JOBS.forEach(function (j) {
-      var s = AT.rng.genStream(j.seed, j.n);
-      var out = AT.pipeline.compile(j.canonical, s);
-      ok(out.length === 1, j.id + " collapses to scalar");
-      near(out[0], j.target, j.id + " target reproduced from seed " + j.seed);
-    });
-  });
-  test("game: fresh payout for every job is > 0", function () {
-    var st = AT.game.freshState();
-    AT.levels.JOBS.forEach(function (j) {
-      var r = AT.game.attempt(st, j, j.canonical);
-      ok(r.ok, j.id + " canonical passes");
-      ok(r.payout > 0, j.id + " payout " + r.payout + " > 0");
-    });
-  });
-  test("game: wrong pipeline rejected", function () {
-    var st = AT.game.freshState();
-    var j = AT.levels.JOBS[0];
-    var r = AT.game.attempt(st, j, ["map2", "sum"]);
-    ok(!r.ok, "wrong order rejected");
-  });
-  test("game: slots base 6, research extends to 11", function () {
-    var st = AT.game.freshState();
-    eq(AT.game.slots(st), 6, "base cap");
-    st.research.push("r_slots", "r_slots2");
-    eq(AT.game.slots(st), 11, "extended cap");
-  });
-  test("game: payout multiplier stacks percent research", function () {
-    var st = AT.game.freshState();
-    near(AT.game.payoutMultiplier(st), 1, "no bonus");
-    st.research.push("r_pay1", "r_pay2", "r_pay3");
-    var m = AT.game.payoutMultiplier(st);
-    ok(Math.abs(m - 1.75) < 1e-9, "1 + 15% + 25% + 35% = 1.75: " + m);
-    var j = AT.levels.JOBS[0];
-    ok(AT.game.creditFor(st, j) > j.payout, "bonus applied");
-  });
-  test("game: sequential unlock, no skips", function () {
-    var st = AT.game.freshState();
-    ok(AT.game.isJobUnlocked(st, 0), "first unlocked");
-    ok(!AT.game.isJobUnlocked(st, 1), "second locked");
-    AT.game.markSolved(st, AT.levels.JOBS[0].id);
-    ok(AT.game.isJobUnlocked(st, 1), "second unlocked after first solve");
-  });
-  test("game: research gating by credits", function () {
-    var st = AT.game.freshState();
-    st.credits = 10;
-    var node = AT.levels.RESEARCH[0];
-    ok(!AT.game.doResearch(st, node), "too poor");
-    st.credits = node.cost + 1;
-    ok(AT.game.doResearch(st, node), "purchasable with enough credits");
-    ok(!AT.game.doResearch(st, node), "already owned");
+  /* ---------- старт ---------- */
+  group("старт: 1 000 ₽ и одна стойка на 100 нагрузки", function () {
+    var s = E.create();
+    eq(s.balance, 1000, "баланс 1 000 ₽");
+    eq(E.capacity(s), 100, "нагрузка 100");
+    eq(E.usedLoad(s), 0, "нагрузка не занята");
+    eq(s.chapter, 1, "первая глава");
+    eq(s.speed, 1, "скорость x1");
+    eq(s.active.length, 0, "нет активных заказов");
+    eq(E.SANDBOX_BALANCE, 90000000, "песочница = $1 000 000 при курсе 90");
   });
 
-  /* ---------- save & offline math ---------- */
-  test("save: offline compilers cap at 8h and rate 3cr/h each", function () {
-    var st = AT.save.fresh();
-    st.compilers = 2;
-    st.lastSave = Date.now() - (9 * 3600000);
-    var off = AT.save.offlineEarnings(st);
-    eq(off.hours, 8, "capped at 8h");
-    eq(off.credits, 48, "2 compilers × 3cr/h × 8h");
-  });
-  test("save: zero compilers earn nothing offline", function () {
-    var st = AT.save.fresh(); st.compilers = 0;
-    eq(AT.save.offlineEarnings(st).credits, 0, "no compilers, no credits");
-  });
-  test("save: fresh state sane, keys pinned", function () {
-    var st = AT.save.fresh();
-    eq(st.credits, 0, "zero credits");
-    eq(st.v, 1, "version 1");
-    eq(AT.save.KEY, "algo_tycoon_v1", "save key name");
-    eq(AT.save.PRO_KEY, "algo_tycoon_pro_v1", "pro flag key name");
-  });
-  test("save: corrupt payload falls back to fresh", function () {
-    var st = AT.save.load.call; // touch API only; real storage probed in browser below
-    try { localStorage.setItem(AT.save.KEY, "{not json!!"); } catch (e) { }
-    var loaded = AT.save.load();
-    eq(loaded.credits, 0, "clean slate on corrupt save");
-    try { localStorage.removeItem(AT.save.KEY); } catch (e) { }
+  group("оплата: первый заказ «Спарсить 100 карточек WB» = 250 ₽", function () {
+    var s = E.create();
+    var o = E.orderById("o_wb_parse");
+    ok(!!o, "заказ существует");
+    eq(E.payoutFor(s, o), 250, "оплата 250 ₽ без бонусов");
+    eq(E.recommended(s).id, "o_wb_parse", "большая кнопка предлагает первый заказ главы");
   });
 
-  /* ---------- base32 vectors ---------- */
-  test("pay.base32DecodeToBytes: 'MFRGG' → abc", function () {
-    var b = AT.pay.base32DecodeToBytes("MFRGG");
-    eq(String.fromCharCode(b[0], b[1], b[2]), "abc", "vector 1");
-  });
-  test("pay.base32DecodeToBytes: 'MZXW6YTBOI' → foobar", function () {
-    var b = AT.pay.base32DecodeToBytes("MZXW6YTBOI");
-    var s = ""; b.forEach(function (x) { s += String.fromCharCode(x); });
-    eq(s, "foobar", "vector 2");
-  });
-  test("pay: pinned constants match the clipper desk", function () {
-    eq(AT.pay.USDC_BASE, "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913", "USDC Base");
-    eq(AT.pay.PRICE_PRO, 5, "pro price");
-    eq(AT.pay.PRICE_SOURCE, 19, "source price");
-    ok(AT.pay.RECIPIENTS.indexOf("0x72aa6edde71b94f6b99c8e52edc02b5c75f74d1a") !== -1, "treasury A");
-    ok(AT.pay.RECIPIENTS.indexOf("0xbbe6966949d7265a7f5f0b793f08293b9b7fe926") !== -1, "treasury B");
-    eq(AT.pay.DEFAULT_RPC, "https://mainnet.base.org", "rpc");
-  });
-  test("pay.isHexTx", function () {
-    ok(AT.pay.isHexTx("0x" + "ab".repeat(32)), "valid");
-    ok(!AT.pay.isHexTx("0x12"), "too short");
-    ok(!AT.pay.isHexTx(null), "null");
+  /* ---------- нагрузка ---------- */
+  group("нагрузка: заказ занимает стойку и не берётся дважды", function () {
+    var s = E.create();
+    var now = 1000;
+    var r = E.accept(s, "o_arb", now);
+    ok(r.ok, "заказ на 70 нагрузки принят");
+    eq(E.usedLoad(s), 70, "занято 70");
+    eq(E.freeLoad(s, now), 30, "свободно 30");
+    eq(E.accept(s, "o_arb", now).reason, "already_running", "повторный тот же заказ отклонён");
+    eq(E.accept(s, "o_wb_parse", now).reason, "no_room", "заказ на 35 не влезает в 30");
+    ok(E.accept(s, "o_tg_pack", now).ok === false, "на 40 нагрузки места нет");
   });
 
-  /* ---------- license + tx with real payloads & mocks ---------- */
-  var KEY_AT = "JRBTC-ABYPM-RHMIR-2GEWC-E4BCH-IRGC3-DHN4W-XI6LD-N5XW4-IRMEJ-2CEOR-COBZG-6IRME-JSSEO-RQFQR-HKIR2-EJSGK-3LPMR-SW23Z-CPURV-WYOVJ-SZLID-KISBZ-KHO6C-L2C2V-7ZYEG-5OA27-IHTKR-ZXXO2-5TBEC-YKKEB-62C7V-EHJW4-WJ25I-RVXSI-UNK46-FUYGN-OUBCF-5BDLB-LDQQI";
-  var KEY_DCLIP = "JRBTC-ABSPM-RHMIR-2GEWC-E4BCH-IRGIY-3MNFY-CELBC-OQRDU-ITQOJ-XSELB-CMURD-UMBME-J2SEO-RCMRS-W233E-MVWW6-IT5RB-6C6HB-H5TTS-VJPA7-WZPMC-DVCNJ-HPS4J-2CJI2-P76GA-TGEBV-AWPJL-4MCVT-GI2WU-SGDDS-CAP7L-4FUU3-AFVLP-OUNU5-XE6OX-AXCQI-5KEKD-Q";
-  var KEY_AT_EXPIRED = "JRBTC-ACBPM-RHMIR-2GEWC-E4BCH-IRGC3-DHN4W-XI6LD-N5XW4-IRMEJ-2CEOR-COBZG-6IRME-JSSEO-RRG4Y-DAMBQ-GAYDA-MBMEJ-2SEOR-CMRSW-233EM-VWW6I-T5QP2-6XDY4-XGLQE-Q76OP-XWIXN-YH6RW-CKKWV-HYCEH-HKDYN-DUW2A-ZP5ZH-DRTSI-UFSAW-S4BLL-UHBCN-6LSQC-Z7CFG-LY7RY-3AY6X-QFUS6-5ZYCA";
-
-  test("license: valid algo-tycoon key verifies", function () {
-    return AT.pay.verifyLicense(KEY_AT).then(function (r) {
-      ok(r.ok, "ok=true");
-      eq(r.payload.p, "algo-tycoon", "product");
-      eq(r.payload.u, "demodemo", "tag");
-    });
-  });
-  test("license: dclip key is wrong product here", function () {
-    return AT.pay.verifyLicense(KEY_DCLIP).then(function (r) {
-      ok(!r.ok, "rejected");
-      eq(r.reason, "wrong product", "reason");
-    });
-  });
-  test("license: expired algo-tycoon key rejected", function () {
-    return AT.pay.verifyLicense(KEY_AT_EXPIRED).then(function (r) {
-      ok(!r.ok, "rejected");
-      eq(r.reason, "expired", "reason");
-    });
-  });
-  test("license: mutated sig rejected", function () {
-    return AT.pay.verifyLicense(KEY_AT.slice(0, -1) + "2").then(function (r) {
-      ok(!r.ok, "bad signature path");
-    });
+  group("нагрузка: две стойки дают 200 и два заказа параллельно", function () {
+    var s = E.create({ balance: 10000, updates: 0 });
+    s.upgrades.rack = 1;
+    eq(E.capacity(s), 200, "200 нагрузки");
+    ok(E.accept(s, "o_arb", 1000).ok, "первый заказ");
+    ok(E.accept(s, "o_wb_parse", 1000).ok, "второй заказ");
+    eq(E.usedLoad(s), 105, "занято 105");
   });
 
-  function rpcMock(result) {
-    return function () {
-      return Promise.resolve({ ok: true, json: function () { return Promise.resolve({ result: result }); } });
-    };
-  }
-  var TX = "0x" + "ab".repeat(32);
-  var REC_OK = {
-    status: "0x1", blockNumber: "0x4f1a01",
-    logs: [{
-      address: "0x833589fCD6eDb6e08f4c7C32D4f71b54bdA02913",
-      topics: [
-        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-        "0x000000000000000000000000d8dA6BF26964aF0D7459f7524E32ebfFD3335335",
-        "0x00000000000000000000000072aa6edde71b94f6b99c8e52edc02b5c75f74d1a"],
-      data: "0x00000000000000000000000000000000000000000000000000000000004C4B40"
-    }]
-  };
-  test("tx: exact $5 pro payment verifies", function () {
-    return AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 5, fetchImpl: rpcMock(REC_OK), rpcUrl: "mock://" }).then(function (r) {
-      ok(r.ok, "$5 = 5e6 units = 0x4C4B40");
-      eq(r.amountUSDC, 5, "amount");
-    });
-  });
-  test("tx: $19 source payment qualifies too", function () {
-    return AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 19, fetchImpl: rpcMock(REC_OK), rpcUrl: "mock://" }).then(function (r) {
-      ok(!r.ok, "$5 tx does not cover $19");
-    });
-  });
-  test("tx: 1 USDC is below the $5 price", function () {
-    var rec = JSON.parse(JSON.stringify(REC_OK));
-    rec.logs[0].data = "0x" + (1e6).toString(16).padStart(64, "0");
-    return AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 5, fetchImpl: rpcMock(rec), rpcUrl: "mock://" }).then(function (r) {
-      ok(!r.ok, "below price");
-      ok(String(r.reason).indexOf("below") !== -1, "reason");
-    });
-  });
-  test("tx: foreign recipient rejected", function () {
-    var rec = JSON.parse(JSON.stringify(REC_OK));
-    rec.logs[0].topics[2] = "0x" + "e".repeat(64);
-    return AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 5, fetchImpl: rpcMock(rec), rpcUrl: "mock://" }).then(function (r) {
-      ok(!r.ok, "no qualifying transfer");
-    });
-  });
-  test("tx: pending / failed tx handled", function () {
-    return Promise.all([
-      AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 5, fetchImpl: rpcMock(null), rpcUrl: "mock://" }),
-      new Promise(function (res) {
-        var rec = JSON.parse(JSON.stringify(REC_OK)); rec.status = "0x0";
-        AT.pay.verifyBaseUSDCPayment({ txHash: TX, amountUSD: 5, fetchImpl: rpcMock(rec), rpcUrl: "mock://" }).then(res);
-      })
-    ]).then(function (rs) {
-      ok(!rs[0].ok && String(rs[0].reason).indexOf("not found") !== -1, "pending → not found");
-      ok(!rs[1].ok && String(rs[1].reason).indexOf("failed") !== -1, "failed → reason");
-    });
+  /* ---------- завершение ---------- */
+  group("заказ доезжает: деньги, репутация, счётчик", function () {
+    var s = E.create();
+    var t0 = 5000;
+    E.accept(s, "o_wb_parse", t0);
+    var dur = E.durationMs(s, E.orderById("o_wb_parse"));
+    eq(dur, 6000, "6 секунд при x1");
+    eq(E.tick(s, t0 + 1000).gained, 0, "рано — денег нет");
+    var res = E.tick(s, t0 + dur);
+    eq(res.gained, 250, "начислено 250 ₽");
+    eq(s.balance, 1250, "баланс 1 250 ₽");
+    eq(s.completed, 1, "один заказ сдан");
+    eq(s.rep, 2, "репутация +2");
+    eq(s.chapterEarned, 250, "оборот главы 250 ₽");
+    eq(E.tick(s, t0 + dur + 5000).gained, 0, "второй раз не платит");
   });
 
-  /* ---------- ticker & page ---------- */
-  test("ticker: deterministic cosmetic feed", function () {
-    var mk1 = AT.rng.mulberry32(AT.levels.TICKER.seed);
-    var mk2 = AT.rng.mulberry32(AT.levels.TICKER.seed);
-    eq(mk1(), mk2(), "cloned seeds agree");
-    ok(AT.levels.TICKER.instruments.length >= 5, "instruments listed");
-  });
-  test("page: panels and controls present", function () {
-    ["jobs", "research", "pipeline", "library", "run", "verdict", "target", "stream",
-      "ticker", "pro-modal", "tx-in", "key-in", "sb-seed", "sb-ops", "editor-out"].forEach(function (id) {
-        ok(!!document.getElementById(id), "#" + id);
-      });
-  });
-  test("page: no emoji anywhere", function () {
-    ok(!/[\u{1F300}-\u{1FAFF}\u{2600}-\u{2603}\u{27BF}]/u.test(document.body.textContent), "zero emoji");
-  });
-  test("page: no purple palette", function () {
-    var css = Array.prototype.slice.call(document.querySelectorAll("style,link[rel='stylesheet']"));
-    ok(css.length > 0, "stylesheet wired"); // palette pinned in style.css: no purple tokens by construction
+  /* ---------- главы ---------- */
+  group("главы: цель 5 000 ₽ закрывает первую", function () {
+    var s = E.create();
+    eq(E.chapterGoal(s), 5000, "цель главы 1");
+    eq(E.canAdvance(s), false, "пока нельзя");
+    s.chapterEarned = 4999;
+    eq(E.canAdvance(s), false, "4999 мало");
+    s.chapterEarned = 5000;
+    eq(E.canAdvance(s), true, "5 000 — можно");
+    var r = E.advance(s);
+    ok(r.ok, "глава открыта");
+    eq(s.chapter, 2, "мы во второй главе");
+    eq(s.chapterEarned, 0, "оборот главы обнулён");
+    eq(E.chapterGoal(s), 25000, "цель главы 2");
   });
 
-  /* ---------- harness ---------- */
-  async function run() {
-    t0 = performance.now();
-    var wrap = document.getElementById("t-cases");
-    for (var i = 0; i < cases.length; i += 1) {
-      var c = cases[i];
-      var from = results.length;
-      try {
-        var ret = c.fn();
-        if (ret && typeof ret.then === "function") await ret;
-      } catch (e) {
-        results.push({ ok: false, msg: c.name + " ✗ " + (e && e.message ? e.message : String(e)) });
-      }
-      var slice = results.slice(from);
-      var el = document.createElement("div");
-      el.className = "case " + (slice.every(function (r) { return r.ok; }) ? "pass" : "fail");
-      el.textContent = c.name + "  [" + slice.length + " asserts]";
-      wrap.appendChild(el);
+  group("глава 3 закрыта без Pro и открыта с Pro", function () {
+    var s = E.create();
+    eq(E.accept(s, "o_quant", 1000).reason, "locked_chapter", "без Pro заказ кластера не взять");
+    s.chapter = 3;
+    eq(E.accept(s, "o_quant", 1000).reason, "pro_only", "глава 3 требует Pro");
+    s.pro = true;
+    s.upgrades.rack = 4;
+    ok(E.accept(s, "o_quant", 1000).ok, "с Pro заказ принят");
+  });
+
+  group("глава 3 не открывается переходом без Pro", function () {
+    var s = E.create();
+    s.chapter = 2;
+    s.chapterEarned = 25000;
+    eq(E.canAdvance(s), false, "без Pro третья глава не открывается");
+    s.pro = true;
+    eq(E.canAdvance(s), true, "с Pro открывается");
+  });
+
+  /* ---------- скорость ---------- */
+  group("скорость: x5 и x10 только в Pro, время делится", function () {
+    var s = E.create();
+    eq(E.setSpeed(s, 5).reason, "pro_only", "x5 без Pro запрещён");
+    eq(E.setSpeed(s, 10).reason, "pro_only", "x10 без Pro запрещён");
+    eq(E.setSpeed(s, 7).reason, "bad_speed", "странная скорость отклонена");
+    s.pro = true;
+    ok(E.setSpeed(s, 5).ok, "x5 с Pro");
+    var o = E.orderById("o_wb_parse");
+    near(E.durationMs(s, o), 1200, 1, "6 с / 5 = 1.2 с");
+    E.setSpeed(s, 10);
+    near(E.durationMs(s, o), 600, 1, "6 с / 10 = 0.6 с");
+    E.setSpeed(s, 1);
+    eq(E.durationMs(s, o), 6000, "назад к 6 с");
+  });
+
+  /* ---------- апгрейды ---------- */
+  group("апгрейды: стойка стоит 600 ₽, затем 960 ₽", function () {
+    var s = E.create();
+    eq(E.upgradeCost(s, "rack"), 600, "цена первой стойки");
+    ok(E.buyUpgrade(s, "rack").ok, "за 1 000 ₽ стойка покупается");
+    eq(s.balance, 400, "осталось 400 ₽");
+    eq(E.upgradeCost(s, "rack"), 960, "вторая стойка — 960 ₽");
+  });
+
+  group("апгрейды: покупка списывает деньги и качает уровень", function () {
+    var s = E.create({ balance: 5000 });
+    var r = E.buyUpgrade(s, "rack");
+    ok(r.ok, "стойка куплена");
+    eq(r.cost, 600, "списано 600 ₽");
+    eq(s.balance, 4400, "осталось 4 400 ₽");
+    eq(s.upgrades.rack, 1, "уровень 1");
+    eq(E.capacity(s), 200, "200 нагрузки");
+    eq(E.upgradeCost(s, "rack"), 960, "следующая стойка дороже: 960 ₽");
+  });
+
+  group("апгрейды: нет денег — нет покупки", function () {
+    var s = E.create({ balance: 100 });
+    var r = E.buyUpgrade(s, "rack");
+    eq(r.ok, false, "покупка отклонена");
+    eq(r.reason, "no_money", "причина — нет денег");
+    eq(s.balance, 100, "баланс не тронут");
+    eq(s.upgrades.rack, 0, "уровень не вырос");
+  });
+
+  group("апгрейды: отдел продаж +15% к оплате", function () {
+    var s = E.create({ balance: 10000 });
+    E.buyUpgrade(s, "sales");
+    eq(E.payoutFor(s, E.orderById("o_wb_parse")), 288, "250 × 1.15 = 288 ₽");
+  });
+
+  group("апгрейды: нейросеть ускоряет заказ на 20%", function () {
+    var s = E.create({ balance: 10000 });
+    E.buyUpgrade(s, "gpu");
+    eq(E.durationMs(s, E.orderById("o_wb_parse")), 4800, "6 с → 4.8 с");
+  });
+
+  group("апгрейды: оператор даёт +2 репутации за заказ", function () {
+    var s = E.create({ balance: 10000 });
+    E.buyUpgrade(s, "team");
+    E.accept(s, "o_wb_parse", 0);
+    E.tick(s, 6000);
+    eq(s.rep, 4, "2 базовых + 2 от оператора");
+  });
+
+  group("апгрейды: максимальный уровень закрывает покупку", function () {
+    var s = E.create({ balance: 10000000 });
+    for (var i = 0; i < 8; i += 1) E.buyUpgrade(s, "rack");
+    eq(s.upgrades.rack, 8, "восемь уровней");
+    eq(E.upgradeCost(s, "rack"), Infinity, "цена — бесконечность");
+    eq(E.buyUpgrade(s, "rack").reason, "max_level", "дальше нельзя");
+  });
+
+  /* ---------- репутация ---------- */
+  group("репутация: +0.5% к оплате за единицу, потолок +25%", function () {
+    var s = E.create();
+    var o = E.orderById("o_wb_parse");
+    s.rep = 20;
+    near(E.repBonus(s), 0.1, 1e-9, "20 репутации = +10%");
+    eq(E.payoutFor(s, o), 275, "250 + 10% = 275 ₽");
+    s.rep = 500;
+    near(E.repBonus(s), 0.25, 1e-9, "потолок +25%");
+    eq(E.payoutFor(s, o), 313, "250 + 25% = 313 ₽");
+  });
+
+  /* ---------- кризисы ---------- */
+  group("кризисы: обвал рынка −35% на время", function () {
+    var s = E.create({ pro: true });
+    var o = E.orderById("o_wb_parse");
+    eq(E.applyCrisis(s, "crash", 1000).ok, true, "кризис запущен");
+    eq(E.payoutFor(s, o, 1500), 163, "250 × 0.65 = 163 ₽");
+    eq(E.payoutFor(s, o, 1000 + 20001), 250, "через 20 с оплата снова полная");
+  });
+
+  group("кризисы: отключение стойки режет нагрузку вдвое", function () {
+    var s = E.create({ pro: true });
+    E.applyCrisis(s, "blackout", 1000);
+    eq(E.capacity(s, 1500), 50, "100 → 50 нагрузки");
+    eq(E.capacity(s, 1000 + 15001), 100, "через 15 с снова 100");
+  });
+
+  group("кризисы: налоговая списывает 10% один раз", function () {
+    var s = E.create({ pro: true, balance: 5000 });
+    var r = E.applyCrisis(s, "tax", 1000);
+    ok(r.ok, "проверка запущена");
+    eq(r.fine, 500, "штраф 500 ₽");
+    eq(s.balance, 4500, "осталось 4 500 ₽");
+    eq(s.crisis, null, "эффект не висит");
+  });
+
+  group("кризисы: без Pro не работают", function () {
+    var s = E.create();
+    eq(E.applyCrisis(s, "crash", 1000).reason, "pro_only", "кризисы только в Pro");
+  });
+
+  /* ---------- песочница ---------- */
+  group("песочница: $1 000 000, глава 3, скорость x5", function () {
+    var free = E.create();
+    eq(E.startSandbox(free).reason, "pro_only", "без Pro песочницы нет");
+    var s = E.create({ pro: true });
+    var r = E.startSandbox(s);
+    ok(r.ok, "песочница включена");
+    eq(s.balance, 90000000, "90 000 000 ₽ = $1 000 000");
+    eq(s.chapter, 3, "третья глава");
+    eq(s.speed, 5, "скорость x5");
+    eq(s.sandbox, true, "режим помечен");
+  });
+
+  /* ---------- доход в час ---------- */
+  group("прогноз дохода: положительный и растёт со стойкой", function () {
+    var s = E.create();
+    var one = E.incomePerHour(s, 1000);
+    ok(one > 0, "на одной стойке доход есть: " + one);
+    s.upgrades.rack = 2;
+    var three = E.incomePerHour(s, 1000);
+    ok(three > one, "три стойки дают больше: " + three + " > " + one);
+  });
+
+  /* ---------- форматирование ---------- */
+  group("формат: рубли с пробелами, доллары с запятой", function () {
+    eq(E.fmtRub(1000), "1\u00A0000\u00A0₽", "1 000 ₽");
+    eq(E.fmtRub(250), "250\u00A0₽", "250 ₽");
+    eq(E.fmtRub(650000), "650\u00A0000\u00A0₽", "650 000 ₽");
+    eq(E.fmtUsd(11.111), "$11,1", "$11,1");
+    eq(E.fmtUsd(90000000 / 90), "$1\u00A0000\u00A0000", "песочница = $1 000 000");
+    eq(E.fmtSec(6000), "6 с", "6 секунд");
+  });
+
+  /* ---------- сохранение ---------- */
+  group("сохранение: прогресс переживает перезагрузку", function () {
+    var s = E.create({ balance: 4321, chapter: 2, rep: 7, completed: 3 });
+    s.upgrades.rack = 1;
+    s.speed = 1;
+    AT.save.save(s);
+    var back = AT.save.load();
+    eq(back.balance, 4321, "баланс на месте");
+    eq(back.chapter, 2, "глава на месте");
+    eq(back.rep, 7, "репутация на месте");
+    eq(back.upgrades.rack, 1, "апгрейд на месте");
+    AT.save.wipe();
+  });
+
+  group("сохранение: битый JSON не ломает игру", function () {
+    try { localStorage.setItem(AT.save.KEY, "{это не json"); } catch (e) { }
+    var s = AT.save.load();
+    eq(s.balance, 1000, "новая игра вместо белого экрана");
+    AT.save.wipe();
+  });
+
+  group("сохранение: старая схема v1 игнорируется", function () {
+    try { localStorage.setItem(AT.save.KEY, JSON.stringify({ v: 1, credits: 999 })); } catch (e) { }
+    var s = AT.save.load();
+    eq(s.balance, 1000, "v1 не подмешивается");
+    eq(AT.save.KEY, "algo_tycoon_v2", "ключ второй версии");
+    AT.save.wipe();
+  });
+
+  /* ---------- прогон партии ---------- */
+  group("партия: 20 заказов подряд без ухода в минус", function () {
+    var s = E.create();
+    var now = 0;
+    for (var i = 0; i < 40; i += 1) {
+      var rec = E.recommended(s, now);
+      if (rec) E.accept(s, rec.id, now);
+      now += 2000;
+      E.tick(s, now);
     }
-    var dur = Math.round(performance.now() - t0);
-    var passed = results.filter(function (r) { return r.ok; }).length;
-    var failed = results.length - passed;
-    var sumEl = document.getElementById("t-sum");
-    sumEl.textContent = results.length + " assertions · " + passed + " passed · " + failed + " failed · " + dur + "ms";
-    sumEl.classList.add(failed ? "fail" : "pass");
-    window.__RESULTS__ = { total: results.length, passed: passed, failed: failed, durationMs: dur, cases: results };
+    ok(s.balance >= 1000, "баланс не ниже старта: " + s.balance);
+    ok(s.completed >= 5, "сдано хотя бы 5 заказов: " + s.completed);
+    ok(s.earned === s.balance - 1000 || s.earned > 0, "оборот накоплен: " + s.earned);
+  });
+
+  /* ---------- интерфейс ---------- */
+  function registerDomGroups() {
+    group("интерфейс: все узлы на месте", function () {
+      var ids = [
+        "tier-chip", "hud-rub", "hud-usd", "hud-load", "stat-rub", "stat-usd",
+        "stat-income", "stat-rep", "stat-done", "load-fill", "active-list",
+        "orders", "orders-count", "chapters", "chapter-fill", "chapter-next",
+        "upgrades", "speed", "accept-top", "accept-hint", "pay-card-algo",
+        "pro-modal", "key-in", "tx-in", "pro-status", "crises", "steps"
+      ];
+      ids.forEach(function (id) {
+        ok(!!document.getElementById(id), "есть #" + id);
+      });
+    });
+
+    group("интерфейс: большая кнопка зовёт первый заказ", function () {
+      var btn = document.getElementById("accept-top");
+      var txt = btn.textContent;
+      var fresh = AT.app && AT.app.state().completed === 0;
+      if (fresh) {
+        ok(/Принять первый заказ/.test(txt), "кнопка: " + txt);
+        ok(/\+250\u00A0₽/.test(txt), "в кнопке +250 ₽: " + txt);
+      } else {
+        ok(/Взять «/.test(txt), "кнопка предлагает следующий заказ: " + txt);
+      }
+      ok(/[\d]\u00A0₽/.test(txt), "в кнопке видна сумма в рублях: " + txt);
+    });
+
+    group("интерфейс: заказы, апгрейды и главы отрисованы", function () {
+      ok(document.querySelectorAll("#orders .order").length >= 3, "минимум три заказа");
+      eq(document.querySelectorAll("#upgrades .upgrade").length, 4, "четыре апгрейда");
+      eq(document.querySelectorAll("#chapters .chapter").length, 3, "три главы");
+      eq(document.querySelectorAll("#crises .crisis-btn").length, 3, "три кризиса");
+      eq(document.querySelectorAll("#steps li").length, 4, "четыре шага инструкции");
+    });
+
+    group("интерфейс: Pro по умолчанию закрыт, ключ принимается", function () {
+      var pro = document.body.classList.contains("pro");
+      eq(pro, false, "на старте Free");
+      eq(document.getElementById("tier-chip").textContent.trim(), "FREE", "чип FREE");
+      ok(!!document.querySelector('[data-unlock][data-product="all-in-one"]'), "кнопка All-in-One есть");
+      ok(!!document.querySelector('[data-shop-product="algo-tycoon"]'), "карта оплаты привязана к лоту");
+    });
+
+    group("интерфейс: один блок JSON-LD и правильные поля", function () {
+      var blocks = document.querySelectorAll('script[type="application/ld+json"]');
+      eq(blocks.length, 1, "ровно один блок");
+      var doc = JSON.parse(blocks[0].textContent);
+      var app = doc["@graph"].filter(function (n) { return n["@type"] === "SoftwareApplication"; })[0];
+      ok(!!app, "SoftwareApplication описан");
+      ok(app.featureList.length >= 3, "featureList ≥ 3");
+      ok(app.offers.some(function (o) { return Number(o.price) > 0; }), "есть платное предложение");
+      ok(/^https:\/\/9xj89gzrtw-hue\.github\.io/.test(app.url), "абсолютный url");
+    });
+
+    group("интерфейс: нет горизонтального скролла", function () {
+      var doc = document.documentElement.scrollWidth;
+      var win = window.innerWidth;
+      ok(doc <= win + 1, "doc=" + doc + " win=" + win);
+    });
   }
-  void run();
+
+  function finish() {
+    var pass = results.filter(function (r) { return r.ok; }).length;
+    var fail = results.length - pass;
+    window.__RESULTS__ = { groups: groups, total: results.length, pass: pass, fail: fail, results: results };
+
+    var sum = document.getElementById("t-sum");
+    var box = document.getElementById("t-cases");
+    if (sum) sum.textContent = "групп: " + groups + " · проверок: " + results.length + " · ok: " + pass + " · fail: " + fail;
+    if (box) {
+      box.innerHTML = "";
+      results.forEach(function (r) {
+        var d = document.createElement("div");
+        d.className = "t-case" + (r.ok ? "" : " bad");
+        d.textContent = (r.ok ? "ok   " : "FAIL ") + r.msg;
+        box.appendChild(d);
+      });
+    }
+    document.body.classList.add("testing");
+  }
+
+  function run() {
+    registerDomGroups();
+    /* Группы идут подряд; упавшая группа не останавливает остальные. */
+    queue.forEach(function (g) {
+      groups += 1;
+      try { g.fn(); } catch (e) {
+        results.push({ ok: false, msg: "группа «" + g.name + "» упала: " + (e && e.message ? e.message : e) });
+      }
+    });
+    finish();
+  }
+
+  function start() {
+    /* Ждём следующий макрокадр: приложение успевает отрендерить первый экран
+       из DOMContentLoaded, и проверки видят уже живую страницу. */
+    setTimeout(function () {
+      try { run(); } catch (e) {
+        results.push({ ok: false, msg: "батарея упала: " + (e && e.message ? e.message : e) });
+        finish();
+      }
+    }, 0);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
 })();

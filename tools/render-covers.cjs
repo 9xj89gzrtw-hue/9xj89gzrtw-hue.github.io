@@ -35,7 +35,7 @@ const ITEMS = [
     slug: "all-in-one",
     url: "/index.html",
     kicker: "ALL-IN-ONE PRO PASS",
-    headline: "8 инструментов. Один ключ. Без подписки.",
+    headline: "8 продуктов. Один ключ. Без подписки.",
     sub: "Telegram, звук, таблицы, рынки, игра — всё в браузере",
     price: "1 290 ₽",
     priceAlt: "$14.99 · USDC на Base",
@@ -56,7 +56,7 @@ const ITEMS = [
     slug: "tg-chats",
     url: "/tg-chats/index.html",
     kicker: "TG CHAT VALIDATOR",
-    headline: "615 открытых чатов Telegram с проверкой ссылок",
+    headline: "1 200+ открытых чатов Telegram с проверкой ссылок",
     sub: "Участники, тема, город и дата проверки — таблица готова к выгрузке",
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
@@ -78,7 +78,7 @@ const ITEMS = [
     kicker: "TABLE & TG-CHANNEL CLIPPER",
     headline: "Любая таблица — в чистый CSV за один клик",
     sub: "Понимает ленты Telegram и страницы с бесконечной прокруткой",
-    price: "390 ₽",
+    price: "299 ₽",
     priceAlt: "$9 · USDC на Base",
     scrollY: 1500
   },
@@ -115,9 +115,9 @@ const ITEMS = [
   {
     slug: "algo-tycoon",
     url: "/algo-tycoon/index.html",
-    kicker: "ALGO TYCOON",
-    headline: "Собери пайплайн и сдай алгоритм",
-    sub: "J01 · First compile, две карты и кнопка запуска — игра сразу",
+    kicker: "AI & MARKET TYCOON",
+    headline: "Симулятор ИИ-стартапа и алго-биржи",
+    sub: "1 000 ₽ и одна стойка на старте: заказы, серверы, квантовый кластер",
     price: "249 ₽",
     priceAlt: "$2.49 · USDC на Base",
     scrollY: 0
@@ -203,7 +203,7 @@ function coverHtml(item, shot, w, h) {
     .price b{display:block;font-size:${wide ? 30 : 34}px;letter-spacing:-.03em;line-height:1}
     .price span{display:block;margin-top:5px;font-size:${wide ? 12.5 : 13}px;color:#64748b}
   </style></head><body>
-    <div class="top"><span class="mark"></span><span class="brand">Toolworks <span>· 9 инструментов</span></span></div>
+    <div class="top"><span class="mark"></span><span class="brand">Toolworks <span>· 8 продуктов</span></span></div>
     <div class="kicker">${item.kicker}</div>
     <h1>${item.headline}</h1>
     <div class="sub">${item.sub}</div>

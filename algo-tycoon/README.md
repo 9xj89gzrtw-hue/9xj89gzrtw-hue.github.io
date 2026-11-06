@@ -1,48 +1,51 @@
-# Algo Tycoon
+# AI & Market Tycoon
 
-A pipeline-puzzle economy game for the browser. Synthetic order flow arrives
-seed-by-seed (mulberry32 PRNG — every feed is reproducible), you stack
-deterministic op-cards into a pipeline (`FLOOR → ODD → ABS → CHUNK-2 → MAX`),
-and the desk pays out only when the compiled scalar lands exactly on target
-(tolerance 1e-9).
+Симулятор ИИ-стартапа и алго-биржи прямо в браузере. Вы открываете
+микро-агентство с **1 000 ₽** и одной серверной стойкой, берёте живые заказы
+в один клик («Спарсить 100 карточек WB — +250 ₽», «Озвучить ролик
+нейросетью — +400 ₽», «Поймать арбитражную сделку — +800 ₽»), докупаете
+стойки и апгрейды и растёте до квантового кластера.
 
-- **14 contracts** across three acts (pilot → volume → playbook)
-- **22 op-cards**: maps, abs/floor/neg, filters (even/odd/pos), sorts, reverse,
-  dedupe, chunk-2, zigzag, rotate, take/skip/tail, scalars (Σ Π min max)
-- **Research tree**: payout multipliers, wider pipelines, offline compilers
-  (3 cr/hour each, accrue up to 8 hours while you're away)
-- Free tier: 6-card pipeline, all contracts playable
-- Pro: **$5** one-time (USDC on Base tx-hash verification, or Ed25519 license
-  key) → 11-card pipeline, live **sandbox**, **level editor** (JSON export)
-- **Source pack**: $19 one-time → full unminified source zip
-- No accounts, no KYC, no telemetry. Saves live in
-  `localStorage` (`algo_tycoon_v1`, Pro flag mirrored to `algo_tycoon_pro_v1`).
+- **3 главы**: фриланс → агентство → Уолл-Стрит. Первые две бесплатны.
+- **16 заказов** с реальной экономикой: оплата, нагрузка на стойку, время.
+- **4 апгрейда**: стойка (+100 нагрузки), нейросеть (−20% времени), отдел
+  продаж (+15% к оплате), оператор (+2 репутации за заказ).
+- **Репутация** даёт до +25% к оплате, доход в час считается по факту.
+- **Pro (249 ₽ / $2.49, один платёж)**: глава 3 «Уолл-Стрит и квантовый
+  кластер», песочница на **$1 000 000**, скорость **x5 / x10**, конструктор
+  кризисов (обвал рынка, отключение стойки, налоговая) и экспорт отчёта.
+- Без аккаунта, KYC и телеметрии. Прогресс лежит в `localStorage`
+  (`algo_tycoon_v2`, флаг Pro дублируется в `algo_tycoon_pro_v1`).
 
-## Play
+## Играть
 
-Deployed at <https://9xj89gzrtw-hue.github.io/algo-tycoon/> or open
-`index.html` straight from disk — no modules, no build step, `file://` friendly
-(classic scripts, `window.AT.*` namespaces).
+<https://9xj89gzrtw-hue.github.io/algo-tycoon/> — или откройте `index.html`
+прямо с диска: классические скрипты, без сборки, `file://` работает.
 
-## Tests
+## Как устроено
 
-Open with `?test=1`: 85 case-groups / 223 assertions covering RNG
-determinism, every op-card, pipeline composition + tolerance, a solver pass
-reproducing all 14 targets from seeds alone, payout/unlock/research rules,
-offline-compiler math, base32 vectors, Ed25519 license checks (valid / wrong
-product / expired / tampered) and mocked-RPC USDC verification.
+| Файл | Роль |
+|---|---|
+| `js/content.js` | только данные: главы, заказы, апгрейды, кризисы |
+| `js/economy.js` | чистая экономика: нагрузка, оплата, время, главы, апгрейды |
+| `js/save.js` | сохранение v2 и офлайн-догрузка завершённых заказов |
+| `js/pay.js` | оплата: USDC на Base по хешу + лицензии TW1/Ed25519 |
+| `js/app.js` | интерфейс: рендер по состоянию и один цикл на 120 мс |
+| `tests.js` | батарея проверок, открывается как `?test=1` |
 
-## Telegram Mini App notes
+## Тесты
 
-The game is pure static assets and runs inside a Telegram Mini App webview as
--is:
+Откройте страницу с `?test=1`: 35 групп / 240+ проверок — стартовый баланс,
+оплата первого заказа, нагрузка стоек, завершение заказов, главы и их цели,
+Pro-гейт третьей главы, ускорение x5/x10, апгрейды и их цены, репутация,
+кризисы, песочница, форматирование сумм, сохранение и битый JSON, прогон
+партии из 40 заказов, а также структура страницы (JSON-LD, узлы интерфейса,
+отсутствие горизонтального скролла).
 
-- serve `index.html` over HTTPS (GitHub Pages works),
-- all state is client-side; there is no backend to authorize,
-- payments intentionally stay on-chain (USDC Base) — verification is local, so
-  no Telegram Payments provider registration is required,
-- the popup/modal uses plain DOM, no Telegram SDK calls, so it degrades
-  gracefully if `Telegram.WebApp` is absent; wrap the page in the TMA shell
-  for full-screen height.
+## Заметки про Telegram Mini App
 
-MIT — see `LICENSE`.
+Игра — статические файлы, поэтому работает внутри webview Telegram как есть:
+HTTPS-хостинг, всё состояние на клиенте, оплата остаётся ончейн (USDC Base)
+с локальной проверкой чека.
+
+MIT — см. `LICENSE`.

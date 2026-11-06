@@ -52,6 +52,23 @@
       label: "TG / прямой прайс · без комиссии",
       commission: 0, logistics: 90, ssp: 0, returns: 1,
       returnLogistics: 20, ads: 5, pack: 10, tax: 6
+    },
+    promo1111: {
+      label: "Расчёт цены с учётом СПП и акций WB/Ozon Ноябрь 2026 (Чёрная Пятница / 11.11)",
+      commission: 22,        // обычная комиссия категории % (вне акции)
+      logistics: 60,         // ₽ прямая логистика
+      ssp: 12,               // СПП % (скидка покупателя на состав логистики)
+      returns: 6,            // % возвратов в обычные дни
+      returnLogistics: 45,   // ₽ обработка возврата
+      ads: 12,               // % от выручки на рекламу вне акции
+      pack: 15,              // ₽ упаковка
+      tax: 6,                // УСН % от фактической (акционной) выручки
+      // --- акционные механизмы 11.11 / Чёрная Пятница ---
+      promoDiscount: 30,     // % скидки от карточной цены в акцию
+      promoCommission: 24,   // комиссия % во время акции (WB/Ozon поднимают категорию)
+      promoAds: 20,          // % от акционной выручки на рекламу во время акции
+      promoReturns: 10,      // % возвратов в акции (растут из-за импульсных покупок)
+      promoMinMargin: 10     // дно маржи в акцию, ниже которого продавать нельзя
     }
   };
 
@@ -254,6 +271,49 @@
       };
     }
 
+    /* ---------- promo model (11.11 / ЧП 2026) ----------
+       Activates only when params.promoDiscount is positive. The card price stays
+       untouched; the seller's payout is computed on the promo sell price, with the
+       promo commission / ads / return-rate knobs from the preset. Also derives the
+       maximum discount that still clears promoMinMargin — the exact number sellers
+       ask for before Black Friday savings windows on WB/Ozon. */
+    var sell = price;
+    var promo = null;
+    if (p && typeof p.promoDiscount === "number" && p.promoDiscount > 0 && isFinite(price) && price > 0) {
+      var pct_d = p.promoDiscount / 100;
+      var effComm = p.promoCommission != null ? p.promoCommission : commPct;
+      var effAds = p.promoAds != null ? p.promoAds : p.ads;
+      var effReturns = p.promoReturns != null ? p.promoReturns : (p.returns || 0);
+      var minMargin = p.promoMinMargin != null ? p.promoMinMargin : 10;
+      var sellPrice = price * (1 - pct_d);
+      var pComm = sellPrice * (effComm / 100);
+      var pTax = sellPrice * (p.tax / 100);
+      var pAds = sellPrice * (effAds / 100);
+      var pRetShare = effReturns / 100;
+      var pRetCost = pRetShare * (logEff + (p.returnLogistics || 0));
+      var pProfit = sellPrice - pComm - pTax - pAds - logEff - pRetCost - cost - pack;
+      var pMargin = sellPrice > 0 ? (pProfit / sellPrice) * 100 : 0;
+      var pRoi = cost > 0 ? (pProfit / cost) * 100 : 0;
+      // max discount keeping promо margin >= promoMinMargin:
+      // profit(d) = sell - sell*vf - fixed >= minMargin%*sell  ⇔  sell >= fixed/(vf - m)
+      var vf_p = 1 - (effComm / 100) - (p.tax / 100) - (effAds / 100);
+      var fixed_p = cost + logEff + pRetCost + pack;
+      var maxD = 0;
+      if (vf_p - minMargin / 100 > 0.05) {
+        var needSell = fixed_p / (vf_p - minMargin / 100);
+        maxD = needSell < price ? Math.floor(((1 - needSell / price) * 100) * 2) / 2 : 0; // кратно 0.5%
+        if (maxD < 0) maxD = 0;
+      }
+      promo = {
+        sellPrice: sellPrice, discount: p.promoDiscount,
+        commission: pComm, tax: pTax, ads: pAds, returnCost: pRetCost,
+        profit: pProfit, margin: pMargin, roi: pRoi, maxDiscount: maxD
+      };
+      // the "verdict" of the promo cell uses the promo economics when active
+      var promoVerdict = pProfit >= 0 && pMargin >= (p.promoMinMargin != null ? p.promoMinMargin : 10)
+        ? "green" : (pProfit > 0 ? "yellow" : "red");
+    }
+
     var verdict = profit >= 0 && margin >= 10 ? "green" : (profit > 0 ? "yellow" : "red");
 
     return {
@@ -262,7 +322,8 @@
       logistics: logEff, returnCost: returnCost, pack: pack,
       profit: profit, margin: margin, roi: roi,
       breakeven: breakeven, minPrice: minPrice,
-      competitor: compResult, verdict: verdict
+      competitor: compResult, verdict: verdict,
+      promo: promo, promoVerdict: promoVerdict || null
     };
   }
 
@@ -300,7 +361,12 @@
     ["ROI, %", function (r) { return round2(r.roi); }],
     ["Безубыточность, шт", function (r) { return isFinite(r.breakeven) ? String(r.breakeven) : "недостижимо"; }],
     ["Мин. цена безубыт, ₽", function (r) { return round2(r.minPrice); }],
-    ["Вердикт", function (r) { return r.verdict === "green" ? "прибыльный" : (r.verdict === "yellow" ? "узко" : "убыточный"); }]
+    ["Вердикт", function (r) { return r.verdict === "green" ? "прибыльный" : (r.verdict === "yellow" ? "узко" : "убыточный"); }],
+    ["Акционная цена 11.11, ₽", function (r) { return r.promo ? round2(r.promo.sellPrice) : ""; }],
+    ["Прибыль в акцию, ₽", function (r) { return r.promo ? round2(r.promo.profit) : ""; }],
+    ["Маржа в акцию, %", function (r) { return r.promo ? round2(r.promo.margin) : ""; }],
+    ["Макс. скидка до дна маржи, %", function (r) { return r.promo ? round2(r.promo.maxDiscount) : ""; }],
+    ["Вердикт акции", function (r) { return r.promoVerdict ? (r.promoVerdict === "green" ? "акция ок" : (r.promoVerdict === "yellow" ? "акция узко" : "акция в минус")) : ""; }]
   ];
 
   function round2(x) {
@@ -321,6 +387,25 @@
     return root.ClipCSV.buildCSV(rows, CSV_COLUMNS.map(function (c) { return c[0]; }), { withBOM: true });
   }
 
+  /* ---------- interactive-table API (Агент 1): UnitCalc.calculateRow ----------
+     Accepts: (rowObject, paramsOrPresetKey, fixedMonthly). Column mapping is done
+     automatically from the row's own keys, so the table grid can fire
+     UnitCalc.calculateRow({товар:..., цена: ..., закупка: ...}, "promo1111")
+     on every cell edit and re-render just that row. Unknown keys are ignored. */
+  function calculateRow(rowObject, paramsOrPresetKey, fixedMonthly) {
+    var row = {};
+    var headers = Object.keys(rowObject || {});
+    headers.forEach(function (h) { row[h] = rowObject[h]; });
+    var cols = mapColumns(headers);
+    var p = resolveParams(paramsOrPresetKey);
+    return computeSKU(row, cols, p, fixedMonthly != null ? fixedMonthly : DEFAULTS.fixedMonthly);
+  }
+
+  function resolveParams(paramsOrPresetKey) {
+    if (typeof paramsOrPresetKey === "string") return PRESETS[paramsOrPresetKey] || PRESETS.wb;
+    return paramsOrPresetKey || PRESETS.wb;
+  }
+
   var api = {
     FREE_ROW_CAP: FREE_ROW_CAP,
     PRO_ROW_CAP: PRO_ROW_CAP,
@@ -334,7 +419,11 @@
     summary: summary,
     toCSV: toCSV,
     resultsToRecords: resultsToRecords,
-    CSV_COLUMNS: CSV_COLUMNS
+    CSV_COLUMNS: CSV_COLUMNS,
+    calculateRow: calculateRow,
+    resolveParams: resolveParams
   };
   root.ClipUnit = api;
+  // Public alias for the Agent-1 interactive grid (window.UnitCalc.calculateRow).
+  root.UnitCalc = api;
 })(typeof window !== "undefined" ? window : globalThis);

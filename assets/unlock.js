@@ -992,7 +992,7 @@
         if (lot && lot.id) {
           el.href = cardUrl(lot.id);
           el.hidden = false;
-          var rub = lot.rub ? " · " + Math.round(lot.rub) + " ₽" : "";
+          var rub = lot.rub ? " · " + Math.round(lot.rub).toLocaleString("ru-RU") + " ₽" : "";
           var label = el.querySelector("[data-shop-label]") || el;
           /* The baseline is captured once, before the first price is written,
              so re-binding on unlock:changed never doubles the price or the
