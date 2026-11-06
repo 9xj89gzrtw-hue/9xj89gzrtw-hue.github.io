@@ -1,10 +1,15 @@
 /*
  * unitui.js — Unit-Economics Studio wiring for the landing page.
- * Drives ClipUnit (pure core, unitcalc.js) against the #unitcalc inputs,
+ * Drives ClipUnit (pure core, unitcalc.js) against the sheet editor,
  * renders the colour verdict matrix and enforces the same tier policy the
  * rest of the product uses: free = 50 rows CSV, Pro (the TW1-CLIP-… /
  * TW1-ALL-… key, tx hash or 60-second preview) = 10 000 rows, multi-sheet
  * XLSX report and competitor batch compare.
+ *
+ * The visible input is a spreadsheet grid (add / edit / paste from Excel).
+ * A hidden textarea keeps the old "one text blob" contract for the engine
+ * and for the test harness, so parsing and tests stay untouched.
+ *
  * Exposes window.__UNITCALC__ = { results, summary, pro } for the test harness.
  */
 (function () {
@@ -18,6 +23,11 @@
     ["pack", "упаковка, ₽", 15], ["tax", "налог УСН, %", 6],
     ["fixedMonthly", "фикс. расходы / мес, ₽", 30000]
   ];
+
+  var HEADER_LABELS = {
+    name: "Товар", price: "Цена, ₽", cost: "Закуп, ₽",
+    commission: "Комиссия, %", logistics: "Логистика, ₽", competitor: "Конкурент, ₽"
+  };
 
   var EXAMPLE_WB = [
     "товар;цена;закуп;комиссия%;логистика",
@@ -44,27 +54,29 @@
     ""
   ].join("\n");
 
-  var state = { results: [], summary: null, params: {}, rows: [], cols: null };
+  var state = { results: [], summary: null, params: {}, rows: [], cols: null, grid: { headers: [], rows: [] } };
+  var runTimer = null;
 
   function num(el, fallback) {
     var v = ClipUnit.parseNum(el && el.value);
     return isFinite(v) ? v : fallback;
   }
 
+  /* ---------------- parameters ---------------- */
   function renderParams() {
     var host = $("uc-params");
+    if (!host) return;
     host.textContent = "";
     PARAM_FIELDS.forEach(function (f) {
       var wrap = document.createElement("label");
-      wrap.style.cssText = "display:flex;flex-direction:column;gap:2px;";
+      wrap.className = "uc-param";
       var span = document.createElement("span");
       span.textContent = f[1];
       var input = document.createElement("input");
-      input.className = "mono";
       input.type = "text";
       input.id = "uc-p-" + f[0];
       input.value = String(f[2]);
-      input.style.cssText = "background:#0d0d0c;color:#e8e8e2;border:1px solid #2a2a28;padding:4px 6px;";
+      input.addEventListener("input", scheduleRun);
       wrap.appendChild(span);
       wrap.appendChild(input);
       host.appendChild(wrap);
@@ -101,22 +113,170 @@
     return !!(window.Unlock && window.Unlock.isPro && window.Unlock.isPro("data-clipper"));
   }
 
+  /* ---------------- sheet editor ---------------- */
+  /* One cell = plain text. The engine parses the serialized textarea, so a
+     pasted 500-row table and ten hand-typed rows take the same code path. */
+  function quote(v) {
+    var s = String(v == null ? "" : v);
+    return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  function serializeGrid() {
+    var g = state.grid;
+    var lines = [g.headers.map(quote).join(";")];
+    g.rows.forEach(function (row) {
+      lines.push(g.headers.map(function (h) { return quote(row[h]); }).join(";"));
+    });
+    return lines.join("\n");
+  }
+
+  function syncToTextarea() {
+    var input = $("uc-input");
+    if (input) input.value = serializeGrid();
+  }
+
+  function loadGridFromText(text) {
+    var parsed = ClipUnit.parseInput(text);
+    state.grid = {
+      headers: parsed.headers.slice(0, 8),
+      rows: parsed.rows.map(function (r) {
+        var o = {};
+        parsed.headers.slice(0, 8).forEach(function (h) { o[h] = r[h] == null ? "" : r[h]; });
+        return o;
+      })
+    };
+    if (!state.grid.rows.length) state.grid.rows.push(defaultRow());
+    syncToTextarea();
+    renderGrid();
+  }
+
+  function defaultRow() {
+    var o = {};
+    state.grid.headers.forEach(function (h) { o[h] = ""; });
+    return o;
+  }
+
+  function labelFor(header, cols) {
+    var key = null;
+    Object.keys(cols).forEach(function (field) { if (cols[field] === header) key = field; });
+    return key && HEADER_LABELS[key] ? HEADER_LABELS[key] : header;
+  }
+
+  function renderGrid() {
+    var table = $("uc-grid");
+    if (!table) return;
+    table.textContent = "";
+    var g = state.grid;
+    if (!g.headers.length) return;
+    var cols = ClipUnit.mapColumns(g.headers);
+
+    var thead = document.createElement("thead");
+    var trh = document.createElement("tr");
+    g.headers.forEach(function (h) {
+      var th = document.createElement("th");
+      th.textContent = labelFor(h, cols);
+      var numeric = cols.price === h || cols.cost === h || cols.commission === h ||
+        cols.logistics === h || cols.competitor === h;
+      if (numeric) th.className = "num";
+      trh.appendChild(th);
+    });
+    var thDel = document.createElement("th");
+    thDel.className = "del";
+    thDel.innerHTML = '<span class="sr-only">Удалить строку</span>';
+    trh.appendChild(thDel);
+    thead.appendChild(trh);
+    table.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    g.rows.forEach(function (row, ri) {
+      var tr = document.createElement("tr");
+      g.headers.forEach(function (h) {
+        var td = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "text";
+        input.value = row[h] == null ? "" : row[h];
+        input.setAttribute("aria-label", labelFor(h, cols) + ", строка " + (ri + 1));
+        var numeric = cols.price === h || cols.cost === h || cols.commission === h ||
+          cols.logistics === h || cols.competitor === h;
+        if (numeric) { input.className = "num"; input.inputMode = "decimal"; }
+        input.addEventListener("input", function () {
+          row[h] = input.value;
+          syncToTextarea();
+          scheduleRun();
+        });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      var tdDel = document.createElement("td");
+      tdDel.className = "del";
+      var del = document.createElement("button");
+      del.type = "button";
+      del.className = "row-del";
+      del.title = "Удалить строку";
+      del.setAttribute("aria-label", "Удалить строку " + (ri + 1));
+      del.textContent = "×";
+      del.addEventListener("click", function () {
+        if (state.grid.rows.length <= 1) { defaultRow(); }
+        state.grid.rows.splice(ri, 1);
+        if (!state.grid.rows.length) state.grid.rows.push(defaultRow());
+        syncToTextarea();
+        renderGrid();
+        scheduleRun();
+      });
+      tdDel.appendChild(del);
+      tr.appendChild(tdDel);
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+
+    var info = $("uc-cols-info");
+    if (info) {
+      var mapped = Object.keys(cols).filter(function (k) { return cols[k]; });
+      info.textContent = g.rows.length + " строк · столбцы: " + (mapped.length ? mapped.join(", ") : "не распознаны");
+    }
+  }
+
+  function scheduleRun() {
+    if (runTimer) clearTimeout(runTimer);
+    runTimer = setTimeout(function () { runTimer = null; run(); }, 220);
+  }
+
+  function pasteFromExcel() {
+    function apply(text) {
+      if (!text || !String(text).trim()) return;
+      loadGridFromText(text);
+      run();
+      if ($("uc-status")) $("uc-status").textContent = "вставлено строк: " + state.grid.rows.length + " — проверьте матрицу справа";
+    }
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      navigator.clipboard.readText().then(apply, function () {
+        var manual = window.prompt("Браузер не дал доступ к буферу. Вставьте таблицу сюда (Ctrl+V / Cmd+V):", "");
+        if (manual) apply(manual);
+      });
+      return;
+    }
+    var manual = window.prompt("Вставьте таблицу из Excel или Google Sheets (Ctrl+V / Cmd+V):", "");
+    if (manual) apply(manual);
+  }
+
+  /* ---------------- matrix ---------------- */
   function detailColumns(r) {
     return ClipUnit.CSV_COLUMNS.map(function (c) { return c[1](r); });
   }
 
   function renderMatrix() {
     var table = $("uc-table");
-    table.textContent = "";
     var shown = state.results.slice(0, 50); // DOM matrix preview stays honest at 50
     if (!shown.length) {
+      table.textContent = "";
       table.hidden = true;
       $("uc-out-title").textContent = "МАТРИЦА · нет данных";
-      $("uc-sum").textContent = "— вставьте данные и нажмите РАСЧЁТ —";
+      $("uc-sum").textContent = "— заполните таблицу слева —";
       $("uc-csv").disabled = true;
       $("uc-xlsx").disabled = true;
       return;
     }
+    table.textContent = "";
     table.hidden = false;
     var trh = document.createElement("tr");
     ClipUnit.CSV_COLUMNS.forEach(function (c) {
@@ -144,10 +304,11 @@
   }
 
   function run() {
-    var parsed = ClipUnit.parseInput($("uc-input").value);
+    var text = $("uc-input").value;
+    var parsed = ClipUnit.parseInput(text);
     if (!parsed.rows.length) {
       state.results = []; state.summary = null;
-      $("uc-status").textContent = "нет распознанных строк — вставьте таблицу, CSV или JSON";
+      $("uc-status").textContent = "нет распознанных строк — добавьте товар или вставьте таблицу";
       renderMatrix();
       return;
     }
@@ -157,9 +318,12 @@
     var rows = parsed.rows.slice(0, ClipUnit.PRO_ROW_CAP);
     var results = ClipUnit.computeAll(rows, cols, params, params.fixedMonthly);
     var summary = ClipUnit.summary(results);
-    state = { results: results, summary: summary, params: params, rows: rows, cols: cols };
+    state = {
+      results: results, summary: summary, params: params, rows: rows, cols: cols,
+      grid: state.grid
+    };
     var mapped = Object.keys(cols).filter(function (k) { return cols[k]; });
-    var msg = "формат " + parsed.format + " · строк " + parsed.rows.length +
+    var msg = "строк " + parsed.rows.length +
       (parsed.rows.length > rows.length ? " (взято " + rows.length + ", лимит Pro " + ClipUnit.PRO_ROW_CAP + ")" : "") +
       " · столбцы: " + (mapped.join(", ") || "не распознаны") +
       (missing.length ? " · НЕТ колонки «цена» — строки помечены красным" : "") +
@@ -185,13 +349,13 @@
     download(new Blob([csv], { type: "text/csv" }), "unit-economics-marketplace.csv");
     if (!isPro() && state.results.length > cap) {
       $("uc-status").textContent = "выгружено " + cap + " из " + state.results.length +
-        " строк (FREE). Pro снимает лимит до " + ClipUnit.PRO_ROW_CAP + " и добавляет XLSX и сравнение конкурентов — тот же ключ TW1-CLIP-…";
+        " строк (FREE). Pro снимает лимит до " + ClipUnit.PRO_ROW_CAP + " и добавляет XLSX и сравнение конкурентов.";
     }
   }
 
   function onXLSX() {
     if (!isPro()) {
-      $("uc-status").textContent = "XLSX-отчёт и сравнение конкурентов — в Pro: ключ TW1-CLIP-… / TW1-ALL-… в поле «VERIFY LICENSE KEY» ниже, USDC или 60-секундный preview.";
+      $("uc-status").textContent = "XLSX-отчёт и сравнение конкурентов — в Pro: ключ TW1-CLIP-… / TW1-ALL-… в поле ниже, USDC или 60-секундный тест-драйв.";
       return;
     }
     var hasComp = state.cols && state.cols.competitor;
@@ -234,7 +398,9 @@
 
   function loadExample() {
     var key = $("uc-preset").value;
-    $("uc-input").value = key === "ozon" ? EXAMPLE_OZON : EXAMPLE_WB;
+    var text = key === "ozon" ? EXAMPLE_OZON : EXAMPLE_WB;
+    $("uc-input").value = text;
+    loadGridFromText(text);
     run();
   }
 
@@ -242,20 +408,38 @@
     if (!$("uc-input")) return;
     renderParams();
     applyPreset($("uc-preset").value || "wb");
+
     $("uc-preset").addEventListener("change", function () {
       applyPreset($("uc-preset").value);
-      $("uc-status").textContent = "профиль " + (ClipUnit.PRESETS[$("uc-preset").value] || {}).label + " — нажмите РАСЧЁТ";
+      $("uc-status").textContent = "профиль " + (ClipUnit.PRESETS[$("uc-preset").value] || {}).label + " — пересчитано";
+      scheduleRun();
     });
     $("uc-run").addEventListener("click", run);
     $("uc-example").addEventListener("click", loadExample);
     $("uc-csv").addEventListener("click", onCSV);
     $("uc-xlsx").addEventListener("click", onXLSX);
-    renderMatrix();
-    window.__UNITCALC__ = { results: [], summary: null, cols: null, pro: isPro() };
+    if ($("uc-paste")) $("uc-paste").addEventListener("click", pasteFromExcel);
+    if ($("uc-row-add")) $("uc-row-add").addEventListener("click", function () {
+      state.grid.rows.push(defaultRow());
+      syncToTextarea();
+      renderGrid();
+      var inputs = $("uc-grid").querySelectorAll("tbody tr:last-child input");
+      if (inputs.length) inputs[0].focus();
+      scheduleRun();
+    });
+
+    /* Start with a real, already-filled example: an empty black textarea was
+       the single biggest "how do I even use this" complaint. */
+    $("uc-input").value = EXAMPLE_WB;
+    loadGridFromText(EXAMPLE_WB);
+    run();
+
+    window.__UNITCALC__ = window.__UNITCALC__ || { results: [], summary: null, cols: null, pro: isPro() };
     /* test/automation hook */
     window.__UNITCALC_RUN__ = function (text, presetKey) {
       if (presetKey) applyPreset(presetKey);
       $("uc-input").value = text;
+      loadGridFromText(text);
       run();
       return window.__UNITCALC__;
     };

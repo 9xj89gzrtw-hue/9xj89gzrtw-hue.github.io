@@ -121,8 +121,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
   white-space: nowrap;
 }
 .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
-.btn-primary:hover { background: #1e293b; }
+.btn-primary {
+  background: linear-gradient(180deg, #1b2a44, #0f172a);
+  color: #fff;
+  border-color: #0f172a;
+  box-shadow: 0 6px 16px -10px rgba(15, 23, 42, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.btn-primary:hover { background: linear-gradient(180deg, #24365a, #182338); }
 .btn-primary:disabled { background: #cbd5e1; border-color: #cbd5e1; color: #fff; cursor: not-allowed; }
 .btn-ghost { background: var(--bg); border-color: var(--line); color: var(--ink); box-shadow: var(--shadow); }
 .btn-ghost:hover { background: var(--bg-soft); }

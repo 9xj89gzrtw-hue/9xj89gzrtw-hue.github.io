@@ -257,10 +257,10 @@
       document.getElementById("demo-feed")
     );
     eq(res.total, 8, "8 rows");
-    eq(res.rows[0].title, "Market open: traders eye liquidity shift", "row0 title");
+    eq(res.rows[0].title, "Рынок открылся: трейдеры ждут перетока ликвидности", "row0 title");
     ok(res.rows[0].link.indexOf("/post/") !== -1, "link contains /post/");
     eq(res.rows[0].time, "09:14", "row0 time");
-    ok(res.rows[0].views.indexOf("12.4K") !== -1, "row0 views");
+    ok(res.rows[0].views.indexOf("12,4 тыс.") !== -1, "row0 views");
     eq(res.truncated, false, "not truncated");
   });
   test("engine: maxRows caps extraction", function () {

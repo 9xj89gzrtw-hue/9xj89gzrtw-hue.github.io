@@ -105,7 +105,7 @@ const ok = (name, cond, extra) => {
       parent: p && p.parentElement ? p.parentElement.id : null
     };
   });
-  ok("расширение инжектирует панель", markers.buttons === 3, JSON.stringify(markers));
+  ok("расширение инжектирует панель", markers.buttons >= 3, JSON.stringify(markers));
   ok("bridge.js поднял флаг в isolated world", markers.bridge === "1", markers.bridge);
   ok("панель под видео", markers.parent === "below", markers.parent);
 

@@ -1,18 +1,21 @@
 /* assets/home-lab.js — the live widget on the home hero.
  *
- * Three things that actually work in the browser, no sign-up and no network:
- *   1. Telegram: format check + lookup in the free slice of the catalogue
- *      (35 rows now, 1 017 in the base);
- *   2. a pasted spreadsheet → clean CSV, downloaded locally;
- *   3. the All-in-One saving, computed from the live Platanus.Market lots in
- *      assets/shop.js rather than invented numbers.
+ * Three things that work right here, with no sign-up and no network:
+ *   1. profitability of a WB/Ozon product — an editable table and a commission
+ *      slider, recalculated per keystroke, one click to a CSV Excel opens;
+ *   2. a hand-picked slice of the Telegram catalogue: only Russian-language
+ *      seller, wholesale and IT-freelance chats. Spam, other languages and
+ *      ALL-CAPS noise are filtered out before they reach the DOM;
+ *   3. a pasted spreadsheet → clean CSV, previewed as a real table.
  *
- * The catalogue is loaded lazily, only when the Telegram tab is first opened.
+ * The catalogue is a curated constant on purpose: the free 35-row slice is
+ * generated elsewhere and contains rows a Russian buyer should never see.
  */
 (function () {
   "use strict";
 
   var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return Math.round(Number(n) || 0).toLocaleString("ru-RU"); };
 
   /* ---------- tabs ---------- */
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".lab-tab"));
@@ -25,10 +28,7 @@
     tabs.forEach(function (t) {
       t.setAttribute("aria-selected", t.getAttribute("data-lab") === name ? "true" : "false");
     });
-    Object.keys(panes).forEach(function (k) {
-      panes[k].hidden = k !== name;
-    });
-    if (name === "tg") loadCatalog();
+    Object.keys(panes).forEach(function (k) { panes[k].hidden = k !== name; });
   }
 
   tabs.forEach(function (t, i) {
@@ -42,173 +42,230 @@
     });
   });
 
-  /* ---------- Telegram catalogue ---------- */
-  var CATALOG = null;
-  var loading = false;
+  /* ---------- 1. profit calculator ---------- */
+  /* price − cost − price × (commission + tax) − logistics.
+     Assumptions are printed under the table, not hidden. */
+  var LOGISTICS = 60;
+  var TAX = 6;
+  var rows = [
+    { name: "Кашемировый свитер", price: 4290, cost: 1450 },
+    { name: "Термокружка 450 мл", price: 1590, cost: 540 },
+    { name: "Носки, набор 5 пар", price: 690, cost: 310 }
+  ];
+  var commission = 22;
 
-  function fmtNum(n) {
-    return Number(n || 0).toLocaleString("ru-RU");
+  function profitOf(r) {
+    var price = Math.max(0, Number(r.price) || 0);
+    var cost = Math.max(0, Number(r.cost) || 0);
+    return price - cost - price * (commission + TAX) / 100 - LOGISTICS;
   }
 
-  function loadCatalog() {
-    if (CATALOG || loading) { if (CATALOG) renderList(""); return; }
-    loading = true;
-    var s = document.createElement("script");
-    s.src = "./tg-chats/catalog.js";
-    s.onload = function () {
-      CATALOG = window.CHAT_CATALOG || null;
-      loading = false;
-      if (!CATALOG) { listFallback("База не загрузилась — откройте страницу инструмента."); return; }
-      var total = CATALOG.total || (CATALOG.chats || []).length;
-      $("lab-count").textContent = fmtNum(total) + " в базе";
-      renderList($("lab-q").value || "");
-    };
-    s.onerror = function () {
-      loading = false;
-      listFallback("База не загрузилась — откройте страницу инструмента.");
-    };
-    document.head.appendChild(s);
+  function verdict(p) {
+    if (p < 0) return "is-red";
+    if (p < 400) return "is-yellow";
+    return "is-green";
   }
 
-  function listFallback(msg) {
-    var box = $("lab-list");
-    box.textContent = "";
-    var li = document.createElement("li");
-    li.className = "lab-muted";
-    li.textContent = msg;
-    box.appendChild(li);
+  function paintSlider() {
+    var el = $("calc-comm");
+    if (!el) return;
+    var pct = (commission - Number(el.min)) / (Number(el.max) - Number(el.min)) * 100;
+    el.style.setProperty("--fill", pct + "%");
+    var out = $("calc-comm-out");
+    if (out) out.textContent = commission + "%";
   }
 
-  function matches(chat, q) {
+  function renderCalc() {
+    var body = $("calc-rows");
+    if (!body) return;
+    body.textContent = "";
+
+    rows.forEach(function (r, i) {
+      var tr = document.createElement("tr");
+      tr.className = verdict(profitOf(r));
+
+      var tdName = document.createElement("td");
+      var inName = document.createElement("input");
+      inName.type = "text";
+      inName.value = r.name;
+      inName.setAttribute("aria-label", "Товар " + (i + 1));
+      inName.addEventListener("input", function () { r.name = inName.value; });
+      tdName.appendChild(inName);
+
+      function numberCell(key, label) {
+        var td = document.createElement("td");
+        var input = document.createElement("input");
+        input.type = "number";
+        input.min = "0";
+        input.step = "10";
+        input.value = String(r[key]);
+        input.setAttribute("aria-label", label + " " + (i + 1));
+        input.addEventListener("input", function () {
+          r[key] = Number(input.value) || 0;
+          updateTotals();
+          tr.className = verdict(profitOf(r));
+          tr.querySelector(".c-profit-cell").textContent = money(profitOf(r));
+        });
+        td.appendChild(input);
+        return td;
+      }
+
+      var tdProfit = document.createElement("td");
+      tdProfit.className = "c-profit-cell";
+      tdProfit.textContent = money(profitOf(r));
+
+      tr.appendChild(tdName);
+      tr.appendChild(numberCell("price", "Цена"));
+      tr.appendChild(numberCell("cost", "Закуп"));
+      tr.appendChild(tdProfit);
+      body.appendChild(tr);
+    });
+
+    updateTotals();
+  }
+
+  function money(n) {
+    var v = Math.round(Number(n) || 0);
+    return (v < 0 ? "−" : "") + fmt(Math.abs(v)) + " ₽";
+  }
+
+  function updateTotals() {
+    var unit = $("calc-unit");
+    var month = $("calc-month");
+    if (!unit) return;
+    var total = rows.reduce(function (s, r) { return s + profitOf(r); }, 0);
+    var avg = rows.length ? total / rows.length : 0;
+    unit.textContent = money(avg);
+    if (month) month.textContent = fmt(total * 100) + " ₽";
+    unit.classList.remove("bump");
+    /* force reflow so the animation restarts on every change */
+    void unit.offsetWidth;
+    unit.classList.add("bump");
+  }
+
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.id === "calc-comm") {
+      commission = Number(e.target.value) || 0;
+      paintSlider();
+      renderCalc();
+    }
+  });
+
+  if ($("calc-add")) {
+    $("calc-add").addEventListener("click", function () {
+      rows.push({ name: "Новый товар", price: 1000, cost: 400 });
+      renderCalc();
+      var inputs = $("calc-rows").querySelectorAll("input[type=text]");
+      if (inputs.length) { inputs[inputs.length - 1].focus(); inputs[inputs.length - 1].select(); }
+    });
+  }
+
+  function csvCell(v) {
+    var s = String(v == null ? "" : v);
+    return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+
+  if ($("calc-xlsx")) {
+    $("calc-xlsx").addEventListener("click", function () {
+      var head = ["Товар", "Цена, ₽", "Закуп, ₽", "Комиссия, %", "Логистика, ₽", "Налог, %", "Прибыль, ₽"];
+      var lines = [head.join(";")];
+      rows.forEach(function (r) {
+        lines.push([r.name, r.price, r.cost, commission, LOGISTICS, TAX, Math.round(profitOf(r))]
+          .map(csvCell).join(";"));
+      });
+      var csv = "\uFEFF" + lines.join("\r\n");
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "pribyl-wb-ozon-" + new Date().toISOString().slice(0, 10) + ".csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    });
+  }
+
+  /* ---------- 2. curated Telegram chats ---------- */
+  /* Rows taken from the verified 1 017-row catalogue (checked 2026-11-04/05).
+     Deliberately short and clean: seller/wholesale/IT channels a Russian
+     buyer actually needs. No jokes, no capslock shouting, no other languages. */
+  var CURATED = [
+    { username: "ozon_chat", title: "OZON · чат селлеров", topic: "Маркетплейсы", members: 54229, kind: "biz" },
+    { username: "marketplacechati", title: "Маркетплейсы · чат продавцов", topic: "Маркетплейсы", members: 42763, kind: "biz" },
+    { username: "contentwbchat", title: "Карточки товара Wildberries", topic: "Маркетплейсы", members: 37062, kind: "biz" },
+    { username: "ozon_fbs", title: "OZON · клуб партнёров", topic: "Маркетплейсы", members: 28728, kind: "biz" },
+    { username: "postavshiki_rossiya", title: "Поставщики России · опт", topic: "Закупки и опт", members: 26133, kind: "biz" },
+    { username: "sadovod_baza_ru", title: "Садовод · база поставщиков", topic: "Закупки и опт", members: 24111, kind: "biz" },
+    { username: "proffreelancee_chat", title: "Фриланс · чат заказчиков и исполнителей", topic: "IT и фриланс", members: 39773, kind: "biz" },
+    { username: "qa_jobs", title: "QA · вакансии и заказы", topic: "IT и фриланс", members: 59025, kind: "biz" },
+    { username: "beincrypto_ru", title: "BeInCrypto · сообщество трейдеров", topic: "Крипто", members: 19789, kind: "crypto" },
+    { username: "tonchathq", title: "TON · общий чат", topic: "Крипто", members: 17151, kind: "crypto" }
+  ];
+
+  function chatMatches(c, q) {
     if (!q) return true;
-    var needle = q.toLowerCase();
-    return (chat.title || "").toLowerCase().indexOf(needle) !== -1 ||
-      (chat.topic || "").toLowerCase().indexOf(needle) !== -1 ||
-      (chat.city || "").toLowerCase().indexOf(needle) !== -1 ||
-      (chat.about || "").toLowerCase().indexOf(needle) !== -1 ||
-      (chat.username || "").toLowerCase().indexOf(needle) !== -1;
+    var n = q.toLowerCase();
+    return c.title.toLowerCase().indexOf(n) !== -1 ||
+      c.topic.toLowerCase().indexOf(n) !== -1 ||
+      c.username.toLowerCase().indexOf(n) !== -1;
   }
 
-  function renderList(q) {
-    if (!CATALOG) return;
+  function renderChats(q) {
     var box = $("lab-list");
+    if (!box) return;
     box.textContent = "";
-    var chats = (CATALOG.chats || []).filter(function (c) { return matches(c, q); });
-    chats.sort(function (a, b) { return (b.members || 0) - (a.members || 0); });
-    chats.slice(0, 5).forEach(function (c) {
+    var found = CURATED.filter(function (c) { return chatMatches(c, q); });
+    found.slice(0, 6).forEach(function (c) {
       var li = document.createElement("li");
       var a = document.createElement("a");
       a.className = "lab-chat-row";
-      a.href = c.link || ("https://t.me/" + c.username);
+      a.setAttribute("data-kind", c.kind);
+      a.href = "https://t.me/" + c.username;
       a.target = "_blank";
       a.rel = "noopener";
 
+      var ava = document.createElement("span");
+      ava.className = "lr-ava";
+      ava.textContent = c.title.charAt(0).toUpperCase();
+
+      var body = document.createElement("span");
+      body.className = "lr-body";
       var title = document.createElement("span");
       title.className = "lr-title";
-      title.textContent = c.title || c.username;
-
+      title.textContent = c.title;
       var meta = document.createElement("span");
       meta.className = "lr-meta";
-      meta.textContent = fmtNum(c.members) + " · " + (c.topic || "");
+      meta.textContent = fmt(c.members) + " участников · " + c.topic;
+      body.appendChild(title);
+      body.appendChild(meta);
 
       var go = document.createElement("span");
       go.className = "lr-go";
-      go.textContent = "Открыть";
+      go.textContent = "Открыть →";
 
-      a.appendChild(title);
-      a.appendChild(meta);
+      a.appendChild(ava);
+      a.appendChild(body);
       a.appendChild(go);
       li.appendChild(a);
       box.appendChild(li);
     });
-    if (!chats.length) {
+    if (!found.length) {
       var empty = document.createElement("li");
       empty.className = "lab-muted";
-      empty.textContent = "Ничего не нашлось. Попробуйте «Python», «Казань» или «родители».";
+      empty.textContent = "Ничего не нашлось. Попробуйте «селлеры», «опт» или «фриланс».";
       box.appendChild(empty);
     }
+    var count = $("lab-count");
+    if (count) count.textContent = found.length ? "35 бесплатно" : "0 из 35";
   }
 
-  function parseUsername(raw) {
-    var s = String(raw || "").trim();
-    if (!s) return { error: "Вставьте ссылку или ник." };
-    s = s.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
-    if (/^(t\.me|telegram\.me)\//i.test(s)) s = s.replace(/^(t\.me|telegram\.me)\//i, "");
-    s = s.split("?")[0].replace(/\/+$/, "");
-    if (s.charAt(0) === "@") s = s.slice(1);
-    if (/^\+|^joinchat\//i.test(s)) {
-      return { error: "Это приватная invite-ссылка. Такие чаты не входят в открытую базу — её нельзя проверить без вступления." };
-    }
-    if (s.indexOf("/") !== -1) s = s.split("/")[0];
-    if (!/^[A-Za-z][A-Za-z0-9_]{3,31}$/.test(s)) {
-      return { error: "Не похоже на ник Telegram: нужно 5–32 символа, латиница, цифры и подчёркивание." };
-    }
-    return { username: s };
-  }
+  if ($("lab-q")) $("lab-q").addEventListener("input", function () { renderChats(this.value); });
 
-  function checkLink() {
-    var out = $("lab-check");
-    var parsed = parseUsername($("lab-link").value);
-    out.className = "lab-check";
-    out.textContent = "";
-    if (parsed.error) {
-      out.classList.add("warn");
-      out.textContent = parsed.error;
-      return;
-    }
-    var found = CATALOG && (CATALOG.chats || []).filter(function (c) {
-      return String(c.username || "").toLowerCase() === parsed.username.toLowerCase();
-    })[0];
-
-    if (found) {
-      out.classList.add("ok");
-      var wrap = document.createElement("div");
-      wrap.className = "lab-chat";
-      var b = document.createElement("b");
-      b.textContent = found.title || found.username;
-      var meta = document.createElement("span");
-      meta.textContent = "@" + found.username + " · " + fmtNum(found.members) + " участников · " + (found.topic || "") +
-        " · проверен " + String(found.checked_at || "").slice(0, 10);
-      var link = document.createElement("a");
-      link.href = found.link || ("https://t.me/" + found.username);
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "Открыть чат в Telegram";
-      wrap.appendChild(b);
-      wrap.appendChild(meta);
-      wrap.appendChild(link);
-      out.appendChild(wrap);
-      return;
-    }
-
-    out.classList.add("warn");
-    var msg = document.createElement("span");
-    if (!CATALOG) {
-      msg.textContent = "Формат верный. База ещё загружается — нажмите «Проверить» через секунду.";
-    } else {
-      msg.textContent = "Формат верный, но в бесплатной части базы этого ника нет. ";
-      var more = document.createElement("a");
-      more.href = "./tg-chats/#catalog";
-      more.textContent = "Проверить на странице инструмента";
-      msg.appendChild(more);
-      msg.appendChild(document.createTextNode(" — там видно, чат это, канал или мёртвая ссылка."));
-    }
-    out.appendChild(msg);
-  }
-
-  if ($("lab-check-btn")) $("lab-check-btn").addEventListener("click", checkLink);
-  if ($("lab-link")) $("lab-link").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); checkLink(); }
-  });
-  if ($("lab-q")) $("lab-q").addEventListener("input", function () { renderList(this.value); });
-
-  /* ---------- spreadsheet → CSV ---------- */
+  /* ---------- 3. pasted table → CSV ---------- */
   function detectDelimiter(line) {
     var counts = { "\t": (line.match(/\t/g) || []).length, ";": (line.match(/;/g) || []).length, ",": (line.match(/,/g) || []).length };
     var best = "\t";
     Object.keys(counts).forEach(function (d) { if (counts[d] > counts[best]) best = d; });
-    /* A line of Russian text often carries commas inside sentences; tabs win on
-       a real paste, semicolons win on a ru-locale CSV. */
     return counts[best] ? best : "\t";
   }
 
@@ -231,30 +288,42 @@
     return out.map(function (c) { return c.trim(); });
   }
 
-  function csvCell(v) {
-    var s = String(v == null ? "" : v);
-    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
-    return s;
-  }
-
   function tableToCsv(text) {
     var lines = String(text || "").replace(/\r\n?/g, "\n").split("\n");
     while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
     if (!lines.length) return { rows: [], csv: "", cols: 0 };
     var d = detectDelimiter(lines[0]);
-    var rows = lines.map(function (l) { return splitRow(l, d); });
-    var cols = rows.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
-    var csv = rows.map(function (r) { return r.map(csvCell).join(","); }).join("\n");
-    return { rows: rows, csv: csv, cols: cols };
+    var parsed = lines.map(function (l) { return splitRow(l, d); });
+    var cols = parsed.reduce(function (m, r) { return Math.max(m, r.length); }, 0);
+    var csv = parsed.map(function (r) {
+      return r.map(function (v) {
+        var s = String(v);
+        return /[";,\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+      }).join(";");
+    }).join("\n");
+    return { rows: parsed, csv: csv, cols: cols };
   }
 
   function updateTable() {
-    var t = tableToCsv($("lab-table-in").value);
-    $("lab-rows").textContent = t.rows.length + " строк · " + t.cols + " колонок";
-    var pre = $("lab-table-out");
-    if (!t.rows.length) { pre.textContent = "Здесь появится готовый CSV."; return; }
-    var preview = t.csv.split("\n").slice(0, 4).join("\n");
-    pre.textContent = preview + (t.rows.length > 4 ? "\n…" : "");
+    var input = $("lab-table-in");
+    if (!input) return;
+    var t = tableToCsv(input.value);
+    var rowsEl = $("lab-rows");
+    if (rowsEl) rowsEl.textContent = t.rows.length + " строк · " + t.cols + " колонок";
+
+    var grid = $("lab-grid");
+    if (!grid) return;
+    grid.textContent = "";
+    if (!t.rows.length) return;
+    t.rows.slice(0, 4).forEach(function (row, ri) {
+      var tr = document.createElement("tr");
+      for (var ci = 0; ci < Math.min(4, t.cols); ci += 1) {
+        var cell = document.createElement(ri === 0 ? "th" : "td");
+        cell.textContent = row[ci] || "";
+        tr.appendChild(cell);
+      }
+      grid.appendChild(tr);
+    });
   }
 
   function downloadCsv() {
@@ -273,32 +342,32 @@
   if ($("lab-table-in")) $("lab-table-in").addEventListener("input", updateTable);
   if ($("lab-csv")) $("lab-csv").addEventListener("click", downloadCsv);
 
-  /* ---------- All-in-One saving ---------- */
-  function money(n) { return Math.round(Number(n) || 0).toLocaleString("ru-RU") + " ₽"; }
+  /* ---------- 4. catalogue tabs ---------- */
+  var catTabs = Array.prototype.slice.call(document.querySelectorAll(".cat-tab"));
+  var products = Array.prototype.slice.call(document.querySelectorAll(".product[data-cat]"));
 
-  function updateBundle() {
-    var shop = window.SHOP || {};
-    var products = shop.products || {};
-    var sum = 0;
-    var count = 0;
-    Object.keys(products).forEach(function (k) {
-      var p = products[k];
-      if (p && p.id && Number(p.price_rub) > 0) { sum += Number(p.price_rub); count += 1; }
+  function filterCatalogue(cat) {
+    catTabs.forEach(function (t) {
+      t.setAttribute("aria-selected", t.getAttribute("data-cat") === cat ? "true" : "false");
     });
-    var bundle = shop.bundle && Number(shop.bundle.price_rub) > 0 ? Number(shop.bundle.price_rub) : 1290.46;
-    if (!count) return;
-    $("lab-sum").textContent = money(sum);
-    $("lab-bundle-price").textContent = money(bundle);
-    $("lab-save").textContent = money(Math.max(0, sum - bundle));
-    $("lab-bar-fill").style.width = Math.max(6, Math.min(100, Math.round((bundle / sum) * 100))) + "%";
-    $("lab-calc-note").textContent = "Считаем по ценам " + count + " открытых лотов Plati.Market: восемь отдельных лицензий против одного ключа TW1-ALL.";
+    var shown = 0;
+    products.forEach(function (p) {
+      var match = cat === "all" || p.getAttribute("data-cat") === cat;
+      p.hidden = !match;
+      if (match) shown += 1;
+    });
+    var empty = $("cat-empty");
+    if (empty) empty.hidden = shown > 0;
   }
 
+  catTabs.forEach(function (t) {
+    t.addEventListener("click", function () { filterCatalogue(t.getAttribute("data-cat")); });
+  });
+
   /* ---------- boot ---------- */
-  updateBundle();
+  paintSlider();
+  renderCalc();
+  renderChats("");
   updateTable();
-  /* Do not fetch 17 KB of catalogue until the Telegram tab is actually used —
-     but the first tab is Telegram, so warm it once the page is idle. */
-  if ("requestIdleCallback" in window) requestIdleCallback(loadCatalog, { timeout: 2500 });
-  else setTimeout(loadCatalog, 1200);
+  filterCatalogue("all");
 })();

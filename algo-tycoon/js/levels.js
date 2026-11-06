@@ -9,21 +9,21 @@
   root.AT = root.AT || {};
 
   var JOBS = [
-    { id: "j01", act: 1, seed: 101, n: 8, rtl: "First compile", brief: "Prove the desk works: return the sum of the raw stream.", canonical: ["sum"], target: 14.4, payout: 25 },
-    { id: "j02", act: 1, seed: 102, n: 8, rtl: "Mirror book", brief: "The client wants the mirrored book: negate first, then sum.", canonical: ["neg", "sum"], target: -41.9, payout: 30 },
-    { id: "j03", act: 1, seed: 103, n: 8, rtl: "Long side only", brief: "Drop the shorts: keep positive values, then sum.", canonical: ["pos", "sum"], target: 16.6, payout: 35 },
-    { id: "j04", act: 1, seed: 104, n: 10, rtl: "Tick rounding", brief: "Exchange rounds every fill down: FLOOR the stream, then sum.", canonical: ["floor", "sum"], target: -5, payout: 45 },
+    { id: "j01", act: 1, seed: 101, n: 8, rtl: "Первая сборка", brief: "Проверьте работу деска: посчитайте сумму исходного потока.", canonical: ["sum"], target: 14.4, payout: 25 },
+    { id: "j02", act: 1, seed: 102, n: 8, rtl: "Зеркальный стакан", brief: "Клиенту нужен зеркальный стакан: инвертируйте знак и просуммируйте.", canonical: ["neg", "sum"], target: -41.9, payout: 30 },
+    { id: "j03", act: 1, seed: 103, n: 8, rtl: "Только лонг", brief: "Исключите короткие позиции: оставьте положительные числа и просуммируйте.", canonical: ["pos", "sum"], target: 16.6, payout: 35 },
+    { id: "j04", act: 1, seed: 104, n: 10, rtl: "Округление тика", brief: "Биржа округляет каждую сделку вниз: примените floor и просуммируйте.", canonical: ["floor", "sum"], target: -5, payout: 45 },
   ];
 
   var RESEARCH = [
-    { id: "r_pay1", label: "APPROVAL SPEED", desc: "+15% on every future payout", cost: 60, effect: { payoutPct: 15 } },
-    { id: "r_comp1", label: "OFFLINE COMPILER I", desc: "+1 offline compiler: 3 cr/hour, accrues up to 8h while away", cost: 100, effect: { compilers: 1 } },
-    { id: "r_slots", label: "WIDE PIPELINE", desc: "pipeline cap 6 → 9 cards", cost: 120, effect: { slots: 3 } },
-    { id: "r_pay2", label: "DESK REPUTATION", desc: "+25% on every future payout", cost: 220, effect: { payoutPct: 25 } },
-    { id: "r_comp2", label: "OFFLINE COMPILER II", desc: "+1 offline compiler (stacks)", cost: 320, effect: { compilers: 1 } },
-    { id: "r_pay3", label: "EXECUTION PHONE LINE", desc: "+35% on every future payout", cost: 500, effect: { payoutPct: 35 } },
-    { id: "r_slots2", label: "BREADTH MODE", desc: "pipeline cap +2 more (11 total)", cost: 640, effect: { slots: 2 } },
-    { id: "r_comp3", label: "OFFLINE COMPILER III", desc: "+1 offline compiler (stacks)", cost: 900, effect: { compilers: 1 } }
+    { id: "r_pay1", label: "Скорость согласования", desc: "+15% к каждой последующей выплате", cost: 60, effect: { payoutPct: 15 } },
+    { id: "r_comp1", label: "Автономный компилятор I", desc: "+1 фоновый компилятор: 3 кр/ч (до 8 ч офлайн)", cost: 100, effect: { compilers: 1 } },
+    { id: "r_slots", label: "Широкий пайплайн", desc: "лимит пайплайна: с 6 до 9 карт", cost: 120, effect: { slots: 3 } },
+    { id: "r_pay2", label: "Репутация деска", desc: "+25% к каждой последующей выплате", cost: 220, effect: { payoutPct: 25 } },
+    { id: "r_comp2", label: "Автономный компилятор II", desc: "+1 фоновый компилятор (суммируется)", cost: 320, effect: { compilers: 1 } },
+    { id: "r_pay3", label: "Прямой телефон исполнения", desc: "+35% к каждой последующей выплате", cost: 500, effect: { payoutPct: 35 } },
+    { id: "r_slots2", label: "Режим масштаба", desc: "лимит пайплайна ещё +2 карты (всего 11)", cost: 640, effect: { slots: 2 } },
+    { id: "r_comp3", label: "Автономный компилятор III", desc: "+1 фоновый компилятор (суммируется)", cost: 900, effect: { compilers: 1 } }
   ];
 
   var TICKER = {
