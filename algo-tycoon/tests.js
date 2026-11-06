@@ -115,19 +115,19 @@
   });
 
   /* ---------- главы ---------- */
-  group("главы: цель 5 000 ₽ закрывает первую", function () {
+  group("главы: цель 25 000 ₽ закрывает первую", function () {
     var s = E.create();
-    eq(E.chapterGoal(s), 5000, "цель главы 1");
+    eq(E.chapterGoal(s), 25000, "цель главы 1");
     eq(E.canAdvance(s), false, "пока нельзя");
-    s.chapterEarned = 4999;
-    eq(E.canAdvance(s), false, "4999 мало");
-    s.chapterEarned = 5000;
-    eq(E.canAdvance(s), true, "5 000 — можно");
+    s.chapterEarned = 24999;
+    eq(E.canAdvance(s), false, "24 999 мало");
+    s.chapterEarned = 25000;
+    eq(E.canAdvance(s), true, "25 000 — можно");
     var r = E.advance(s);
     ok(r.ok, "глава открыта");
     eq(s.chapter, 2, "мы во второй главе");
     eq(s.chapterEarned, 0, "оборот главы обнулён");
-    eq(E.chapterGoal(s), 25000, "цель главы 2");
+    eq(E.chapterGoal(s), 250000, "цель главы 2");
   });
 
   group("глава 3 закрыта без Pro и открыта с Pro", function () {
@@ -143,7 +143,7 @@
   group("глава 3 не открывается переходом без Pro", function () {
     var s = E.create();
     s.chapter = 2;
-    s.chapterEarned = 25000;
+    s.chapterEarned = 250000;
     eq(E.canAdvance(s), false, "без Pro третья глава не открывается");
     s.pro = true;
     eq(E.canAdvance(s), true, "с Pro открывается");
