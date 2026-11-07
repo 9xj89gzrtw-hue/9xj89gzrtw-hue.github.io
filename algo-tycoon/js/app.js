@@ -16,18 +16,53 @@
   var el = {};
   var lastSaveAt = 0;
   var shownFlash = 0;
+  var previewSnapshot = null;   // прогресс до 60-сек тест-драйва
+  var demoUsedPro = false;      // в демо нажали x5/x10 или песочницу
 
   function $(id) { return document.getElementById(id); }
 
-  function proActive() {
-    if (!root.Unlock) return !!(state && state.pro);
-    return !!(root.Unlock.isPro("algo-tycoon") || root.Unlock.hasUniversal());
+  /* Настоящий Pro: оплата, ключ TW1 или universal-запись. Превью сюда не
+     входит — иначе тест-драйв сохранился бы на диск как покупка. */
+  function realPro() {
+    if (state && state.pro) return true;
+    if (!root.Unlock) return false;
+    var rec = root.Unlock.state("algo-tycoon");
+    if (rec && rec.hash) return true;
+    return !!(root.Unlock.hasUniversal && root.Unlock.hasUniversal());
+  }
+
+  function previewActive() {
+    return !!(root.Unlock && root.Unlock.isPreview && root.Unlock.isPreview("algo-tycoon"));
+  }
+
+  /* Интерфейс Pro: реальный ключ ИЛИ 60-секундный тест-драйв. */
+  function proActive() { return realPro() || previewActive(); }
+
+  function syncPro() {
+    if (!state) return;
+    state.pro = realPro();
+    state.preview = previewActive();
   }
 
   function save() {
-    state.pro = proActive();
+    syncPro();
+    /* Демо живёт только в памяти вкладки: ни прогресс, ни флаг Pro не пишем. */
+    if (previewActive()) { lastSaveAt = Date.now(); return; }
     S.save(state);
     lastSaveAt = Date.now();
+  }
+
+  function snapshotState() {
+    return JSON.parse(JSON.stringify({
+      balance: state.balance, chapter: state.chapter, rep: state.rep,
+      completed: state.completed, earned: state.earned, chapterEarned: state.chapterEarned,
+      upgrades: state.upgrades, speed: state.speed, sandbox: state.sandbox,
+      active: state.active, crisis: state.crisis
+    }));
+  }
+
+  function restoreState(snap) {
+    Object.keys(snap).forEach(function (k) { state[k] = snap[k]; });
   }
 
   /* ---------- отрисовка ---------- */
@@ -44,6 +79,7 @@
     paintCrises();
     paintSpeed();
     paintPro();
+    paintVip(st);
   }
 
   function paintHeader(st) {
@@ -58,11 +94,31 @@
     el.statRub.textContent = E.fmtRub(st.rub);
     el.statUsd.textContent = "≈ " + E.fmtUsd(st.usd);
     el.statIncome.textContent = E.group(st.incomePerHour) + " ₽/час";
+    if (el.statIncomeNote) {
+      el.statIncomeNote.textContent = st.active > 0
+        ? "по заказам, которые сейчас на стойке"
+        : "стойка простаивает — возьмите заказ";
+    }
     el.statRep.textContent = E.group(st.rep);
     el.statRepNote.textContent = "бонус к оплате +" + st.repBonusPct + "%";
     el.statDone.textContent = E.group(st.completed);
     el.statTotal.textContent = "оборот " + E.fmtRub(st.earned);
     el.chapterTag.textContent = st.chapterTag + " · " + st.chapterName;
+  }
+
+  /* VIP-тикер: появляется после третьего сданного заказа и всё время висит
+     в правой колонке. Это не попап и не оверлей — обычный блок в потоке. */
+  function paintVip(st) {
+    if (!el.vipTicker) return;
+    var show = st.completed >= 3;
+    el.vipTicker.hidden = !show;
+    if (!show) return;
+    el.vipTicker.classList.toggle("is-pro", st.pro);
+    if (el.vipDemo) {
+      el.vipDemo.hidden = st.pro;
+      el.vipDemo.disabled = st.pro;
+    }
+    if (el.vipBuy) el.vipBuy.textContent = st.pro ? "Pro уже открыт" : "🔓 Открыть VIP за 149 ₽";
   }
 
   function paintLoad(st) {
@@ -301,7 +357,6 @@
 
   function paintPro() {
     var pro = proActive();
-    if (pro && !state.pro) { state.pro = true; S.save(state); }
     document.body.classList.toggle("pro", pro);
     el.tier.textContent = pro ? "PRO" : "FREE";
     el.tier.className = "chip mono" + (pro ? " chip-pro" : "");
@@ -403,6 +458,7 @@
       if (res.reason === "pro_only") { flash("Ускорение x5 и x10 — в Pro."); openPro(); }
       return;
     }
+    if (previewActive() && x > 1) demoUsedPro = true;
     save();
     paintSpeed();
     paintBigButton();
@@ -411,6 +467,7 @@
   function runSandbox() {
     var res = E.startSandbox(state);
     if (!res.ok) { openPro(); return; }
+    if (previewActive()) demoUsedPro = true;
     flash("Песочница включена: $1 000 000 на счету, глава 3 открыта. Экспериментируйте.");
     save();
     renderAll();
@@ -605,6 +662,7 @@
     el = {
       hudRub: $("hud-rub"), hudUsd: $("hud-usd"), hudLoad: $("hud-load"), tier: $("tier-chip"),
       statRub: $("stat-rub"), statUsd: $("stat-usd"), statIncome: $("stat-income"),
+      statIncomeNote: $("stat-income-note"),
       statRep: $("stat-rep"), statRepNote: $("stat-rep-note"), statDone: $("stat-done"),
       statTotal: $("stat-total"), chapterTag: $("chapter-tag"),
       loadFill: $("load-fill"), loadLabel: $("dash-load-label"), dashNote: $("dash-note"),
@@ -616,6 +674,7 @@
       payCard: $("pay-card-algo"), payUsdc: $("pay-usdc"), openPro: $("open-pro"),
       payCard2: document.querySelector('#pro-modal [data-shop-product="algo-tycoon"]'),
       sandboxStart: $("sandbox-start"), sandboxNote: $("sandbox-note"),
+      vipTicker: $("vip-ticker"), vipBuy: $("vip-buy"), vipDemo: $("vip-demo"),
       crises: $("crises"), crisisOut: $("crisis-out"),
       reportJson: $("report-json"), reportCsv: $("report-csv"), reset: $("reset"),
       steps: $("steps"), modal: $("pro-modal"), modalClose: $("modal-close"),
@@ -670,7 +729,44 @@
       el.steps.appendChild(li);
     });
 
-    document.addEventListener("unlock:changed", function () {
+    document.addEventListener("unlock:changed", function (e) {
+      var nowPreview = previewActive();
+      var wasPreview = !!state.preview;
+      if (nowPreview && !wasPreview) {
+        previewSnapshot = snapshotState();
+        demoUsedPro = false;
+        flash("Тест-драйв Pro на 60 секунд: доступны x5, песочница $1 000 000 и глава 3.");
+      } else if (!nowPreview && wasPreview) {
+        var usedProFeatures = demoUsedPro || state.sandbox || state.speed > 1;
+        if (previewSnapshot) { restoreState(previewSnapshot); previewSnapshot = null; }
+        demoUsedPro = false;
+        syncPro();
+        save();
+        renderAll();
+        paintBigButton();
+        flash(usedProFeatures
+          ? "Тест-драйв закончился. Песочница и x5 остались в демо — полный Pro навсегда за 149 ₽."
+          : "Тест-драйв закончился. Полный Pro — 149 ₽, прогресс не потерян.");
+        if (!realPro()) {
+          el.proStatus.textContent = usedProFeatures
+            ? "Вы попробовали песочницу и ускорение. Полный ключ Pro навсегда — 149 ₽: карта РФ / СБП или USDC на Base."
+            : "Тест-драйв закончился. Полный ключ Pro навсегда — 149 ₽: карта РФ / СБП или USDC на Base.";
+          openPro();
+        }
+        return;
+      }
+      syncPro();
+      paintPro();
+      paintSpeed();
+      renderAll();
+      paintBigButton();
+    });
+
+    if (el.vipBuy) el.vipBuy.addEventListener("click", openPro);
+    if (el.vipDemo) el.vipDemo.addEventListener("click", function () {
+      if (!root.Unlock || !root.Unlock.startPreview) { openPro(); return; }
+      root.Unlock.startPreview("algo-tycoon", 60);
+      flash("Тест-драйв Pro включён на 60 секунд: x5, песочница и глава 3.");
       paintPro();
       paintSpeed();
       renderAll();

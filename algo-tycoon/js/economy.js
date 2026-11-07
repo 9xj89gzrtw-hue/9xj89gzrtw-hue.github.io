@@ -74,7 +74,9 @@
     return null;
   }
 
-  function isPro(s) { return !!(s && (s.pro || s.sandbox)); }
+  /* Pro в памяти: настоящий ключ/оплата (s.pro), песочница или 60-секундный
+     тест-драйв (s.preview). Превью не сохраняется на диск — см. app.js. */
+  function isPro(s) { return !!(s && (s.pro || s.sandbox || s.preview)); }
 
   /* ---------- нагрузка ---------- */
   function loadMult(s, now) {
@@ -130,10 +132,6 @@
     return C.ORDERS.filter(function (o) {
       return o.chapter <= s.chapter && !isActive(s, o.id);
     });
-  }
-
-  function orderScore(s, order) {
-    return payoutFor(s, order) / Math.max(1, order.load);
   }
 
   /* Первый заказ, который реально влезает на стойку. Порядок — как в списке
@@ -279,16 +277,14 @@
   }
 
   /* ---------- сводка ---------- */
+  /* Доход в час — только по заказам, которые прямо сейчас крутятся на стойке.
+     Пустая стойка = 0 ₽/час: цифра честная, а не прогноз «если всё занять». */
   function incomePerHour(s, now) {
-    var room = capacity(s, now);
-    var list = availableOrders(s).slice().sort(function (a, b) { return orderScore(s, b) - orderScore(s, a); });
     var perSec = 0;
-    for (var i = 0; i < list.length && room > 0; i += 1) {
-      var o = list[i];
-      if (o.load > room) continue;
-      room -= o.load;
-      perSec += payoutFor(s, o, now) / (durationMs(s, o) / 1000);
-    }
+    (s.active || []).forEach(function (a) {
+      var ms = Math.max(600, Number(a.endsAt || 0) - Number(a.startedAt || 0));
+      perSec += Number(a.payout || 0) / (ms / 1000);
+    });
     return Math.round(perSec * 3600);
   }
 
@@ -338,7 +334,7 @@
     var v = Number(n) || 0;
     var abs = Math.abs(v);
     if (abs >= 1000) return "$" + group(v);
-    return "$" + v.toFixed(1).replace(".", ",");
+    return "$" + v.toFixed(2);
   }
 
   function fmtSec(ms) {

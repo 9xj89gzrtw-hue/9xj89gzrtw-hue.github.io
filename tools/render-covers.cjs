@@ -48,8 +48,8 @@ const ITEMS = [
     kicker: "AUDIO DUB STUDIO",
     headline: "Озвучка и клипы видео — прямо в браузере",
     sub: "Дорожки по ролям, таймкод, BWF/ID3-метки, очередь до 200 файлов",
-    price: "299 ₽",
-    priceAlt: "$7 · USDC на Base",
+    price: "199 ₽",
+    priceAlt: "$1.99 · USDC на Base",
     scrollY: 150
   },
   {
@@ -76,11 +76,11 @@ const ITEMS = [
     slug: "data-clipper",
     url: "/data-clipper/index.html",
     kicker: "TABLE & TG-CHANNEL CLIPPER",
-    headline: "Любая таблица — в чистый CSV за один клик",
-    sub: "Понимает ленты Telegram и страницы с бесконечной прокруткой",
+    headline: "Калькулятор маржи 11.11 и таблицы в Excel",
+    sub: "Стресс-тест 120 товаров WB, выгрузка сайтов и Telegram",
     price: "299 ₽",
-    priceAlt: "$9 · USDC на Base",
-    scrollY: 1500
+    priceAlt: "$2.99 · USDC на Base",
+    scrollY: 0
   },
   {
     slug: "newsflow",
@@ -118,8 +118,8 @@ const ITEMS = [
     kicker: "AI & MARKET TYCOON",
     headline: "Симулятор ИИ-стартапа и алго-биржи",
     sub: "1 000 ₽ и одна стойка на старте: заказы, серверы, квантовый кластер",
-    price: "249 ₽",
-    priceAlt: "$2.49 · USDC на Base",
+    price: "149 ₽",
+    priceAlt: "$1.49 · USDC на Base",
     scrollY: 0
   }
 ];

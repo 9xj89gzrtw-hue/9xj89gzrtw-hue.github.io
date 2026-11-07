@@ -7,6 +7,21 @@
   "use strict";
 
   var $ = function (id) { return document.getElementById(id); };
+  var ROLE_LABELS = {
+    title: "Заголовок", link: "Ссылка", datetime: "Дата и время",
+    time: "Время", date: "Дата", ago: "Давность", author: "Автор",
+    user: "Пользователь", from_name: "Автор", views: "Просмотры",
+    "views-count": "Просмотры", reactions: "Реакции", likes: "Лайки",
+    comments: "Комментарии", shares: "Репосты", price: "Цена",
+    cost: "Закуп", amount: "Сумма", rate: "Ставка", meta: "Метаданные"
+  };
+  function roleLabel(role) { return ROLE_LABELS[role] || role; }
+  function groupLabel(g) {
+    if (g.tag === "tr") return "Строки таблицы";
+    if (g.tag === "li") return "Пункты списка";
+    if (g.tag === "article") return "Карточки";
+    return "Блоки";
+  }
   var state = {
     groups: [],
     selectedIdx: null,
@@ -38,7 +53,7 @@
       cnt.textContent = String(g.count) + "×";
       var sig = document.createElement("span");
       sig.className = "sig";
-      sig.textContent = [g.tag, g.classes.join(".")].join(".");
+      sig.textContent = groupLabel(g);
       row.appendChild(cnt);
       row.appendChild(sig);
       var tags = document.createElement("div");
@@ -46,7 +61,7 @@
       g.fieldCandidates.forEach(function (cand) {
         var t = document.createElement("span");
         t.className = "field-tag" + (state.roles[cand.role] !== undefined ? " on" : "");
-        t.textContent = cand.role;
+        t.textContent = roleLabel(cand.role);
         t.dataset.role = cand.role;
         t.addEventListener("click", function () { toggleRole(idx, cand.role, cand.selector); });
         t.dataset.groupIdx = String(idx);
@@ -114,19 +129,19 @@
     if (!state.rows.length) {
       table.hidden = true;
       $("out-title").textContent = state.selectedIdx === null ?
-        "OUTPUT · no group selected" : "OUTPUT · no rows with the selected fields";
+        "РЕЗУЛЬТАТ · группа не выбрана" : "РЕЗУЛЬТАТ · нет строк с выбранными полями";
       $("btn-dl").disabled = !state.csv;
-      $("csv-preview").textContent = state.csv || "— pick at least one field tag —";
+      $("csv-preview").textContent = state.csv || "— выберите хотя бы одно поле —";
       window.__CLIP_DEMO__ = { rows: state.rows, csv: state.csv, groups: state.groups.length };
       return;
     }
     table.hidden = false;
-    $("out-title").textContent = "OUTPUT · " + state.rows.length + " rows · fields: " +
-      (state.roleOrder.join(", ") || "none");
+    $("out-title").textContent = "РЕЗУЛЬТАТ · " + state.rows.length + " строк · поля: " +
+      (state.roleOrder.map(roleLabel).join(", ") || "не выбраны");
     var trh = document.createElement("tr");
     state.roleOrder.forEach(function (k) {
       var th = document.createElement("th");
-      th.textContent = k;
+      th.textContent = roleLabel(k);
       trh.appendChild(th);
     });
     table.appendChild(trh);

@@ -452,3 +452,48 @@ body.pro .pro-only { display: block; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---------- VIP-тикер после третьего заказа ---------- */
+
+.vip-ticker {
+  position: relative;
+  overflow: hidden;
+  border-color: #ffcf8a;
+  background: linear-gradient(135deg, #fff8ea 0%, #ffffff 62%);
+}
+
+.vip-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+
+.vip-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 9px; border-radius: 6px;
+  background: #ffd9a8; border: 1px solid #ffb45c;
+  color: #7a2e00; font: 800 10.5px/1 var(--mono); letter-spacing: .08em;
+}
+
+.vip-live { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; color: #b42318; }
+.vip-live i {
+  width: 7px; height: 7px; border-radius: 50%; background: #e5484d; display: inline-block;
+  animation: vipPulse 1.2s ease-in-out infinite;
+}
+
+.vip-marquee { overflow: hidden; border: 1px solid #ffe1b8; border-radius: 8px; background: #fff; padding: 8px 0; }
+.vip-track { display: flex; width: max-content; animation: vipScroll 20s linear infinite; }
+.vip-track span {
+  display: block; padding-right: 48px;
+  font: 600 12px/1.45 var(--mono); color: #7a2e00; white-space: nowrap;
+}
+
+.vip-note { margin: 10px 0 11px; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.vip-note b { color: #c2410c; }
+.vip-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.vip-actions .btn { flex: 1 1 140px; margin: 0; }
+
+.pro-old { margin: -4px 0 12px; font: 12px/1.4 var(--mono); color: var(--muted); }
+.pro-old s { color: #b45309; }
+
+@keyframes vipScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes vipPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(229, 72, 77, .42); }
+  50% { opacity: .55; box-shadow: 0 0 0 5px rgba(229, 72, 77, 0); }
+}

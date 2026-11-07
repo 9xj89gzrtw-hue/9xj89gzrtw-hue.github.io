@@ -226,19 +226,19 @@
   function assertEquals(a, b, m) { eq(a, b, m); }
 
   /* ---------- engine: group detection on the demo feed ---------- */
-  test("engine: finds the demo-post group with count 8", function () {
+  test("engine: finds the post-card group with count 8", function () {
     var groups = ClipEngine.findCardGroups(document.getElementById("demo-feed"));
     ok(groups.length > 0, "at least one group");
-    var grp = groups.find(function (g) { return g.classes.join(" ").indexOf("demo-post") !== -1; });
-    ok(!!grp, "demo-post group present");
+    var grp = groups.find(function (g) { return g.classes.join(" ").indexOf("post-card") !== -1; });
+    ok(!!grp, "post-card group present");
     eq(grp.count, 8, "8 demo posts");
     var sig = (grp.tag + "|" + grp.classes.join(".")).toLowerCase();
-    ok(sig.indexOf("demo-post") !== -1, "signature contains demo-post");
+    ok(sig.indexOf("post-card") !== -1, "signature contains post-card");
     ok(grp.fieldCandidates.length >= 3, "field candidates >= 3");
   });
   test("engine: fieldScan yields title/link/time/views roles", function () {
     var feed = document.getElementById("demo-feed");
-    var card = feed.querySelector(".demo-post");
+    var card = feed.querySelector(".post-card");
     var cands = ClipEngine.fieldScan(card);
     var roles = cands.map(function (c) { return c.role; });
     ok(roles.indexOf("title") !== -1, "title role");
@@ -246,12 +246,12 @@
     var cls = cands.map(function (c) { return c.selector; }).join(" ");
     ok(/m-time|m-views|m-link/.test(cls), "metric/time/link spans visible to candidates");
   });
-  test("engine: matchCount for .demo-post selector is 8", function () {
-    eq(ClipEngine.matchCount({ selector: ".demo-post" }, document.getElementById("demo-feed")), 8, "8 matches");
+  test("engine: matchCount for .post-card selector is 8", function () {
+    eq(ClipEngine.matchCount({ selector: ".post-card" }, document.getElementById("demo-feed")), 8, "8 matches");
   });
   test("engine: extractRows fills title/link/time/views", function () {
     var res = ClipEngine.extractRows(
-      { selector: ".demo-post" },
+      { selector: ".post-card" },
       { title: ".pt a", link: ".pt a", time: ".m-time", views: ".m-views" },
       50,
       document.getElementById("demo-feed")
@@ -264,7 +264,7 @@
     eq(res.truncated, false, "not truncated");
   });
   test("engine: maxRows caps extraction", function () {
-    var res = ClipEngine.extractRows({ selector: ".demo-post" }, { title: ".pt a" }, 3, document.getElementById("demo-feed"));
+    var res = ClipEngine.extractRows({ selector: ".post-card" }, { title: ".pt a" }, 3, document.getElementById("demo-feed"));
     eq(res.total, 3, "capped at 3");
     ok(res.truncated, "truncated flag set");
   });
@@ -388,7 +388,7 @@
     ok(window.__CLIP_DETECT__, "sandbox() dispatch exposed");
     var groups = window.__CLIP_DETECT__();
     ok(groups.length >= 1, "at least one group detected");
-    ok(groups.some(function (g) { return (g.classes.join(".") || "").indexOf("demo-post") !== -1; }), "demo-post group");
+    ok(groups.some(function (g) { return (g.classes.join(".") || "").indexOf("post-card") !== -1; }), "post-card group");
   });
   test("sandbox: selecting the demo group harvests 8 rows", function () {
     window.__CLIP_SELECT__(0);

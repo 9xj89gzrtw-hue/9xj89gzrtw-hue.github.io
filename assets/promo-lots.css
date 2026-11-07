@@ -1,0 +1,66 @@
+/* Promo price-comparison block shared by the five paid landing pages. */
+.promo-lot {
+  max-width: 470px;
+  margin: 18px 0 4px;
+  padding: 14px 16px 12px;
+  border: 1px solid #f0c27a;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fffaf0 0%, #ffffff 72%);
+  box-shadow: 0 12px 30px rgba(180, 83, 9, .10);
+  text-align: left;
+}
+.promo-lot-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 6px;
+}
+.promo-lot-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 700 9.5px/1 var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  letter-spacing: .09em; text-transform: uppercase;
+  padding: 4px 7px; border-radius: 4px; background: #141414; color: #fff;
+}
+.promo-lot-badge::before { content: "🔥"; font-size: 11px; }
+.promo-lot-save {
+  font: 750 12px/1 var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: #c2410c;
+}
+.promo-lot-prices { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.promo-lot-now {
+  font-size: 32px; font-weight: 780; line-height: 1;
+  letter-spacing: -.03em; color: #141414;
+}
+.promo-lot-old {
+  font-size: 15px; font-weight: 500; color: #8a8a80;
+  text-decoration: line-through; text-decoration-thickness: 1.5px;
+}
+.promo-lot-copy {
+  margin: 7px 0 10px; font-size: 12.5px; line-height: 1.5; color: #3a3a35;
+}
+.promo-lot-buy {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 11px 12px;
+  border: 1px solid #141414; border-radius: 7px;
+  background: #ff5200; color: #141414;
+  font: 750 12px/1.2 var(--font, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  letter-spacing: .01em; text-decoration: none; text-align: center;
+  box-shadow: 0 8px 18px rgba(255, 82, 0, .20);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.promo-lot-buy:hover { transform: translateY(-1px); box-shadow: 0 11px 22px rgba(255, 82, 0, .26); }
+.promo-lot-note {
+  margin: 8px 0 0; text-align: center;
+  font: 10.5px/1.4 var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: #77776e;
+}
+.promo-lot--compact {
+  max-width: none; margin: 14px 0; padding: 11px 12px 10px;
+  box-shadow: none;
+}
+.promo-lot--compact .promo-lot-now { font-size: 24px; }
+.promo-lot--compact .promo-lot-copy { font-size: 11.5px; margin: 6px 0 8px; }
+.promo-lot--compact .promo-lot-buy { padding: 9px 8px; font-size: 10.5px; }
+.promo-lot--compact .promo-lot-note { font-size: 9.5px; }
+@media (max-width: 720px) {
+  .promo-lot { max-width: none; }
+  .promo-lot-now { font-size: 28px; }
+}

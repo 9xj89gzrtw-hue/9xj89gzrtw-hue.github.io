@@ -21,6 +21,9 @@
     ["ssp", "СПП (логистика −), %", 0], ["returns", "возвраты, %", 3],
     ["returnLogistics", "возвратный логистик, ₽", 45], ["ads", "реклама, %", 10],
     ["pack", "упаковка, ₽", 15], ["tax", "налог УСН, %", 6],
+    ["promoDiscount", "скидка акции, %", 0], ["promoCommission", "комиссия в акцию, %", 0],
+    ["promoAds", "реклама в акцию, %", 0], ["promoReturns", "возвраты в акцию, %", 0],
+    ["promoMinMargin", "дно маржи в акцию, %", 10],
     ["fixedMonthly", "фикс. расходы / мес, ₽", 30000]
   ];
 
@@ -54,7 +57,7 @@
     ""
   ].join("\n");
 
-  var state = { results: [], summary: null, params: {}, rows: [], cols: null, grid: { headers: [], rows: [] } };
+  var state = { results: [], summary: null, params: {}, rows: [], cols: null, grid: { headers: [], rows: [] }, stress: false };
   var runTimer = null;
 
   function num(el, fallback) {
@@ -90,9 +93,10 @@
       if (!el || f[0] === "fixedMonthly") return;
       var v = preset[f[0]];
       if (typeof v === "number") el.value = String(v);
+      else if (f[0].indexOf("promo") === 0) el.value = f[0] === "promoMinMargin" ? "10" : "0";
     });
     var ex = $("uc-example");
-    if (ex) ex.textContent = key === "ozon" ? "ПРИМЕР OZON" : key === "telegram" ? "ПРИМЕР TG" : "ПРИМЕР WB";
+    if (ex) ex.textContent = key === "ozon" ? "ПРИМЕР OZON" : key === "telegram" ? "ПРИМЕР TG" : key === "promo1111" ? "ПРИМЕР 11.11" : "ПРИМЕР WB";
   }
 
   function readParams() {
@@ -105,6 +109,11 @@
       ads: num($("uc-p-ads"), 10),
       pack: num($("uc-p-pack"), 15),
       tax: num($("uc-p-tax"), 6),
+      promoDiscount: num($("uc-p-promoDiscount"), 0),
+      promoCommission: num($("uc-p-promoCommission"), 0),
+      promoAds: num($("uc-p-promoAds"), 0),
+      promoReturns: num($("uc-p-promoReturns"), 0),
+      promoMinMargin: num($("uc-p-promoMinMargin"), 10),
       fixedMonthly: num($("uc-p-fixedMonthly"), ClipUnit.DEFAULTS.fixedMonthly)
     };
   }
@@ -244,6 +253,7 @@
   function pasteFromExcel() {
     function apply(text) {
       if (!text || !String(text).trim()) return;
+      state.stress = false;
       loadGridFromText(text);
       run();
       if ($("uc-status")) $("uc-status").textContent = "вставлено строк: " + state.grid.rows.length + " — проверьте матрицу справа";
@@ -264,9 +274,92 @@
     return ClipUnit.CSV_COLUMNS.map(function (c) { return c[1](r); });
   }
 
+  function matrixRow(r) {
+    var tr = document.createElement("tr");
+    tr.className = r.verdict === "green" ? "uc-green" : r.verdict === "yellow" ? "uc-yellow" : "uc-red";
+    detailColumns(r).forEach(function (v) {
+      var td = document.createElement("td");
+      td.textContent = String(v == null ? "" : v);
+      tr.appendChild(td);
+    });
+    return tr;
+  }
+
+  function promoLossStats(results) {
+    var count = 0, loss = 0;
+    results.forEach(function (r) {
+      if (r.promoVerdict === "red") {
+        count += 1;
+        if (r.promo && r.promo.profit < 0) loss += -r.promo.profit;
+      }
+    });
+    return { count: count, loss: Math.round(loss) };
+  }
+
+  function renderStressSummary(stats, results) {
+    var box = $("uc-stress-summary");
+    if (!box) return;
+    if (!state.stress) { box.hidden = true; box.textContent = ""; return; }
+    box.hidden = false;
+    box.textContent = "";
+    var kicker = document.createElement("div");
+    kicker.className = "uc-stress-kicker";
+    kicker.textContent = "СТРЕСС-ТЕСТ · 120 ТОВАРОВ WB · АКЦИЯ 11.11 / ЧЁРНАЯ ПЯТНИЦА";
+    var title = document.createElement("div");
+    title.className = "uc-stress-title";
+    title.textContent = "Найдено " + stats.count + " убыточных товаров, которые съедят " +
+      stats.loss.toLocaleString("ru-RU") + " ₽ вашей прибыли в акции 11.11!";
+    var sub = document.createElement("div");
+    sub.className = "uc-stress-sub";
+    sub.textContent = "Профиль 11.11: скидка 30%, комиссия 24%, реклама 20%, возвраты 10%. " +
+      "Первые 50 строк открыты бесплатно — красные строки уже видны. " +
+      (isPro() ? "Pro: открыты все " + results.length + " строк и полный Excel-отчёт." :
+        "В полном отчёте — все " + results.length + " SKU, " + stats.count + " убыточных и многостраничный Excel.");
+    box.appendChild(kicker);
+    box.appendChild(title);
+    box.appendChild(sub);
+  }
+
+  function stressAhaRow(stats, total) {
+    var tr = document.createElement("tr");
+    tr.className = "uc-aha-row";
+    var td = document.createElement("td");
+    td.colSpan = ClipUnit.CSV_COLUMNS.length;
+    var box = document.createElement("div");
+    box.className = "uc-aha";
+    var head = document.createElement("div");
+    head.className = "uc-aha-head";
+    head.textContent = "Ещё " + (total - ClipUnit.FREE_ROW_CAP) + " строк скрыто · " +
+      stats.count + " убыточных артикулов ждут в полном отчёте";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "btn primary uc-aha-btn";
+    btn.setAttribute("data-unlock", "");
+    btn.setAttribute("data-product", "data-clipper");
+    btn.setAttribute("data-price", "2.99");
+    btn.setAttribute("data-name", "Table & TG-Channel Clipper Pro");
+    btn.setAttribute("data-sub", "Полный стресс-тест 120 товаров, все " + stats.count +
+      " убыточных артикулов и многостраничный Excel-отчёт. 299 ₽, ключ TW1-CLIP-… сразу.");
+    btn.textContent = "🔓 Показать все " + stats.count +
+      " убыточных артикулов и скачать полный многостраничный Excel-отчёт за 299 ₽ (вместо 690 ₽)";
+    var note = document.createElement("p");
+    note.className = "uc-aha-note";
+    note.textContent = "Оплата один раз · ключ TW1-CLIP-… сразу на экране · без подписки и регистрации";
+    box.appendChild(head);
+    box.appendChild(btn);
+    box.appendChild(note);
+    td.appendChild(box);
+    tr.appendChild(td);
+    return tr;
+  }
+
   function renderMatrix() {
     var table = $("uc-table");
-    var shown = state.results.slice(0, 50); // DOM matrix preview stays honest at 50
+    var all = state.results;
+    var stress = !!state.stress && all.length > ClipUnit.FREE_ROW_CAP;
+    var pro = isPro();
+    var cap = stress ? ClipUnit.FREE_ROW_CAP : ClipUnit.FREE_ROW_CAP;
+    var shown = all.slice(0, cap);
     if (!shown.length) {
       table.textContent = "";
       table.hidden = true;
@@ -274,6 +367,7 @@
       $("uc-sum").textContent = "— заполните таблицу слева —";
       $("uc-csv").disabled = true;
       $("uc-xlsx").disabled = true;
+      renderStressSummary({ count: 0, loss: 0 }, all);
       return;
     }
     table.textContent = "";
@@ -285,22 +379,33 @@
       trh.appendChild(th);
     });
     table.appendChild(trh);
-    shown.forEach(function (r) {
-      var tr = document.createElement("tr");
-      tr.className = r.verdict === "green" ? "uc-green" : r.verdict === "yellow" ? "uc-yellow" : "uc-red";
-      detailColumns(r).forEach(function (v) {
-        var td = document.createElement("td");
-        td.textContent = String(v == null ? "" : v);
-        tr.appendChild(td);
+    shown.forEach(function (r) { table.appendChild(matrixRow(r)); });
+
+    if (stress && !pro) {
+      var stats = promoLossStats(all);
+      table.appendChild(stressAhaRow(stats, all.length));
+      all.slice(cap).forEach(function (r) {
+        var tr = matrixRow(r);
+        tr.className += " uc-locked";
+        table.appendChild(tr);
       });
-      table.appendChild(tr);
-    });
+    } else if (stress) {
+      all.slice(cap).forEach(function (r) { table.appendChild(matrixRow(r)); });
+    }
+
     var s = state.summary;
-    $("uc-out-title").textContent = "МАТРИЦА · " + s.count + " артикулов";
-    $("uc-sum").textContent = "зелёных " + s.green + " · узких " + s.yellow + " · убыточных " + s.red +
+    var stats = stress ? promoLossStats(all) : null;
+    $("uc-out-title").textContent = stress ?
+      "СТРЕСС-ТЕСТ 11.11 · " + s.count + " артикулов · " + stats.count + " убыточных" :
+      "МАТРИЦА · " + s.count + " артикулов";
+    $("uc-sum").textContent = stress ?
+      "убыточных в акции " + stats.count + " · потеря " + stats.loss.toLocaleString("ru-RU") + " ₽ · " +
+      (pro ? "все строки открыты" : "первые 50 строк бесплатно") :
+      "зелёных " + s.green + " · узких " + s.yellow + " · убыточных " + s.red +
       " · потенциал/мес ≈ " + Math.round(s.totalProfitMonth).toLocaleString("ru-RU") + " ₽";
     $("uc-csv").disabled = false;
     $("uc-xlsx").disabled = false;
+    renderStressSummary(stats || { count: 0, loss: 0 }, all);
   }
 
   function run() {
@@ -320,17 +425,18 @@
     var summary = ClipUnit.summary(results);
     state = {
       results: results, summary: summary, params: params, rows: rows, cols: cols,
-      grid: state.grid
+      grid: state.grid, stress: state.stress
     };
     var mapped = Object.keys(cols).filter(function (k) { return cols[k]; });
     var msg = "строк " + parsed.rows.length +
       (parsed.rows.length > rows.length ? " (взято " + rows.length + ", лимит Pro " + ClipUnit.PRO_ROW_CAP + ")" : "") +
       " · столбцы: " + (mapped.join(", ") || "не распознаны") +
       (missing.length ? " · НЕТ колонки «цена» — строки помечены красным" : "") +
+      (state.stress ? " · стресс-тест 11.11" : "") +
       (isPro() ? " · PRO" : " · FREE: CSV до " + ClipUnit.FREE_ROW_CAP + " строк");
     $("uc-status").textContent = msg;
     renderMatrix();
-    window.__UNITCALC__ = { results: state.results, summary: state.summary, cols: cols, pro: isPro() };
+    window.__UNITCALC__ = { results: state.results, summary: state.summary, cols: cols, pro: isPro(), stress: !!state.stress };
   }
 
   function download(blob, name) {
@@ -396,9 +502,46 @@
     return rows;
   }
 
+  function stressText() {
+    var losses = [];
+    for (var i = 0; i < 19; i += 1) {
+      var price = 2000 + 100 * i;
+      var cost = 4700 + 70 * i + (i === 18 ? 1041 : 0);
+      losses.push(["Убыточный артикул " + (i + 1) + " · WB", price, cost]);
+    }
+    var goods = [];
+    for (var j = 0; j < 101; j += 1) {
+      var p = 990 + 40 * j;
+      goods.push(["Товар WB " + (j + 1), p, Math.round(0.25 * p)]);
+    }
+    var lossPos = {};
+    [6, 12, 18, 24, 30, 36, 42, 48, 55, 61, 67, 73, 79, 85, 91, 97, 103, 109, 115]
+      .forEach(function (n) { lossPos[n] = true; });
+    var lines = ["товар;цена;закуп"];
+    var gi = 0, li = 0;
+    for (var k = 0; k < 120; k += 1) {
+      var row = lossPos[k] ? losses[li++] : goods[gi++];
+      lines.push(row[0] + ";" + row[1] + ";" + row[2]);
+    }
+    return lines.join("\n");
+  }
+
+  function runStress() {
+    var text = stressText();
+    var sel = $("uc-preset");
+    if (sel) sel.value = "promo1111";
+    applyPreset("promo1111");
+    state.stress = true;
+    $("uc-input").value = text;
+    loadGridFromText(text);
+    run();
+    $("uc-status").textContent = "стресс-тест: 120 товаров WB, профиль 11.11 · первые 50 строк бесплатно";
+  }
+
   function loadExample() {
     var key = $("uc-preset").value;
     var text = key === "ozon" ? EXAMPLE_OZON : EXAMPLE_WB;
+    state.stress = false;
     $("uc-input").value = text;
     loadGridFromText(text);
     run();
@@ -416,6 +559,7 @@
     });
     $("uc-run").addEventListener("click", run);
     $("uc-example").addEventListener("click", loadExample);
+    if ($("uc-stress")) $("uc-stress").addEventListener("click", runStress);
     $("uc-csv").addEventListener("click", onCSV);
     $("uc-xlsx").addEventListener("click", onXLSX);
     if ($("uc-paste")) $("uc-paste").addEventListener("click", pasteFromExcel);
@@ -438,6 +582,7 @@
     /* test/automation hook */
     window.__UNITCALC_RUN__ = function (text, presetKey) {
       if (presetKey) applyPreset(presetKey);
+      state.stress = false;
       $("uc-input").value = text;
       loadGridFromText(text);
       run();

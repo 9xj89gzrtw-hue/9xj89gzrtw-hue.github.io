@@ -7,6 +7,8 @@
   var PRICE = 9;
   var FREE_CHECKS = 10;
   var PRO_CHECKS = 50;
+  var AHA_LIMIT = 10;
+  var AHA_PREVIEW_ROWS = 5;
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -29,6 +31,21 @@
   var state = { topic: "Все", city: "", query: "", sort: "members", view: "base", checking: false };
 
   function isPro() { return !!(window.Unlock && window.Unlock.isPro(PRODUCT)); }
+
+  /* Aha-пейволл включается, когда человек начал искать: ввёл запрос, выбрал
+     тему или город. В бесплатной части видно 10 лучших совпадений, дальше —
+     живые строки полной базы под маской и кнопка покупки. */
+  function isAhaMode() {
+    if (isPro()) return false;
+    return !!(state.query.trim() || state.city || state.topic !== "Все");
+  }
+
+  function plural(n, one, few, many) {
+    var m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return one;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return few;
+    return many;
+  }
 
   /* The demo must not decrypt the paid pack: `isPro()` is true for the 60 s
      preview, but the AES key is only reachable after a real entitlement. */
@@ -67,6 +84,39 @@
     });
   }
 
+  function updateVipButtons() {
+    var vipBtns = $$(".vip-btn");
+    vipBtns.forEach(function (btn) {
+      var top = btn.getAttribute("data-vip-topic");
+      var active = (state.topic === top);
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
+      if (active) {
+        btn.classList.add("is-active");
+      } else {
+        btn.classList.remove("is-active");
+      }
+    });
+  }
+
+  function setupVipFilters() {
+    var vipBtns = $$(".vip-btn");
+    vipBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var top = btn.getAttribute("data-vip-topic");
+        if (state.topic === top) {
+          state.topic = "Все";
+        } else {
+          state.topic = top;
+        }
+        updateVipButtons();
+        renderTopics();
+        renderRows();
+        var rowsEl = $("#rows");
+        if (rowsEl) rowsEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+
   function renderTopics() {
     var host = $("#topics");
     host.innerHTML = "";
@@ -91,6 +141,7 @@
       });
       host.appendChild(b);
     });
+    updateVipButtons();
   }
 
   function renderCities() {
@@ -125,12 +176,97 @@
     return meta;
   }
 
+  function ahaPreviewPool(shown, all) {
+    var taken = {};
+    shown.forEach(function (c) { taken[c.username] = true; });
+    var pool = all.slice(shown.length).filter(function (c) { return !taken[c.username]; });
+    pool.forEach(function (c) { taken[c.username] = true; });
+    if (pool.length < AHA_PREVIEW_ROWS) {
+      var topics = {};
+      shown.forEach(function (c) { topics[c.topic] = true; });
+      DATA.chats.forEach(function (c) {
+        if (pool.length >= AHA_PREVIEW_ROWS) return;
+        if (taken[c.username] || !topics[c.topic]) return;
+        taken[c.username] = true;
+        pool.push(c);
+      });
+    }
+    if (pool.length < AHA_PREVIEW_ROWS) {
+      DATA.chats.forEach(function (c) {
+        if (pool.length >= AHA_PREVIEW_ROWS) return;
+        if (taken[c.username]) return;
+        taken[c.username] = true;
+        pool.push(c);
+      });
+    }
+    return pool;
+  }
+
+  function renderAha(all, shown) {
+    var block = $("#aha-block");
+    var active = isAhaMode() && all.length > 0;
+    block.hidden = !active;
+    if (!active) return;
+
+    var rest = Math.max(0, TOTAL - shown.length);
+    $("#aha-title").textContent = "Найдено ещё " + fmt(rest) + " " +
+      plural(rest, "проверенный чат", "проверенных чата", "проверенных чатов") +
+      " в полной базе (" + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") + ") по вашей теме";
+    $("#aha-sub").textContent = shown.length + " " +
+      plural(shown.length, "совпадение", "совпадения", "совпадений") +
+      " открыты полностью. Остальные — в полной выгрузке с Excel.";
+
+    var buy = $("#aha-buy");
+    if (buy) {
+      buy.textContent = "🔓 Открыть все " + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") +
+        " и скачать Excel за 490 ₽ (СБП / Карта РФ — ключ сразу)";
+    }
+
+    var host = $("#aha-rows");
+    host.innerHTML = "";
+    var pool = ahaPreviewPool(shown, all);
+    for (var i = 0; i < AHA_PREVIEW_ROWS && pool.length; i++) {
+      var c = pool[i % pool.length];
+      var row = document.createElement("div");
+      row.className = "aha-row";
+
+      var chat = document.createElement("div");
+      chat.className = "aha-chat";
+      var handle = document.createElement("span");
+      handle.className = "aha-handle";
+      handle.textContent = "@" + c.username;
+      var badge = document.createElement("span");
+      badge.className = "pro-badge";
+      badge.textContent = "PRO";
+      chat.appendChild(handle);
+      chat.appendChild(badge);
+
+      var topic = document.createElement("div");
+      topic.className = "aha-topic";
+      topic.textContent = c.topic;
+      var city = document.createElement("div");
+      city.className = "aha-city";
+      city.textContent = c.city || "РФ / СНГ";
+      var members = document.createElement("div");
+      members.className = "aha-members";
+      members.textContent = fmt(c.members) + " участн.";
+
+      row.appendChild(chat);
+      row.appendChild(topic);
+      row.appendChild(city);
+      row.appendChild(members);
+      host.appendChild(row);
+    }
+  }
+
   function renderRows() {
     var list = $("#rows");
     var all = filtered();
     var pro = isPro();
-    var shown = all;
+    var aha = isAhaMode();
+    var shown = aha ? all.slice(0, AHA_LIMIT) : all;
     list.innerHTML = "";
+    list.classList.toggle("aha-mode", aha);
 
     shown.forEach(function (c) {
       var li = document.createElement("li");
@@ -186,15 +322,16 @@
     });
 
     $("#empty-row").hidden = all.length !== 0;
+    renderAha(all, shown);
     var more = TOTAL > DATA.chats.length;
-    $("#limit-bar").hidden = pro || !more;
+    $("#limit-bar").hidden = pro || !more || aha;
     if (!pro && more) {
       $("#limit-text").textContent = "В бесплатной версии " + fmt(DATA.chats.length) +
         " чатов из " + fmt(TOTAL) + ". Поиск и фильтры работают по доступной части.";
     }
 
     var badge = $("#visible-badge");
-    badge.textContent = pro ? fmt(all.length) + " чатов" : fmt(all.length) + " из " + fmt(TOTAL);
+    badge.textContent = pro ? fmt(all.length) + " чатов" : fmt(aha ? shown.length : all.length) + " из " + fmt(TOTAL);
     badge.className = "badge" + (!pro && more ? " badge-warn" : "");
     $("#check-quota").textContent = (isPro() ? PRO_CHECKS : FREE_CHECKS) + " ссылок за раз";
   }
@@ -202,7 +339,7 @@
   function download(format) {
     var all = filtered();
     var pro = isPro();
-    var rows = all;
+    var rows = isAhaMode() ? all.slice(0, AHA_LIMIT) : all;
     if (!rows.length) { toast("Нет строк для выгрузки", true); return; }
     var table = [["Название", "Ссылка", "Тематика", "Город", "Участники", "Проверен", "Описание"]];
     rows.forEach(function (c) {
@@ -427,6 +564,8 @@
 
     renderCities();
     renderTopics();
+    setupVipFilters();
+    updateVipButtons();
     renderRows();
     if (canLoadPack()) loadPro();
 
@@ -436,6 +575,7 @@
     $("#reset-filters").addEventListener("click", function () {
       state.query = ""; state.city = ""; state.topic = "Все";
       $("#q").value = ""; $("#city").value = "";
+      updateVipButtons();
       renderTopics(); renderRows();
     });
 

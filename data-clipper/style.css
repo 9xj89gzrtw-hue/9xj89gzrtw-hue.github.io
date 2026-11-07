@@ -157,16 +157,16 @@ section[id], section.block, .block-head[id], [id="sandbox"], [id="install"], [id
   font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--muted);
 }
 .demo-feed { flex: 1; overflow: auto; padding: 12px; max-height: 480px; }
-.demo-post {
+.post-card {
   background: var(--paper); border: 1px solid var(--line-soft); border-radius: 5px;
   padding: 10px 12px; margin-bottom: 10px;
 }
-.demo-post .pt { font-weight: 650; font-size: 13.5px; margin-bottom: 3px; }
-.demo-post .pt a { text-decoration: none; color: var(--ink); }
-.demo-post .pt a:hover { color: var(--orange); }
-.demo-post .px { color: #3a3a35; font-size: 12.6px; }
-.demo-post .pm { display: flex; gap: 12px; margin-top: 7px; font-family: var(--mono); font-size: 9.5px; color: var(--muted); }
-.demo-post .pm b { color: var(--ink); font-weight: 650; }
+.post-card .pt { font-weight: 650; font-size: 13.5px; margin-bottom: 3px; }
+.post-card .pt a { text-decoration: none; color: var(--ink); }
+.post-card .pt a:hover { color: var(--orange); }
+.post-card .px { color: #3a3a35; font-size: 12.6px; }
+.post-card .pm { display: flex; gap: 12px; margin-top: 7px; font-family: var(--mono); font-size: 9.5px; color: var(--muted); }
+.post-card .pm b { color: var(--ink); font-weight: 650; }
 .out-pane { display: flex; flex-direction: column; }
 .out-head {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -294,4 +294,65 @@ body.testing #tests { display: block; padding: 20px 0 40px; }
   .btn.bookmarklet { white-space: normal; text-align: center; }
   .btn { max-width: 100%; }
   .shot-foot { flex-direction: column; gap: 4px; }
+}
+
+/* ---------- stress test 11.11 + Aha-paywall ---------- */
+.sheet-scroll { max-height: 420px; overflow-y: auto; }
+.price-old { font-size: 18px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+.uc-stress-summary {
+  margin: 14px 0 0; padding: 16px 18px;
+  border: 1px solid #f0c27a; border-radius: 8px;
+  background: linear-gradient(180deg, #fffaf0 0%, #ffffff 75%);
+  box-shadow: 0 10px 28px rgba(180, 83, 9, .08);
+}
+.uc-stress-summary[hidden] { display: none; }
+.uc-stress-kicker {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
+  color: #b45309; text-transform: uppercase;
+}
+.uc-stress-title { font-size: 19px; font-weight: 750; line-height: 1.28; margin: 5px 0 4px; letter-spacing: -.015em; }
+.uc-stress-sub { font-size: 12.5px; color: #4a4a44; line-height: 1.5; max-width: 90ch; }
+.uc-aha-row td {
+  padding: 0 !important; white-space: normal !important;
+  max-width: none !important; overflow: visible !important;
+  background: #fff !important; box-shadow: none !important;
+}
+.uc-aha {
+  margin: 10px 0; padding: 14px 16px;
+  border: 1px solid #f0c27a; border-radius: 8px;
+  background: linear-gradient(180deg, #fff7e8 0%, #ffffff 70%);
+}
+.uc-aha-head { font-size: 12.5px; font-weight: 650; color: #7c2d12; margin-bottom: 9px; }
+.uc-aha-btn {
+  display: block; width: 100%; white-space: normal; line-height: 1.35;
+  font-size: 13px; padding: 12px 14px; text-align: center;
+  box-shadow: 0 8px 18px rgba(255, 82, 0, .18);
+}
+.uc-aha-note { margin: 8px 0 0; text-align: center; font-size: 10.5px; color: var(--muted); }
+.uc-locked td { filter: blur(4px); opacity: .35; pointer-events: none; user-select: none; }
+@media (max-width: 720px) {
+  .uc-stress-title { font-size: 16px; }
+  .uc-aha { padding: 12px; }
+  .uc-aha-btn { font-size: 12px; }
+}
+
+/* ---------- top-level tool tabs ---------- */
+.app-tabs {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin: 18px 0 0; padding: 0 0 0; border-bottom: 1px solid var(--line);
+}
+.app-tab {
+  appearance: none; border: 1px solid transparent; border-bottom: 0;
+  background: transparent; color: var(--muted); cursor: pointer;
+  font: 650 12px/1.2 var(--font); padding: 11px 14px;
+  border-radius: 6px 6px 0 0; position: relative; top: 1px;
+}
+.app-tab:hover { color: var(--ink); background: #F6F6F0; }
+.app-tab.is-active {
+  color: var(--ink); background: var(--paper);
+  border-color: var(--line); box-shadow: inset 0 3px 0 var(--orange);
+}
+.tab-panel[hidden] { display: none !important; }
+@media (max-width: 720px) {
+  .app-tab { font-size: 11px; padding: 9px 10px; }
 }

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI &amp; Market Tycoon — симулятор ИИ-стартапа и алго-биржи</title>
-<meta name="description" content="Браузерный симулятор ИИ-стартапа: берите заказы в один клик, качайте серверные стойки, выходите на алго-биржу. Старт — 1 000 ₽ и одна стойка. Бесплатно, без регистрации. Pro — 249 ₽: квантовый кластер, песочница $1 000 000 и ускорение x10.">
+<meta name="description" content="Браузерный симулятор ИИ-стартапа: берите заказы в один клик, качайте серверные стойки, выходите на алго-биржу. Старт — 1 000 ₽ и одна стойка. Бесплатно, без регистрации. Pro — 149 ₽ вместо 299 ₽: квантовый кластер, песочница $1 000 000 и ускорение x10.">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 <script src="../assets/verify.js"></script>
@@ -58,7 +58,7 @@
           {
             "@type": "Offer",
             "name": "Pro",
-            "price": "2.49",
+            "price": "1.49",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
             "url": "https://9xj89gzrtw-hue.github.io/algo-tycoon/",
@@ -82,7 +82,7 @@
         "category": "GameApplication",
         "offers": {
           "@type": "Offer",
-          "price": "2.49",
+          "price": "1.49",
           "priceCurrency": "USD",
           "availability": "https://schema.org/InStock",
           "url": "https://9xj89gzrtw-hue.github.io/algo-tycoon/",
@@ -91,7 +91,7 @@
             "name": "Toolworks",
             "url": "https://9xj89gzrtw-hue.github.io"
           },
-          "alternatePrice": "249 RUB"
+          "alternatePrice": "149 RUB"
         }
       }
     ]
@@ -106,7 +106,7 @@
 <header class="bar">
   <a class="brand" href="../"><span class="mark"></span><span class="brand-text">AI &amp; MARKET TYCOON</span></a>
   <div class="hud">
-    <span class="hud-item">Баланс <b id="hud-rub">1 000 ₽</b> <i id="hud-usd">≈ $11,1</i></span>
+    <span class="hud-item">Баланс <b id="hud-rub">1 000 ₽</b> <i id="hud-usd">≈ $11.11</i></span>
     <span class="hud-item hud-load">Серверы <b id="hud-load">0 / 100</b></span>
     <button class="chip mono" id="tier-chip" type="button" title="Статус Pro">FREE</button>
   </div>
@@ -127,12 +127,12 @@
         <div class="stat">
           <span>Баланс</span>
           <b id="stat-rub">1 000 ₽</b>
-          <i id="stat-usd">≈ $11,1</i>
+          <i id="stat-usd">≈ $11.11</i>
         </div>
         <div class="stat">
           <span>Доход</span>
           <b id="stat-income">0 ₽/час</b>
-          <i>прогноз при полной загрузке</i>
+          <i id="stat-income-note">стойка простаивает — возьмите заказ</i>
         </div>
         <div class="stat">
           <span>Репутация</span>
@@ -202,6 +202,24 @@
 
     <aside class="col-side">
 
+      <section class="panel vip-ticker" id="vip-ticker" hidden aria-live="polite">
+        <div class="vip-top">
+          <span class="vip-badge">🔥 VIP-КОНТРАКТ</span>
+          <span class="vip-live mono"><i></i> LIVE</span>
+        </div>
+        <div class="vip-marquee" aria-hidden="true">
+          <div class="vip-track">
+            <span>Срочный VIP-контракт с Уолл-Стрит: награда +25 000 ₽ и ускорение серверов x10.</span>
+            <span>Срочный VIP-контракт с Уолл-Стрит: награда +25 000 ₽ и ускорение серверов x10.</span>
+          </div>
+        </div>
+        <p class="vip-note">Доступно в Pro за <b>149 ₽</b> или в бесплатном 60-сек тест-драйве!</p>
+        <div class="vip-actions">
+          <button class="btn primary" id="vip-buy" type="button">🔓 Открыть VIP за 149 ₽</button>
+          <button class="btn btn-quiet" id="vip-demo" type="button">Тест-драйв 60 сек</button>
+        </div>
+      </section>
+
       <section class="panel" id="upgrades-panel">
         <div class="panel-head">
           <h2>Апгрейды</h2>
@@ -215,7 +233,8 @@
           <h2>Pro</h2>
           <span class="badge-soft mono">НАВСЕГДА</span>
         </div>
-        <p class="pro-price"><b>249 ₽</b> <span class="mono">или $2.49 в USDC на Base</span></p>
+        <p class="pro-price"><b>149 ₽</b> <span class="mono">или $1.49 в USDC на Base</span></p>
+        <p class="pro-old">вместо <s>299 ₽</s> · акция ноября 2026</p>
         <ul class="pro-list">
           <li>Глава 3 «Уолл-Стрит и квантовый кластер»</li>
           <li>Песочница на $1 000 000</li>
@@ -223,7 +242,7 @@
           <li>Конструктор кризисов и экспорт отчёта</li>
         </ul>
         <a class="btn primary btn-block" id="pay-card-algo" data-shop-product="algo-tycoon" data-shop-note=" · ключ TW1 сразу на экране" href="https://oplata.info/" target="_blank" rel="noopener">Купить Pro — карта РФ / СБП</a>
-        <button class="btn btn-block" id="pay-usdc" type="button">Оплатить в 1 клик — Base USDC ($2.49)</button>
+        <button class="btn btn-block" id="pay-usdc" type="button">Оплатить в 1 клик — Base USDC ($1.49)</button>
         <button class="btn btn-block btn-quiet" id="open-pro" type="button">У меня уже есть ключ TW1-…</button>
         <div data-preview-mount="price"></div>
       </section>
@@ -268,7 +287,7 @@
   <div class="modal-box">
     <div class="modal-head"><b>ОТКРЫТЬ PRO</b><button class="x" id="modal-close" type="button" aria-label="закрыть">×</button></div>
     <a class="btn primary btn-block" data-shop-product="algo-tycoon" data-shop-note=" · ключ TW1 сразу на экране" href="https://oplata.info/" target="_blank" rel="noopener">Купить Pro — карта РФ / СБП</a>
-    <button class="btn btn-block" id="pay-1click" type="button">Оплатить в 1 клик — Base USDC ($2.49)</button>
+    <button class="btn btn-block" id="pay-1click" type="button">Оплатить в 1 клик — Base USDC ($1.49)</button>
     <p class="tiny" id="pay-1click-hint">MetaMask · Rabby · Base Wallet</p>
     <button class="btn btn-block btn-quiet" type="button" data-unlock data-product="all-in-one" data-price="14.99" data-name="All-in-One Pro Pass" data-sub="Все 8 продуктов одним ключом TW1-ALL-…">Все 8 продуктов — All-in-One Pro Pass · $14.99</button>
     <div class="pay">
@@ -276,7 +295,7 @@
       <div>B: <code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
       <div class="pay-net">СЕТЬ: BASE · АКТИВ: USDC · БЕЗ KYC</div>
     </div>
-    <button class="btn btn-block" id="tab-tx-btn" type="button">Проверить перевод — Pro $2.49</button>
+    <button class="btn btn-block" id="tab-tx-btn" type="button">Проверить перевод — Pro $1.49</button>
     <input id="tx-in" class="mono" type="text" placeholder="0x… хеш перевода USDC">
     <input id="key-in" class="mono" type="text" placeholder="TW1-… ключ с карты или после оплаты">
     <div class="actions"><button class="btn btn-block" id="tab-key-btn" type="button">Проверить ключ</button></div>

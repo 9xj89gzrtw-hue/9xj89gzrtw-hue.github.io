@@ -9,7 +9,7 @@
   root.AT = root.AT || {};
 
   var PRODUCT = "algo-tycoon";
-  var PRICE_PRO = 2.49;
+  var PRICE_PRO = 1.49;
   var PRICE_SOURCE = 19;
   var USDC_BASE = "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913";
   var TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";

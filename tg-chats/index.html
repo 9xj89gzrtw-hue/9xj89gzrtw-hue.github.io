@@ -166,6 +166,13 @@
       <div data-preview-mount="tool"></div>
 
       <div class="panel card" id="view-base">
+        <div class="vip-filters-row" role="group" aria-label="Нишевые VIP-фильтры в 1 клик">
+          <span class="vip-filters-label">⚡️ VIP-фильтры в 1 клик:</span>
+          <button class="vip-btn" type="button" data-vip-topic="Маркетплейсы WB/Ozon">📦 Селлеры WB &amp; Ozon (110+ чатов)</button>
+          <button class="vip-btn" type="button" data-vip-topic="Закупки/Опт">🏭 Закупки &amp; Опт (60+ чатов)</button>
+          <button class="vip-btn" type="button" data-vip-topic="Логистика/Карго">🚚 Логистика &amp; Карго (60+ чатов)</button>
+        </div>
+
         <div class="search-row">
           <div class="search-wrap">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
@@ -191,6 +198,21 @@
           <span class="num">Проверен</span>
         </div>
         <ul class="result-list" id="rows"></ul>
+        <div class="aha-block" id="aha-block" hidden>
+          <div class="aha-head">
+            <span class="aha-fire" aria-hidden="true">🔥</span>
+            <div class="aha-copy">
+              <b id="aha-title">Найдено ещё 1 201 проверенный чат в полной базе (1 211 чатов) по вашей теме</b>
+              <span class="aha-sub" id="aha-sub">Первые 10 совпадений открыты полностью. Остальные — в полной выгрузке.</span>
+            </div>
+          </div>
+          <div class="aha-table" aria-hidden="true">
+            <div class="aha-thead"><span>Чат</span><span>Тема</span><span>Город</span><span class="num">Участники</span></div>
+            <div id="aha-rows"></div>
+          </div>
+          <button class="btn btn-primary aha-btn" type="button" id="aha-buy" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Все 1 211 чатов, CSV/XLSX и проверка 50 ссылок за раз. 490 ₽, ключ TW1 сразу.">🔓 Открыть все 1 211 чатов и скачать Excel за 490 ₽ (СБП / Карта РФ — ключ сразу)</button>
+          <p class="tiny muted aha-note">Оплата один раз · ключ TW1-… сразу на экране · без подписки и регистрации</p>
+        </div>
         <div class="limit-bar" id="limit-bar" hidden>
           <div>
             <p class="small" id="limit-text">В бесплатной версии 35 чатов из 1 200+.</p>

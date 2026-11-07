@@ -29,7 +29,7 @@ const SHOTS = shotsArg === -1 ? path.join(AGENT_OUT, "screenshots") : process.ar
 /* Must match CARD_SHOP in assets/unlock.js and the live listings. */
 const CASES = [
   {
-    page: "audio-dub-extractor", product: "audio-dub-studio", id: 6354599, rub: 299,
+    page: "audio-dub-extractor", product: "audio-dub-studio", id: 6354599, rub: 199,
     keys: "audio-dub-studio", code: "AUDIO",
     open: '[data-unlock][data-product="audio-dub-studio"]',
     card: "#unlock-card", cardLabel: "#unlock-card-label", cardHint: "#unlock-card-hint",
@@ -52,7 +52,7 @@ const CASES = [
     storage: "archive-studio:pro"
   },
   {
-    page: "data-clipper", product: "data-clipper", id: 6354602, rub: 390,
+    page: "data-clipper", product: "data-clipper", id: 6354602, rub: 299,
     keys: "data-clipper", code: "CLIP",
     open: null, card: "#pay-card", cardLabel: "#pay-card span", cardHint: null,
     field: "#key-in", submit: "#buy-verify-key", error: "#tx-status",

@@ -165,21 +165,21 @@
    * "not listed yet": the button is not rendered instead of pointing at a 404.
    */
   var SHOP_DEFAULTS = {
-    "audio-dub-studio": { id: 6354599, rub: 298.83 },
-    "tgchats": { id: 6354600, rub: 490.05 },
-    "tg-chats": { id: 6354600, rub: 490.05 },
-    "docsearch": { id: 6354601, rub: 689.92 },
-    "archive-studio": { id: 6354601, rub: 689.92 },
-    "data-clipper": { id: 6354602, rub: 390.13 },
-    "newsflow": { id: 6358143, rub: 390.13 },
-    "live-radar": { id: 6358155, rub: 390.13 },
-    "base-tax-audit": { id: 6358164, rub: 490.05 },
-    "algo-tycoon": { id: 6365339, rub: 249.08 },
-    "all-in-one": { id: 6326936, rub: 1290.46 }
+    "audio-dub-studio": { id: 6354599, rub: 199.04 },
+    "tgchats": { id: 6354600, rub: 490.44 },
+    "tg-chats": { id: 6354600, rub: 490.44 },
+    "docsearch": { id: 6354601, rub: 690.46 },
+    "archive-studio": { id: 6354601, rub: 690.46 },
+    "data-clipper": { id: 6354602, rub: 299.51 },
+    "newsflow": { id: 6358143, rub: 390.42 },
+    "live-radar": { id: 6358155, rub: 390.42 },
+    "base-tax-audit": { id: 6358164, rub: 490.44 },
+    "algo-tycoon": { id: 6365339, rub: 148.79 },
+    "all-in-one": { id: 6326936, rub: 1289.55 }
   };
   var SELLER_ID = 1481449;
   var BUNDLE_PRICE_USD = 14.99;
-  var BUNDLE_PRICE_RUB = 1290.46;
+  var BUNDLE_PRICE_RUB = 1289.55;
 
   function has(obj, k) { return Object.prototype.hasOwnProperty.call(obj, k); }
 

@@ -61,7 +61,7 @@
           {
             "@type": "Offer",
             "name": "Pro",
-            "price": "9",
+            "price": "2.99",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
             "url": "https://9xj89gzrtw-hue.github.io/data-clipper/",
@@ -85,7 +85,7 @@
         "category": "UtilitiesApplication",
         "offers": {
           "@type": "Offer",
-          "price": "9",
+          "price": "2.99",
           "priceCurrency": "USD",
           "availability": "https://schema.org/InStock",
           "url": "https://9xj89gzrtw-hue.github.io/data-clipper/",
@@ -113,8 +113,8 @@
       Таблицы и Telegram → Excel
     </div>
     <span class="spacer"></span>
-    <a class="nav" href="#sandbox">песочница</a>
-    <a class="nav" href="#unitcalc">калькулятор</a>
+    <a class="nav" href="#unitcalc">калькулятор 11.11</a>
+    <a class="nav" href="#sandbox">выгрузка таблиц</a>
     <a class="nav" href="#install">установка</a>
     <a class="nav" href="#pro">pro&nbsp;299&nbsp;₽</a>
     <a class="nav" href="#faq">вопросы</a>
@@ -127,19 +127,19 @@
   <!-- hero -->
   <section class="hero">
     <div>
-      <div class="kicker">расширение для браузера · таблицы из любой страницы</div>
-      <h1>Любая страница — <span class="o">чистая таблица</span>.<br>Один клик.</h1>
-      <p class="lede">Откройте канал Telegram, каталог, прайс или список объявлений — расширение найдёт повторяющиеся карточки, покажет поля и выгрузит аккуратный CSV или Excel. Без аккаунта и без отправки данных на сервер.</p>
+      <div class="kicker">Калькулятор маржи WB/Ozon 2026 · Выгрузка таблиц в Excel</div>
+      <h1>Калькулятор маржи WB/Ozon 2026 <span class="o">+ Таблица в Excel</span>.<br>В один клик.</h1>
+      <p class="lede">Посчитайте чистую прибыль, комиссии маркетплейсов, логистику и налоги с учётом акций 11.11, или выгрузите любую таблицу и ленту из Telegram в чистый Excel. Без аккаунта и без отправки данных на сервер.</p>
       <div class="cta-row">
-        <a class="btn primary" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>СКАЧАТЬ .ZIP · БЕСПЛАТНО</a>
-        <a class="btn" href="#sandbox">Попробовать без установки</a>
+        <a class="btn primary" href="#unitcalc">Калькулятор маржи WB/Ozon 2026</a>
+        <a class="btn" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>Скачать выгрузку в Excel</a>
         <a class="btn bookmarklet" id="bookmarklet-1click"
            href="javascript:(function(){function x(v){return (v.textContent||'').replace(/\s+/g,' ').trim();}var res=[];document.querySelectorAll('table').forEach(function(tb){var rs=tb.querySelectorAll('tr');if(rs.length<2)return;var w=[];rs.forEach(function(r){var c=r.querySelectorAll('th,td');if(!c.length)return;w.push(Array.prototype.map.call(c,function(f){return '\x22'+x(f).replace(/\x22/g,'\x22\x22')+'\x22';}).join(','));});if(w.length>1)res.push(w.join('%5Cn'));});if(!res.length){alert('Таблицы на странице не найдены');return;}var csv=res.join('%5Cn%5Cn');var b=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=document.title.replace(/%5Ba-z0-9 -%5D/ig,'').trim().substring(0,40)+'.csv';a.click();})();"
            title="Перетащите кнопку на панель закладок и нажмите на любой странице — таблица скачается в CSV без установки расширения.">ТАБЛИЦА В CSV БЕЗ УСТАНОВКИ — ПЕРЕТАЩИТЕ В ЗАКЛАДКИ</a>
       </div>
       <div class="tagrow">
         <span class="tag">Бесплатно: 50 строк за выгрузку</span>
-        <span class="tag">Pro: 299 ₽ один раз</span>
+        <span class="tag o">Pro: <s>690 ₽</s> → 299 ₽ по акции ноября</span>
         <span class="tag">без KYC и подписки</span>
         <span class="tag">Chrome / Edge / Brave</span>
       </div>
@@ -167,35 +167,77 @@
     </div>
   </section>
 
-  <!-- features -->
-  <section class="block">
-    <div class="block-head"><span class="kicker">01</span><h2>Что это умеет</h2></div>
-    <div class="inst-grid">
-      <div class="inst"><span class="screw"><i></i><i></i></span>
-        <div class="kicker">поиск</div>
-        <h3>Сам находит повторяющиеся карточки</h3>
-        <p>Движок сканирует страницу и находит блоки с одинаковой структурой — ленты, каталоги, списки объявлений — и предлагает поля: заголовок, ссылка, автор, цена, просмотры, время.</p>
-        <div class="gauge"><span>групп на странице</span><span>до 12</span></div>
+  <div class="app-tabs" role="tablist" aria-label="Инструменты">
+    <button class="app-tab is-active" type="button" role="tab" aria-selected="true" data-app-tab="calc">Калькулятор маржи 11.11</button>
+    <button class="app-tab" type="button" role="tab" aria-selected="false" data-app-tab="export">Выгрузка любой таблицы с сайта / Telegram</button>
+  </div>
+
+  <div data-preview-mount="tool"></div>
+
+  <!-- unit economics studio -->
+  <section class="block tab-panel" id="unitcalc" data-tab-panel="calc">
+    <div class="block-head"><span class="kicker">01</span><h2>Калькулятор маржи WB / Ozon 2026 + стресс-тест акции 11.11</h2></div>
+    <p style="max-width: 72ch; color:#3a3a35; margin-top:0;">Впишите товары в таблицу — цена, закуп, комиссия, логистика — и сразу увидите <b>чистую прибыль на штуку</b>, маржу, ROI и точку безубыточности. Учитываются комиссия категории, логистика, СПП, упаковка, возвраты и налог УСН (профили 2026 года: WB, Ozon, прямой прайс). Красная/жёлтая/зелёная матрица показывает убыточные SKU до закупки. Данные не покидают браузер.</p>
+    <div id="uc-stress-summary" class="uc-stress-summary" hidden></div>
+    <div class="sandbox">
+      <div class="demo-pane">
+        <div class="demo-head">
+          <span>ТАБЛИЦА ТОВАРОВ · правьте ячейки или вставьте из Excel</span>
+          <span class="spacer" style="flex:1"></span>
+          <select id="uc-preset" class="mono" style="max-width:200px" aria-label="Профиль расчёта">
+            <option value="wb">WB · типовой FBO 2026</option>
+            <option value="ozon">Ozon · типовой FBO 2026</option>
+            <option value="promo1111">Расчёт цены с учётом СПП и акций WB/Ozon Ноябрь 2026 (Чёрная Пятница / 11.11)</option>
+            <option value="telegram">TG / прямой прайс · без комиссии</option>
+          </select>
+        </div>
+
+        <div class="sheet">
+          <div class="sheet-tools">
+            <button id="uc-paste" class="btn sm" type="button">ВСТАВИТЬ ИЗ EXCEL / БУФЕРА</button>
+            <button id="uc-row-add" class="btn sm" type="button">+ СТРОКА</button>
+            <span class="sheet-hint" id="uc-cols-info">Столбцы распознаются автоматически</span>
+          </div>
+          <div class="sheet-scroll">
+            <table class="sheet-grid" id="uc-grid" aria-label="Таблица товаров"></table>
+          </div>
+          <!-- The engine and the tests still read one text value; the grid writes it. -->
+          <textarea id="uc-input" class="sheet-raw" aria-hidden="true" tabindex="-1"></textarea>
+        </div>
+
+        <div class="tagrow" style="margin-top:10px;">
+          <button id="uc-run" class="btn sm" type="button">РАССЧИТАТЬ</button>
+          <button id="uc-example" class="btn sm" type="button">ПРИМЕР WB</button>
+          <button id="uc-stress" class="btn sm primary" type="button">ЗАГРУЗИТЬ СТРЕСС-ТЕСТ НА 120 ТОВАРОВ WB (ПРОВЕРКА АКЦИИ 11.11)</button>
+          <span class="tag">Пересчёт идёт сам, кнопка — для порядка</span>
+        </div>
+        <div class="demo-head" style="margin-top:12px;">
+          <span>ПАРАМЕТРЫ · всё правится руками, проценты — от цены</span>
+        </div>
+        <div id="uc-params" class="uc-params"></div>
       </div>
-      <div class="inst"><span class="screw"><i></i><i></i></span>
-        <div class="kicker">проверка</div>
-        <h3>Показывает результат до выгрузки</h3>
-        <p>Включайте и выключайте поля и смотрите, как меняется предпросмотр из пяти строк. Таблицы со сложными объединёнными ячейками тоже разбираются.</p>
-        <div class="gauge"><span>строк в предпросмотре</span><span>5 · вживую</span></div>
-      </div>
-      <div class="inst"><span class="screw"><i></i><i></i></span>
-        <div class="kicker">выгрузка</div>
-        <h3>CSV всем, Excel — в Pro</h3>
-        <p>CSV по стандарту RFC 4180 с кодировкой UTF-8: Excel открывает его без диалогов про кодировку. Pro выгружает многостраничный XLSX с листом описания запуска.</p>
-        <div class="gauge"><span>форматы</span><span>CSV · XLSX</span></div>
+      <div class="out-pane">
+        <div class="out-head">
+          <span id="uc-out-title">МАТРИЦА · нет данных</span>
+          <span class="spacer" style="flex:1"></span>
+          <button id="uc-csv" class="btn sm" type="button">СКАЧАТЬ CSV</button>
+          <button id="uc-xlsx" class="btn sm" type="button">XLSX-ОТЧЁТ · PRO</button>
+        </div>
+        <div class="out-body" style="max-height:480px; overflow:auto;">
+          <table class="out-table" id="uc-table"></table>
+          <div id="uc-status" class="mono uc-status"></div>
+        </div>
+        <div class="out-foot"><span class="kicker">БЕСПЛАТНО до 50 артикулов</span><span id="uc-sum">— таблица уже заполнена примером —</span></div>
       </div>
     </div>
+    <details class="faq" style="margin-top:10px;"><summary>Как считается прибыль и что означают колонки</summary>
+      <p>Чистая прибыль за штуку = цена − комиссия категории − налог УСН − реклама − логистика (с вычетом СПП, если задана) − доля возвратов (возвратная логистика + обработка возврата) − упаковка − закуп. ROI считается от закупа, точка безубыточности — сколько штук в месяц покрывает фиксированные расходы. «Минимальная цена» — порог, ниже которого SKU уходит в минус; матрица: зелёный ≥ 10% маржи, жёлтый — прибыль есть, но узко, красный — минус.</p>
+    </details>
   </section>
 
   <!-- sandbox -->
-  <section class="block" id="sandbox">
-    <div class="block-head"><span class="kicker">02</span><h2>Песочница: настоящий движок на публичных данных</h2></div>
-    <div data-preview-mount="tool"></div>
+  <section class="block tab-panel" id="sandbox" data-tab-panel="export" hidden>
+    <div class="block-head"><span class="kicker">03</span><h2>Песочница: настоящий движок на публичных данных</h2></div>
     <p style="max-width: 70ch; color:#3a3a35; margin-top:0;">Здесь работает тот же движок, который расширение вставляет на страницу. Он обрабатывает два реальных публичных набора: <b>снимок разметки ленты публичного канала Telegram</b> (<span class="mono">t.me/s/…</span>, снят 31.10.2026) и <b>снимок публичной таблицы</b> — Википедия, «Список крупнейших банков» (снят 02.11.2026). Движок сканирует оба источника, группирует повторяющиеся строки, выбирает поля и выгружает тот же CSV, что и расширение. Данные и код — те же, что в продукте.</p>
     <div class="sandbox">
       <div class="demo-pane">
@@ -205,14 +247,14 @@
           <button id="btn-detect" class="btn sm" type="button">НАЙТИ КАРТОЧКИ</button>
         </div>
         <div class="demo-feed" id="demo-feed">
-          <article class="demo-post"><div class="pt"><a href="/post/alpha-01">Рынок открылся: трейдеры ждут перетока ликвидности</a></div><div class="px">Утренняя заметка — потоки уходят в основные валюты, спреды сужаются на всех площадках.</div><div class="pm"><span class="m-time">09:14</span><span class="m-views">12,4 тыс. просмотров</span><span class="m-link"><a href="/post/alpha-01">/post/alpha-01</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/beta-02">Стейблкоины: расчёт опустился ниже 2 секунд</a></div><div class="px">Медианное время расчёта на новой сети — 1,8 секунды на 500 переводах.</div><div class="pm"><span class="m-time">10:02</span><span class="m-views">9,8 тыс. просмотров</span><span class="m-link"><a href="/post/beta-02">/post/beta-02</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/gamma-03">Комиссии второго уровня — минимум за две недели</a></div><div class="px">Средняя стоимость обмена упала на 14% за неделю: пачки полнее, данные дешевле.</div><div class="pm"><span class="m-time">11:40</span><span class="m-views">15,1 тыс. просмотров</span><span class="m-link"><a href="/post/gamma-03">/post/gamma-03</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/delta-04">Внебиржевые столы сообщают о тихом накоплении</a></div><div class="px">Квартальные ставки сжимаются, размеры блоков остаются в прежнем диапазоне.</div><div class="pm"><span class="m-time">12:07</span><span class="m-views">7,3 тыс. просмотров</span><span class="m-link"><a href="/post/delta-04">/post/delta-04</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/eps-05">Хранение ключей: шаблоны вместо церемоний</a></div><div class="px">Новые настройки по умолчанию — пороги ролей вместо ручных церемоний с ключами.</div><div class="pm"><span class="m-time">12:55</span><span class="m-views">11,0 тыс. просмотров</span><span class="m-link"><a href="/post/eps-05">/post/eps-05</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/zeta-06">Ставки фандинга выровнялись после сжатия</a></div><div class="px">Базис вернулся в коридор, риск каскадных ликвидаций снижается.</div><div class="pm"><span class="m-time">13:21</span><span class="m-views">21,6 тыс. просмотров</span><span class="m-link"><a href="/post/zeta-06">/post/zeta-06</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/eta-07">Аудиты в работе: два патча, один перезапуск</a></div><div class="px">Ветка с исправлениями заморожена на проверку, разбор — после публикации.</div><div class="pm"><span class="m-time">14:03</span><span class="m-views">6,2 тыс. просмотров</span><span class="m-link"><a href="/post/eta-07">/post/eta-07</a></span></div></article>
-          <article class="demo-post"><div class="pt"><a href="/post/theta-08">Архивы каналов: инструменты выгрузки вышли</a></div><div class="px">Массовая выгрузка стала удобнее для исследовательских команд.</div><div class="pm"><span class="m-time">15:30</span><span class="m-views">8,9 тыс. просмотров</span><span class="m-link"><a href="/post/theta-08">/post/theta-08</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/alpha-01">Рынок открылся: трейдеры ждут перетока ликвидности</a></div><div class="px">Утренняя заметка — потоки уходят в основные валюты, спреды сужаются на всех площадках.</div><div class="pm"><span class="m-time">09:14</span><span class="m-views">12,4 тыс. просмотров</span><span class="m-link"><a href="/post/alpha-01">/post/alpha-01</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/beta-02">Стейблкоины: расчёт опустился ниже 2 секунд</a></div><div class="px">Медианное время расчёта на новой сети — 1,8 секунды на 500 переводах.</div><div class="pm"><span class="m-time">10:02</span><span class="m-views">9,8 тыс. просмотров</span><span class="m-link"><a href="/post/beta-02">/post/beta-02</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/gamma-03">Комиссии второго уровня — минимум за две недели</a></div><div class="px">Средняя стоимость обмена упала на 14% за неделю: пачки полнее, данные дешевле.</div><div class="pm"><span class="m-time">11:40</span><span class="m-views">15,1 тыс. просмотров</span><span class="m-link"><a href="/post/gamma-03">/post/gamma-03</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/delta-04">Внебиржевые столы сообщают о тихом накоплении</a></div><div class="px">Квартальные ставки сжимаются, размеры блоков остаются в прежнем диапазоне.</div><div class="pm"><span class="m-time">12:07</span><span class="m-views">7,3 тыс. просмотров</span><span class="m-link"><a href="/post/delta-04">/post/delta-04</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/eps-05">Хранение ключей: шаблоны вместо церемоний</a></div><div class="px">Новые настройки по умолчанию — пороги ролей вместо ручных церемоний с ключами.</div><div class="pm"><span class="m-time">12:55</span><span class="m-views">11,0 тыс. просмотров</span><span class="m-link"><a href="/post/eps-05">/post/eps-05</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/zeta-06">Ставки фандинга выровнялись после сжатия</a></div><div class="px">Базис вернулся в коридор, риск каскадных ликвидаций снижается.</div><div class="pm"><span class="m-time">13:21</span><span class="m-views">21,6 тыс. просмотров</span><span class="m-link"><a href="/post/zeta-06">/post/zeta-06</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/eta-07">Аудиты в работе: два патча, один перезапуск</a></div><div class="px">Ветка с исправлениями заморожена на проверку, разбор — после публикации.</div><div class="pm"><span class="m-time">14:03</span><span class="m-views">6,2 тыс. просмотров</span><span class="m-link"><a href="/post/eta-07">/post/eta-07</a></span></div></article>
+          <article class="post-card"><div class="pt"><a href="/post/theta-08">Архивы каналов: инструменты выгрузки вышли</a></div><div class="px">Массовая выгрузка стала удобнее для исследовательских команд.</div><div class="pm"><span class="m-time">15:30</span><span class="m-views">8,9 тыс. просмотров</span><span class="m-link"><a href="/post/theta-08">/post/theta-08</a></span></div></article>
         </div>
       </div>
       <div class="demo-pane">
@@ -245,63 +287,29 @@
     </div>
   </section>
 
-  <!-- unit economics studio -->
-  <section class="block" id="unitcalc">
-    <div class="block-head"><span class="kicker">03</span><h2>Калькулятор прибыли WB / Ozon — маржа, ROI, точка безубыточности</h2></div>
-    <p style="max-width: 72ch; color:#3a3a35; margin-top:0;">Впишите товары в таблицу — цена, закуп, комиссия, логистика — и сразу увидите <b>чистую прибыль на штуку</b>, маржу, ROI и точку безубыточности. Учитываются комиссия категории, логистика, СПП, упаковка, возвраты и налог УСН (профили 2026 года: WB, Ozon, прямой прайс). Красная/жёлтая/зелёная матрица показывает убыточные SKU до закупки. Данные не покидают браузер.</p>
-    <div class="sandbox">
-      <div class="demo-pane">
-        <div class="demo-head">
-          <span>ТАБЛИЦА ТОВАРОВ · правьте ячейки или вставьте из Excel</span>
-          <span class="spacer" style="flex:1"></span>
-          <select id="uc-preset" class="mono" style="max-width:200px" aria-label="Профиль расчёта">
-            <option value="wb">WB · типовой FBO 2026</option>
-            <option value="ozon">Ozon · типовой FBO 2026</option>
-            <option value="promo1111">Расчёт цены с учётом СПП и акций WB/Ozon Ноябрь 2026 (Чёрная Пятница / 11.11)</option>
-            <option value="telegram">TG / прямой прайс · без комиссии</option>
-          </select>
-        </div>
-
-        <div class="sheet">
-          <div class="sheet-tools">
-            <button id="uc-paste" class="btn sm" type="button">ВСТАВИТЬ ИЗ EXCEL / БУФЕРА</button>
-            <button id="uc-row-add" class="btn sm" type="button">+ СТРОКА</button>
-            <span class="sheet-hint" id="uc-cols-info">Столбцы распознаются автоматически</span>
-          </div>
-          <div class="sheet-scroll">
-            <table class="sheet-grid" id="uc-grid" aria-label="Таблица товаров"></table>
-          </div>
-          <!-- The engine and the tests still read one text value; the grid writes it. -->
-          <textarea id="uc-input" class="sheet-raw" aria-hidden="true" tabindex="-1"></textarea>
-        </div>
-
-        <div class="tagrow" style="margin-top:10px;">
-          <button id="uc-run" class="btn sm" type="button">РАССЧИТАТЬ</button>
-          <button id="uc-example" class="btn sm" type="button">ПРИМЕР WB</button>
-          <span class="tag">Пересчёт идёт сам, кнопка — для порядка</span>
-        </div>
-        <div class="demo-head" style="margin-top:12px;">
-          <span>ПАРАМЕТРЫ · всё правится руками, проценты — от цены</span>
-        </div>
-        <div id="uc-params" class="uc-params"></div>
+  <!-- features -->
+  <section class="block">
+    <div class="block-head"><span class="kicker">02</span><h2>Что это умеет</h2></div>
+    <div class="inst-grid">
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">поиск</div>
+        <h3>Сам находит повторяющиеся карточки</h3>
+        <p>Движок сканирует страницу и находит блоки с одинаковой структурой — ленты, каталоги, списки объявлений — и предлагает поля: заголовок, ссылка, автор, цена, просмотры, время.</p>
+        <div class="gauge"><span>групп на странице</span><span>до 12</span></div>
       </div>
-      <div class="out-pane">
-        <div class="out-head">
-          <span id="uc-out-title">МАТРИЦА · нет данных</span>
-          <span class="spacer" style="flex:1"></span>
-          <button id="uc-csv" class="btn sm" type="button">СКАЧАТЬ CSV</button>
-          <button id="uc-xlsx" class="btn sm" type="button">XLSX-ОТЧЁТ · PRO</button>
-        </div>
-        <div class="out-body" style="max-height:480px; overflow:auto;">
-          <table class="out-table" id="uc-table"></table>
-          <div id="uc-status" class="mono uc-status"></div>
-        </div>
-        <div class="out-foot"><span class="kicker">БЕСПЛАТНО до 50 артикулов</span><span id="uc-sum">— таблица уже заполнена примером —</span></div>
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">проверка</div>
+        <h3>Показывает результат до выгрузки</h3>
+        <p>Включайте и выключайте поля и смотрите, как меняется предпросмотр из пяти строк. Таблицы со сложными объединёнными ячейками тоже разбираются.</p>
+        <div class="gauge"><span>строк в предпросмотре</span><span>5 · вживую</span></div>
+      </div>
+      <div class="inst"><span class="screw"><i></i><i></i></span>
+        <div class="kicker">выгрузка</div>
+        <h3>CSV всем, Excel — в Pro</h3>
+        <p>CSV по стандарту RFC 4180 с кодировкой UTF-8: Excel открывает его без диалогов про кодировку. Pro выгружает многостраничный XLSX с листом описания запуска.</p>
+        <div class="gauge"><span>форматы</span><span>CSV · XLSX</span></div>
       </div>
     </div>
-    <details class="faq" style="margin-top:10px;"><summary>Как считается прибыль и что означают колонки</summary>
-      <p>Чистая прибыль за штуку = цена − комиссия категории − налог УСН − реклама − логистика (с вычетом СПП, если задана) − доля возвратов (возвратная логистика + обработка возврата) − упаковка − закуп. ROI считается от закупа, точка безубыточности — сколько штук в месяц покрывает фиксированные расходы. «Минимальная цена» — порог, ниже которого SKU уходит в минус; матрица: зелёный ≥ 10% маржи, жёлтый — прибыль есть, но узко, красный — минус.</p>
-    </details>
   </section>
 
   <!-- install -->
@@ -339,8 +347,8 @@
         <div class="note">Бесплатная версия — рабочий инструмент, а не пробник на неделю.</div>
       </div>
       <div class="price-card pro">
-        <div class="tier-k">Pro</div>
-        <div class="big">299 ₽</div><div class="per">один раз · карта РФ, СБП или USDC</div>
+        <div class="tier-k">Pro · акция ноября</div>
+        <div class="big">299 ₽ <s class="price-old">690 ₽</s></div><div class="per">один раз · карта РФ, СБП или USDC $2.99</div>
         <ul>
           <li><b>Без лимита строк</b> (выгрузка до 5 000+)</li>
           <li><b>Автопрокрутка</b> бесконечных лент</li>
@@ -355,7 +363,7 @@
 
     <div class="verify" style="margin-top:14px;">
       <button id="pay-1click" class="btn primary" type="button" style="width:100%; justify-content:center; margin-bottom:6px;">
-        <span data-1click-label>ОПЛАТИТЬ В 1 КЛИК — $9.00</span>
+        <span data-1click-label>ОПЛАТИТЬ В 1 КЛИК — $2.99</span>
       </button>
       <p id="pay-1click-hint" style="font-size:11px; text-align:center; margin:0 0 12px; opacity:.7;">MetaMask · Rabby · Base Wallet — кошелёк переключится на Base и подтвердит перевод</p>
       <a class="btn primary" id="pay-card" data-shop-product="data-clipper" href="https://oplata.info/asp2/pay_wm.asp?id_d=6354602&ai=1481449&lang=ru-RU" target="_blank" rel="noopener" style="width:100%; display:flex; justify-content:center; margin-bottom:6px; text-decoration:none;">
@@ -367,9 +375,9 @@
       <div class="addr"><span>КОШЕЛЁК A:</span><code>0x72Aa6edDE71B94f6b99c8e52EdC02B5C75F74d1a</code></div>
       <div class="addr"><span>КОШЕЛЁК B:</span><code>0xbbe6966949d7265a7f5f0b793f08293b9b7fe926</code></div>
       <div class="tagrow">
-        <span class="tag o">СЕТЬ: BASE</span><span class="tag">АКТИВ: USDC</span><span class="tag">СУММА: 9.00</span>
+        <span class="tag o">СЕТЬ: BASE</span><span class="tag">АКТИВ: USDC</span><span class="tag">СУММА: 2.99</span>
       </div>
-      <input id="tx-in" class="mono" type="text" placeholder="0x… хеш перевода 9.00 USDC (сеть Base)">
+      <input id="tx-in" class="mono" type="text" placeholder="0x… хеш перевода 2.99 USDC (сеть Base)">
       <div style="display:flex; gap:9px; flex-wrap:wrap;">
         <button id="buy-verify-tx" class="btn primary" type="button">ПРОВЕРИТЬ ПЕРЕВОД</button>
         <button id="buy-verify-key" class="btn" type="button">ПРОВЕРИТЬ КЛЮЧ</button>
@@ -428,7 +436,7 @@
   if (window.Unlock && window.Unlock.mountOneClick) {
     window.Unlock.mountOneClick($("pay-1click"), {
       product: "data-clipper",
-      price: 9,
+      price: 2.99,
       note: $("pay-1click-hint"),
       onError: function (msg) { say(msg, false); },
       onDone: function (r) {
@@ -441,11 +449,11 @@
   if (btn && window.ClipTx) {
     btn.addEventListener("click", function () {
       say("проверяем Base…", false);
-      window.ClipTx.verifyBaseUSDCPayment({ txHash: $("tx-in").value, minAmountUSD: 9 })
+      window.ClipTx.verifyBaseUSDCPayment({ txHash: $("tx-in").value, minAmountUSD: 2.99 })
         .then(function (r) {
           if (r.ok) {
             say("перевод подтверждён: " + r.amountUSDC + " USDC, блок " + r.blockNumber, true);
-            if (window.Unlock) window.Unlock.activate("data-clipper", { hash: r.txHash, received: String(Math.round(r.amountUSDC * 1e6)), price: 9 });
+            if (window.Unlock) window.Unlock.activate("data-clipper", { hash: r.txHash, received: String(Math.round(r.amountUSDC * 1e6)), price: 2.99 });
           } else {
             say("не подтверждено: " + r.reason, false);
           }
@@ -474,12 +482,42 @@
         say(map[(lic && lic.error)] || "ключ не принят", false);
         return;
       }
-      window.Unlock.activate("data-clipper", { hash: "license:" + lic.key, received: 0, price: 9, kind: "license", code: lic.code, kid: lic.kid });
+      window.Unlock.activate("data-clipper", { hash: "license:" + lic.key, received: 0, price: 2.99, kind: "license", code: lic.code, kid: lic.kid });
       say("ключ принят: " + lic.code + " · " + lic.kid + " — Pro включён офлайн", true);
     }, function (e) { say("ошибка проверки: " + e.message, false); });
   }
   if (keyBtn) keyBtn.addEventListener("click", verifyKey);
   if ($("key-in")) $("key-in").addEventListener("keydown", function (e) { if (e.key === "Enter") verifyKey(); });
+})();
+</script>
+<script>
+/* Tool tabs: calculator first, table/Telegram export second. */
+(function () {
+  "use strict";
+  var tabs = Array.prototype.slice.call(document.querySelectorAll("[data-app-tab]"));
+  var panels = Array.prototype.slice.call(document.querySelectorAll("[data-tab-panel]"));
+  function show(name, scroll) {
+    tabs.forEach(function (t) {
+      var on = t.getAttribute("data-app-tab") === name;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    panels.forEach(function (p) { p.hidden = p.getAttribute("data-tab-panel") !== name; });
+    if (scroll) {
+      var el = document.getElementById(name === "calc" ? "unitcalc" : "sandbox");
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+  tabs.forEach(function (t) {
+    t.addEventListener("click", function () { show(t.getAttribute("data-app-tab"), false); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('a[href="#sandbox"]'), function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); show("export", true); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('a[href="#unitcalc"]'), function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); show("calc", true); });
+  });
+  if (location.hash === "#sandbox") show("export", false);
 })();
 </script>
 </body>
