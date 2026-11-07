@@ -129,19 +129,15 @@
     <div>
       <div class="kicker">Калькулятор маржи WB/Ozon 2026 · Выгрузка таблиц в Excel</div>
       <h1>Калькулятор маржи WB/Ozon 2026 <span class="o">+ Таблица в Excel</span>.<br>В один клик.</h1>
-      <p class="lede">Посчитайте чистую прибыль, комиссии маркетплейсов, логистику и налоги с учётом акций 11.11, или выгрузите любую таблицу и ленту из Telegram в чистый Excel. Без аккаунта и без отправки данных на сервер.</p>
+      <p class="lede">Посчитайте чистую прибыль с учётом комиссий, логистики и акции 11.11 — или выгрузите любую таблицу и ленту Telegram в Excel. Без аккаунта и отправки данных на сервер.</p>
       <div class="cta-row">
-        <a class="btn primary" href="#unitcalc">Калькулятор маржи WB/Ozon 2026</a>
-        <a class="btn" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>Скачать выгрузку в Excel</a>
-        <a class="btn bookmarklet" id="bookmarklet-1click"
-           href="javascript:(function(){function x(v){return (v.textContent||'').replace(/\s+/g,' ').trim();}var res=[];document.querySelectorAll('table').forEach(function(tb){var rs=tb.querySelectorAll('tr');if(rs.length<2)return;var w=[];rs.forEach(function(r){var c=r.querySelectorAll('th,td');if(!c.length)return;w.push(Array.prototype.map.call(c,function(f){return '\x22'+x(f).replace(/\x22/g,'\x22\x22')+'\x22';}).join(','));});if(w.length>1)res.push(w.join('%5Cn'));});if(!res.length){alert('Таблицы на странице не найдены');return;}var csv=res.join('%5Cn%5Cn');var b=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=document.title.replace(/%5Ba-z0-9 -%5D/ig,'').trim().substring(0,40)+'.csv';a.click();})();"
-           title="Перетащите кнопку на панель закладок и нажмите на любой странице — таблица скачается в CSV без установки расширения.">ТАБЛИЦА В CSV БЕЗ УСТАНОВКИ — ПЕРЕТАЩИТЕ В ЗАКЛАДКИ</a>
+        <a class="btn primary" href="#unitcalc">Калькулятор 11.11</a>
+        <a class="btn" id="btn-install-top" href="downloads/data-clipper-unpacked.zip" download>Скачать Excel</a>
       </div>
       <div class="tagrow">
         <span class="tag">Бесплатно: 50 строк за выгрузку</span>
         <span class="tag o">Pro: <s>690 ₽</s> → 299 ₽ по акции ноября</span>
         <span class="tag">без KYC и подписки</span>
-        <span class="tag">Chrome / Edge / Brave</span>
       </div>
     </div>
     <div class="shot" aria-hidden="true">
@@ -177,7 +173,11 @@
   <!-- unit economics studio -->
   <section class="block tab-panel" id="unitcalc" data-tab-panel="calc">
     <div class="block-head"><span class="kicker">01</span><h2>Калькулятор маржи WB / Ozon 2026 + стресс-тест акции 11.11</h2></div>
-    <p style="max-width: 72ch; color:#3a3a35; margin-top:0;">Впишите товары в таблицу — цена, закуп, комиссия, логистика — и сразу увидите <b>чистую прибыль на штуку</b>, маржу, ROI и точку безубыточности. Учитываются комиссия категории, логистика, СПП, упаковка, возвраты и налог УСН (профили 2026 года: WB, Ozon, прямой прайс). Красная/жёлтая/зелёная матрица показывает убыточные SKU до закупки. Данные не покидают браузер.</p>
+    <div class="stress-cta">
+      <button id="uc-stress" class="btn primary" type="button">ЗАГРУЗИТЬ СТРЕСС-ТЕСТ НА 120 ТОВАРОВ WB (ПРОВЕРКА АКЦИИ 11.11)</button>
+      <span class="tag">1 клик · 120 SKU · отчёт по убыточным</span>
+    </div>
+    <p style="max-width: 72ch; color:#3a3a35; margin-top:0;">Впишите товары — цена, закуп, комиссия, логистика — и сразу увидите <b>чистую прибыль на штуку</b>, маржу, ROI и точку безубыточности. Учитываются СПП, возвраты, упаковка и налог УСН 2026. Красная/жёлтая/зелёная матрица показывает убыточные SKU до закупки. Данные не покидают браузер.</p>
     <div id="uc-stress-summary" class="uc-stress-summary" hidden></div>
     <div class="sandbox">
       <div class="demo-pane">
@@ -208,7 +208,6 @@
         <div class="tagrow" style="margin-top:10px;">
           <button id="uc-run" class="btn sm" type="button">РАССЧИТАТЬ</button>
           <button id="uc-example" class="btn sm" type="button">ПРИМЕР WB</button>
-          <button id="uc-stress" class="btn sm primary" type="button">ЗАГРУЗИТЬ СТРЕСС-ТЕСТ НА 120 ТОВАРОВ WB (ПРОВЕРКА АКЦИИ 11.11)</button>
           <span class="tag">Пересчёт идёт сам, кнопка — для порядка</span>
         </div>
         <div class="demo-head" style="margin-top:12px;">
@@ -322,6 +321,9 @@
       <li>Нажмите <b>«Загрузить распакованное расширение»</b> и выберите папку.</li>
       <li>Закрепите значок, откройте любую ленту и нажмите <b>НАЙТИ</b>.</li>
     </ol>
+    <p style="margin-top:12px;"><a class="btn bookmarklet" id="bookmarklet-1click"
+           href="javascript:(function(){function x(v){return (v.textContent||'').replace(/\s+/g,' ').trim();}var res=[];document.querySelectorAll('table').forEach(function(tb){var rs=tb.querySelectorAll('tr');if(rs.length<2)return;var w=[];rs.forEach(function(r){var c=r.querySelectorAll('th,td');if(!c.length)return;w.push(Array.prototype.map.call(c,function(f){return '\x22'+x(f).replace(/\x22/g,'\x22\x22')+'\x22';}).join(','));});if(w.length>1)res.push(w.join('%5Cn'));});if(!res.length){alert('Таблицы на странице не найдены');return;}var csv=res.join('%5Cn%5Cn');var b=new Blob([csv],{type:'text/csv'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=document.title.replace(/%5Ba-z0-9 -%5D/ig,'').trim().substring(0,40)+'.csv';a.click();})();"
+           title="Перетащите кнопку на панель закладок и нажмите на любой странице — таблица скачается в CSV без установки расширения.">ТАБЛИЦА В CSV БЕЗ УСТАНОВКИ — ПЕРЕТАЩИТЕ В ЗАКЛАДКИ</a></p>
     <div class="tagrow" style="margin-top:14px;">
       <span class="tag">сборка</span><span class="tag mono">dclip-1.0.0+20261030</span>
       <span class="tag">разрешения</span><span class="tag mono">activeTab · scripting · storage</span>

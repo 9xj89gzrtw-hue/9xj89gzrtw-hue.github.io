@@ -32,6 +32,15 @@
     commission: "Комиссия, %", logistics: "Логистика, ₽", competitor: "Конкурент, ₽"
   };
 
+  var FIELD_RU = {
+    name: "товар", price: "цена", cost: "закуп",
+    commission: "комиссия", logistics: "логистика", competitor: "конкурент"
+  };
+
+  function fieldList(keys) {
+    return keys.map(function (k) { return FIELD_RU[k] || k; }).join(", ");
+  }
+
   var EXAMPLE_WB = [
     "товар;цена;закуп;комиссия%;логистика",
     "Кашемир свитер жен;4290;1450;19;60",
@@ -241,7 +250,7 @@
     var info = $("uc-cols-info");
     if (info) {
       var mapped = Object.keys(cols).filter(function (k) { return cols[k]; });
-      info.textContent = g.rows.length + " строк · столбцы: " + (mapped.length ? mapped.join(", ") : "не распознаны");
+      info.textContent = g.rows.length + " строк · столбцы: " + (mapped.length ? fieldList(mapped) : "не распознаны");
     }
   }
 
@@ -430,7 +439,7 @@
     var mapped = Object.keys(cols).filter(function (k) { return cols[k]; });
     var msg = "строк " + parsed.rows.length +
       (parsed.rows.length > rows.length ? " (взято " + rows.length + ", лимит Pro " + ClipUnit.PRO_ROW_CAP + ")" : "") +
-      " · столбцы: " + (mapped.join(", ") || "не распознаны") +
+      " · столбцы: " + (fieldList(mapped) || "не распознаны") +
       (missing.length ? " · НЕТ колонки «цена» — строки помечены красным" : "") +
       (state.stress ? " · стресс-тест 11.11" : "") +
       (isPro() ? " · PRO" : " · FREE: CSV до " + ClipUnit.FREE_ROW_CAP + " строк");
