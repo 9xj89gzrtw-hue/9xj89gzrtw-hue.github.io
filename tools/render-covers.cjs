@@ -25,6 +25,18 @@ const OUT_OG = path.join(ROOT, "assets", "og");
 const TMP = path.join(ROOT, "tools", ".cover-shots");
 const PORT = 8831;
 
+/* Live total from Agent 4's catalog — the cover headline, the tg-chats h1
+   and the "Все (N)" chip all read the same number. */
+function tgTotal() {
+  try {
+    const src = fs.readFileSync(path.join(ROOT, "tg-chats", "catalog.js"), "utf8");
+    const m = src.match(/"total"\s*:\s*(\d+)/);
+    if (m) return Number(m[1]).toLocaleString("ru-RU");
+  } catch (e) { /* fallback below */ }
+  return "1 515";
+}
+const TG_TOTAL = tgTotal();
+
 const onlyIdx = process.argv.indexOf("--only");
 const ONLY = onlyIdx === -1 ? null : process.argv[onlyIdx + 1];
 
@@ -56,11 +68,15 @@ const ITEMS = [
     slug: "tg-chats",
     url: "/tg-chats/index.html",
     kicker: "TG CHAT VALIDATOR",
-    headline: "1 429 живых открытых чатов Telegram в Excel",
+    headline: `${TG_TOTAL} живых открытых чатов Telegram в Excel`,
     sub: "Селлеры WB/Ozon, закупки, карго, ИТ, недвижимость — пишите бесплатно без заявок",
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
-    scrollY: 330
+    scrollY: 0,
+    /* The free slice ranks the cashback-spam chat ("КЭШбЫК…", 105k members,
+       local-services topic) 2nd — filter to marketplace sellers before the
+       shot so the cover never shows it. */
+    clickChips: "Селлеры WB/Ozon"
   },
   {
     slug: "docsearch",
@@ -222,6 +238,15 @@ async function shoot(browser, item) {
   try {
     await page.goto(`http://127.0.0.1:${PORT}${item.url}`, { waitUntil: "load", timeout: 30000 });
     await page.waitForTimeout(900);
+    if (item.clickChips) {
+      const picked = await page.evaluate((needle) => {
+        const chips = Array.from(document.querySelectorAll(".chip"));
+        const btn = chips.find((b) => (b.textContent || "").indexOf(needle) !== -1);
+        if (btn) { btn.click(); return true; }
+        return false;
+      }, item.clickChips);
+      if (picked) await page.waitForTimeout(550);
+    }
     if (item.scrollY) {
       await page.evaluate((y) => window.scrollTo(0, y), item.scrollY);
       await page.waitForTimeout(420);
@@ -237,6 +262,12 @@ async function compose(browser, item, shotDataUri, width, height, outFile) {
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
   await page.setContent(coverHtml(item, shotDataUri, width, height), { waitUntil: "load" });
   await page.waitForTimeout(220);
+  /* The headline must never be clipped at the top or spill past the canvas. */
+  const overflow = await page.evaluate(() => ({
+    h: document.documentElement.scrollHeight,
+    clipped: document.documentElement.scrollHeight > window.innerHeight + 1
+  }));
+  if (overflow.clipped) console.log(`  ! ${item.slug} ${width}x${height}: content overflows canvas (${overflow.h}px > ${height}px)`);
   await page.screenshot({ path: outFile, type: "png" });
   await page.close();
 }

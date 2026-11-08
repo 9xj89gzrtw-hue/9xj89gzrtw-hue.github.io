@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Готовая база 1 500+ живых открытых чатов Telegram (Ноябрь 2026) в Excel</title>
-<meta name="description" content="Готовая база 1 500+ живых открытых чатов Telegram (Ноябрь 2026) в Excel. Селлеры WB/Ozon (111 чатов), ЖК и недвижимость Москвы и СПб (232 чата), закупки и опт (63 чата), карго и логистика (63 чата), фриланс и ИТ (413 чатов). В каждый чат можно писать бесплатно без заявок на вступление.">
+<meta name="description" content="Готовая база 1 515 живых открытых чатов Telegram (Ноябрь 2026) в Excel. Селлеры WB/Ozon (111 чатов), ЖК и недвижимость Москвы и СПб (247 чатов), закупки и опт (63 чата), карго и логистика (73 чата), фриланс и ИТ (389 чатов). В каждый чат можно писать бесплатно без заявок на вступление.">
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/tg-chats/">
 <meta property="og:title" content="Готовая база 1 500+ живых открытых чатов Telegram (Ноябрь 2026) в Excel">
-<meta property="og:description" content="Селлеры Wildberries и Ozon (111 чатов), оптовые поставщики и закупки (63 чата), карго и логистика (63 чата), фриланс и ИТ (413 чатов), недвижимость и ЖК (232 чата). В каждый чат можно писать бесплатно без заявок.">
+<meta property="og:description" content="Селлеры Wildberries и Ozon (111 чатов), оптовые поставщики и закупки (63 чата), карго и логистика (73 чата), фриланс и ИТ (389 чатов), недвижимость и ЖК (247 чатов). В каждый чат можно писать бесплатно без заявок.">
 <meta property="og:type" content="website">
 <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/base.css">
@@ -122,16 +122,17 @@
   <section class="hero">
     <div class="wrap">
       <span class="eyebrow"><span class="pulse"></span> <span id="hero-count">База загружается</span></span>
-      <h1>Готовая база 1 500+ живых открытых чатов Telegram (Ноябрь 2026) в Excel</h1>
+      <h1><span data-total-chats>1 515</span> живых открытых чатов Telegram в Excel (Ноябрь 2026)</h1>
       <p class="lede">
-        Селлеры Wildberries и Ozon (111 чатов), оптовые поставщики и закупки (63 чата),
-        карго и логистика (63 чата), фриланс и ИТ (413 чатов), недвижимость и ЖК (232 чата).
+        Селлеры Wildberries и Ozon (<span data-cat-count="Маркетплейсы WB/Ozon">111</span> чатов),
+        оптовые поставщики и закупки (<span data-cat-count="Закупки/Опт">63</span> чата),
+        карго и логистика (<span data-cat-count="Логистика/Карго">73</span> чата),
+        фриланс и ИТ (<span data-cat-count="IT/Фриланс">389</span> чатов),
+        недвижимость и ЖК (<span data-cat-count="Недвижимость/Ремонт">247</span> чатов).
         В каждый чат можно писать бесплатно без заявок на вступление.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#catalog">Найти чат</a>
-        <button class="btn btn-ghost" type="button" id="hero-check">Проверить свои ссылки</button>
-        <button class="btn btn-ghost" type="button" id="hero-xlsx">Скачать Excel — 1 500+ чатов</button>
+        <button class="btn btn-primary" type="button" id="hero-xlsx">Скачать всю базу в Excel (.xlsx) — 490 ₽ (или пакет рубрики за 149 ₽)</button>
       </div>
       <p class="hero-meta small muted">
         <span id="stat-count">—</span> чатов в базе
@@ -149,46 +150,20 @@
   <section id="catalog" class="app-section">
     <div class="wrap">
       <h2 class="sr-only">Каталог публичных чатов Telegram</h2>
-      <div class="catalog-top">
+      <div class="catalog-bar">
         <div class="tabs tabs-lg" role="tablist" aria-label="Раздел">
           <button class="tab" type="button" role="tab" aria-selected="true" data-view="base">Каталог</button>
-          <button class="tab" type="button" role="tab" aria-selected="false" data-view="check">Проверка ссылок</button>
+          <button class="tab" type="button" role="tab" aria-selected="false" data-view="check">Проверить свои ссылки</button>
         </div>
-        <div class="catalog-actions">
-          <span class="badge catalog-only" id="visible-badge">—</span>
-          <div class="dl-pair catalog-only">
-            <button class="btn btn-ghost btn-sm" type="button" id="dl-csv">CSV</button>
-            <button class="btn btn-primary btn-sm" type="button" id="dl-xlsx">Excel · 1 500+ чатов</button>
-          </div>
-          <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Все 1 500+ чатов, CSV/XLSX и проверка 50 ссылок за раз.">Pro</button>
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input class="search-input" id="q" type="search" placeholder="Поиск чатов" autocomplete="off" aria-label="Поиск чатов">
         </div>
+        <span class="badge catalog-only" id="visible-badge">—</span>
+        <button class="btn btn-ghost btn-sm catalog-only" type="button" id="dl-csv">CSV</button>
       </div>
 
-      <div data-preview-mount="tool"></div>
-
       <div class="panel card" id="view-base">
-        <div class="vip-filters-row" role="group" aria-label="Нишевые VIP-фильтры в 1 клик">
-          <span class="vip-filters-label">VIP-фильтры в 1 клик:</span>
-          <button class="vip-btn" type="button" data-vip-topic="Маркетплейсы WB/Ozon">Селлеры WB и Ozon (111)</button>
-          <button class="vip-btn" type="button" data-vip-topic="Закупки/Опт">Закупки и опт (63)</button>
-          <button class="vip-btn" type="button" data-vip-topic="Логистика/Карго">Логистика и карго (63)</button>
-          <button class="vip-btn" type="button" data-vip-topic="Недвижимость/Ремонт">ЖК и недвижимость (232)</button>
-        </div>
-
-        <div class="search-row">
-          <div class="search-wrap">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
-            <input class="search-input" id="q" type="search" placeholder="Например: Python, Казань, родители" autocomplete="off" aria-label="Поиск чатов">
-          </div>
-          <select class="field select-city" id="city" aria-label="Город">
-            <option value="">Все города</option>
-          </select>
-          <select class="field select-sort" id="sort" aria-label="Сортировка">
-            <option value="members">По участникам</option>
-            <option value="fresh">По дате проверки</option>
-            <option value="title">По названию</option>
-          </select>
-        </div>
 
         <div class="chips-row" id="topics" role="group" aria-label="Тематика"></div>
 
@@ -211,12 +186,26 @@
             <div class="aha-thead"><span>Чат</span><span>Тема</span><span>Город</span><span class="num">Участники</span></div>
             <div id="aha-rows"></div>
           </div>
-          <button class="btn btn-primary aha-btn" type="button" id="aha-buy" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Все 1 500+ чатов, CSV/XLSX и проверка 50 ссылок за раз. 490 ₽, ключ TW1 сразу.">Открыть все 1 500+ чатов и скачать Excel за 490 ₽ (СБП / Карта РФ — ключ сразу)</button>
-          <p class="tiny muted aha-note">Оплата один раз · ключ TW1-… сразу на экране · без подписки и регистрации</p>
+          <button class="btn btn-primary aha-btn" type="button" id="aha-buy" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Все 1 500+ чатов, CSV/XLSX и проверка 50 ссылок за раз. 490 ₽, ключ TW1 сразу.">Открыть все 1 515 чатов и скачать Excel за 490 ₽ (СБП / Карта РФ — ключ сразу)</button>
+          <div class="pack-grid" role="group" aria-label="Пакеты рубрик в 1 клик">
+            <a class="pack-btn" href="https://oplata.info/asp2/pay_wm.asp?id_d=6378375&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Пакет «Селлеры WB/Ozon + Опт + Карго»</b>
+              <span>247 чатов в Excel — <b>149 ₽</b></span>
+            </a>
+            <a class="pack-btn" href="https://oplata.info/asp2/pay_wm.asp?id_d=6378421&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Пакет «Фриланс, IT, Заказы и Недвижимость РФ»</b>
+              <span>636 чатов в Excel — <b>149 ₽</b></span>
+            </a>
+            <a class="pack-btn pack-full" href="https://oplata.info/asp2/pay_wm.asp?id_d=6354600&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Полная база «Все 1 515 чатов + безлимитный валидатор»</b>
+              <span>Excel — <b>490 ₽</b></span>
+            </a>
+          </div>
+          <p class="tiny muted aha-note">Оплата в 1 клик: СБП / Карта РФ — готовый Excel скачивается сразу после оплаты · ключ TW1-… · без подписки и регистрации</p>
         </div>
         <div class="limit-bar" id="limit-bar" hidden>
           <div>
-            <p class="small" id="limit-text">В бесплатной версии 35 чатов из 1 500+.</p>
+            <p class="small" id="limit-text">В бесплатной версии 35 чатов из 1 515.</p>
             <p class="tiny muted">Полная база открывается после оплаты в этом браузере — ключ TW1-… приходит сразу.</p>
           </div>
           <button class="btn btn-primary btn-sm" type="button" data-unlock data-product="tgchats" data-price="9" data-name="TG Chat Validator Pro" data-sub="Все 1 500+ чатов, CSV/XLSX и проверка 50 ссылок за раз.">Открыть всё за $9</button>
@@ -259,7 +248,7 @@ t.me/third_chat"></textarea>
           <p class="price">0 ₽</p>
           <p class="small muted">Без регистрации и без карты.</p>
           <ul class="price-list">
-            <li>35 чатов из базы 1 500+</li>
+            <li>35 чатов из базы <span data-total-chats>1 515</span></li>
             <li>Поиск и фильтры по этим чатам</li>
             <li>Выгрузка 30 строк в CSV</li>
             <li>Проверка до 10 ссылок за раз</li>
@@ -274,7 +263,7 @@ t.me/third_chat"></textarea>
           <p class="price"><span class="price-rub">490 ₽</span> <span class="small muted">или $9 в USDC на Base</span></p>
           <p class="small muted">Один платёж. Ключ TW1-… открывает Pro в этом браузере.</p>
           <ul class="price-list">
-            <li>Все 1 500+ проверенных чатов</li>
+            <li>Все <span data-total-chats>1 515</span> проверенных чатов</li>
             <li>Выгрузка в CSV и XLSX целиком</li>
             <li>Проверка до 50 ссылок за раз</li>
             <li>Новые чаты в базе — без доплаты</li>
@@ -288,6 +277,53 @@ t.me/third_chat"></textarea>
           </div>
           <div data-preview-mount="price"></div>
           <p class="tiny muted price-fine">Мгновенная автовыдача: сразу после оплаты СБП/картой или USDC вы получаете бессрочный ключ вида <span class="mono">TW1-…</span>, который открывает полную версию прямо в браузере — без регистрации, подписок и установки.</p>
+          <div class="pack-grid" role="group" aria-label="Пакеты рубрик" style="margin-top:12px;">
+            <a class="pack-btn" href="https://oplata.info/asp2/pay_wm.asp?id_d=6378375&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Пакет «Селлеры WB/Ozon + Опт + Карго»</b>
+              <span>247 чатов в Excel — <b>149 ₽</b></span>
+            </a>
+            <a class="pack-btn" href="https://oplata.info/asp2/pay_wm.asp?id_d=6378421&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Пакет «Фриланс, IT, Заказы и Недвижимость РФ»</b>
+              <span>636 чатов в Excel — <b>149 ₽</b></span>
+            </a>
+            <a class="pack-btn pack-full" href="https://oplata.info/asp2/pay_wm.asp?id_d=6354600&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">
+              <b>Полная база «Все <span data-total-chats>1 515</span> чатов + безлимитный валидатор»</b>
+              <span>Excel — <b>490 ₽</b></span>
+            </a>
+          </div>
+          <p class="tiny muted">Покупка в 1 клик без USDC-кошелька: СБП / Карта РФ на Plati.Market — готовый Excel скачивается сразу после оплаты, ключ TW1 приходит автоматически.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="b2b">
+    <div class="wrap">
+      <span class="eyebrow"><span class="pulse"></span> Новый продукт · Ноябрь 2026</span>
+      <h2 style="margin-top:10px;">База 860+ интернет-магазинов и оптовых поставщиков РФ</h2>
+      <p class="lede" style="margin-top:10px; max-width:720px;">
+        Прямые телефоны, Email, Telegram и CMS (Bitrix, WordPress, Tilda, OpenCart) каждого магазина.
+        864 лида, 76% — с контактами. Полная база — один Excel-файл, разобранный по городам и категориям.
+      </p>
+      <div class="b2b-grid">
+        <div class="b2b-card card">
+          <h3>Бесплатный предпросмотр: первые 15 магазинов</h3>
+          <p class="small muted">Живые строки из демо-базы — те же, что в полной выгрузке.</p>
+          <div class="b2b-scroll">
+          <table class="b2b-table" aria-label="Первые 15 магазинов из демо-базы">
+            <thead>
+              <tr><th scope="col">Магазин</th><th scope="col">Телефон</th><th scope="col">Email / Telegram</th><th scope="col">CMS</th></tr>
+            </thead>
+            <tbody id="b2b-rows">
+              <tr><td colspan="4" class="small muted">Загружаем…</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <div class="b2b-actions">
+            <a class="btn btn-primary" href="../downloads/b2b-stores-demo-30.csv" download>Скачать 30 магазинов бесплатно (CSV)</a>
+            <a class="btn btn-ghost" id="b2b-buy" href="https://oplata.info/asp2/pay_wm.asp?id_d=6379842&ai=1481449&lang=ru-RU" target="_blank" rel="noopener">Купить полную базу — 864 магазина в Excel (СБП / Карта РФ)</a>
+          </div>
+          <p class="tiny muted">Демо: <a href="../downloads/b2b-stores-demo-30.csv" download>b2b-stores-demo-30.csv</a> · Полная выгрузка: CSV и XLSX, контакты собраны с публичных страниц магазинов.</p>
         </div>
       </div>
     </div>
@@ -358,6 +394,73 @@ t.me/third_chat"></textarea>
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
   else go();
+})();
+</script>
+<script>
+/* B2B-превью: первые 15 магазинов из downloads/b2b-stores-demo-30.csv. */
+(function () {
+  "use strict";
+  function parseCsv(text) {
+    var rows = [], row = [], field = "", inQuotes = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (inQuotes) {
+        if (ch === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else { inQuotes = false; }
+        } else { field += ch; }
+      } else if (ch === '"') { inQuotes = true; }
+      else if (ch === ",") { row.push(field); field = ""; }
+      else if (ch === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+      else if (ch === "\r") { /* skip */ }
+      else { field += ch; }
+    }
+    if (field !== "" || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+  function first(value) {
+    return String(value || "").split(";")[0].trim();
+  }
+  function render(rows) {
+    var host = document.getElementById("b2b-rows");
+    if (!host) return;
+    var head = rows[0] || [];
+    var idx = {};
+    head.forEach(function (name, i) { idx[name] = i; });
+    host.innerHTML = "";
+    var shown = 0;
+    for (var r = 1; r < rows.length && shown < 15; r++) {
+      var line = rows[r];
+      if (!line || line.length < 2 || !String(line[idx.shop_name] || "").trim()) continue;
+      var tr = document.createElement("tr");
+      var shop = document.createElement("td");
+      shop.textContent = String(line[idx.shop_name] || "").trim() + " · " + String(line[idx.domain] || "").trim();
+      var phone = document.createElement("td");
+      phone.textContent = first(line[idx.phone]);
+      var contact = document.createElement("td");
+      var mail = first(line[idx.email]);
+      var tg = first(line[idx.telegram]);
+      contact.textContent = mail || tg || "—";
+      var cms = document.createElement("td");
+      cms.textContent = String(line[idx.cms] || "").trim();
+      tr.appendChild(shop); tr.appendChild(phone); tr.appendChild(contact); tr.appendChild(cms);
+      host.appendChild(tr);
+      shown += 1;
+    }
+    if (!shown) {
+      host.innerHTML = '<tr><td colspan="4" class="small muted">Предпросмотр недоступен офлайн — скачайте демо-CSV ниже.</td></tr>';
+    }
+  }
+  fetch("../downloads/b2b-stores-demo-30.csv", { cache: "no-store" })
+    .then(function (res) {
+      if (!res.ok) throw new Error("demo csv " + res.status);
+      return res.text();
+    })
+    .then(function (text) { render(parseCsv(text)); })
+    .catch(function () {
+      var host = document.getElementById("b2b-rows");
+      if (host) host.innerHTML = '<tr><td colspan="4" class="small muted">Предпросмотр недоступен офлайн — скачайте демо-CSV ниже.</td></tr>';
+    });
 })();
 </script>
 </body>
