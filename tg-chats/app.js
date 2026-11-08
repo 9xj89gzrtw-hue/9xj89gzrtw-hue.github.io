@@ -9,7 +9,7 @@
   var PRO_CHECKS = 50;
   var AHA_LIMIT = 10;
   var AHA_PREVIEW_ROWS = 5;
-  var FULL_XLSX_NAME = "telegram-chats-1429-full-nov2026.xlsx";
+  var FULL_XLSX_NAME = "telegram-chats-1500-full-nov2026.xlsx";
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -106,6 +106,7 @@
   }
 
   function updateVipButtons() {
+    var fullCounts = DATA.categoryTotals || DATA.categories || {};
     var vipBtns = $$(".vip-btn");
     vipBtns.forEach(function (btn) {
       var top = btn.getAttribute("data-vip-topic");
@@ -115,6 +116,16 @@
         btn.classList.add("is-active");
       } else {
         btn.classList.remove("is-active");
+      }
+      var count = fullCounts[top];
+      if (count != null && !btn.getAttribute("data-labeled")) {
+        var baseText = top === "Маркетплейсы WB/Ozon" ? "Селлеры WB и Ozon"
+          : top === "Закупки/Опт" ? "Закупки и опт"
+          : top === "Логистика/Карго" ? "Логистика и карго"
+          : top === "Недвижимость/Ремонт" ? "ЖК и недвижимость"
+          : top;
+        btn.textContent = baseText + " (" + fmt(count) + ")";
+        btn.setAttribute("data-labeled", "1");
       }
     });
   }
@@ -146,7 +157,7 @@
     /* The free catalog ships only 35 rows, but the tabs must promise the
        full base (catalog.js categories), not the free slice: a buyer who
        taps "IT/Фриланс (1)" thinks the full base has one IT chat. */
-    var fullCounts = DATA.categories || {};
+    var fullCounts = DATA.categoryTotals || DATA.categories || {};
     TOPICS.forEach(function (topic) {
       var n;
       if (topic === "Все") n = TOTAL;
