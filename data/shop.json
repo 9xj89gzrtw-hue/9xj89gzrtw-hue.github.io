@@ -1,6 +1,6 @@
 {
   "source": "gemini/agent2_out/digiseller_tw1_stock.json",
-  "updated": "2026-11-08T16:54:00.511Z",
+  "updated": "2026-11-08T17:05:21.416Z",
   "seller_id": 1481449,
   "currency_note": "price_rub is what the checkout shows; price_usd is what the page charges in USDC on Base",
   "products": {
@@ -28,7 +28,7 @@
       "price_usd": 15,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354601&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/search-contracts-vat-ids-and-invoices-in-eml-mbox-mail-archives-locally/6354601",
+      "card_url": "https://plati.market/itm/6354601",
       "title": "Поиск договоров, ИНН и счетов в архивах почты (.eml/.mbox/txt/csv) локально на ПК (TW"
     },
     "data-clipper": {
@@ -37,7 +37,7 @@
       "price_usd": 2.99,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354602&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/wb-ozon-2026-margin-calculator-site-telegram-table-parser-to-excel-in-one-click/6354602",
+      "card_url": "https://plati.market/itm/6354602",
       "title": "Калькулятор маржи WB/Ozon 2026 + Парсер таблиц и Telegram в Excel в 1 клик (TW1-CLIP)"
     },
     "newsflow": {
@@ -78,30 +78,30 @@
     },
     "wb-sellers-chats": {
       "id": 6378375,
-      "price_rub": 148.84,
+      "price_rub": 148.89,
       "price_usd": 1.49,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6378375&ai=1481449&lang=ru-RU",
       "card_url": "https://plati.market/itm/230-wildberries-ozon-seller-wholesale-and-cargo-chats-2026-excel-csv-validator/6378375",
       "title": "База 230+ чатов Селлеров Wildberries, Ozon, Поставщиков и Карго 2026 (Excel/CSV) + Ва"
     },
+    "b2b-stores-leads": {
+      "id": 6379842,
+      "price_rub": 249.44,
+      "price_usd": 2.49,
+      "stocked": 100,
+      "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6379842&ai=1481449&lang=ru-RU",
+      "card_url": "https://plati.market/itm/database-of-860-russian-e-commerce-stores-wholesalers-2026-excel-phones-emails/6379842",
+      "title": "База 860+ Интернет-Магазинов и Оптовиков РФ 2026 (Excel): Телефоны, Email, TG, CMS +"
+    },
     "freelance-it-chats": {
       "id": 6378421,
-      "price_rub": 148.84,
+      "price_rub": 148.89,
       "price_usd": 1.49,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6378421&ai=1481449&lang=ru-RU",
       "card_url": "https://plati.market/itm/530-freelance-it-and-real-estate-open-chats-2026-excel-csv-ru/6378421",
       "title": "База 530+ открытых чатов Фриланса, IT, Заказов и Недвижимости РФ 2026 (Excel/CSV)"
-    },
-    "b2b-stores-leads": {
-      "id": 6379842,
-      "price_rub": null,
-      "price_usd": null,
-      "stocked": 0,
-      "pay_url": null,
-      "card_url": null,
-      "title": null
     }
   },
   "bundle": {

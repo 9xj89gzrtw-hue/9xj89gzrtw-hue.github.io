@@ -2,3 +2,5 @@
 6f2976f17f8bfe243bf8a8d9ab3133abeaa57dff7dc0814b28683bf4df035019  table-tg-clipper.user.js
 ac1a8436a5f5348847e674341c430ffe52fc314607eccf0bc3b9e6410831fc70  algo-tycoon-itch-web.zip
 06efccc9610fb064c0236d7cd9e027aed77254f1e4ee83e3f5645ea56c461451  audio-dub-kombo-ext.zip
+29445ee89bd4906393a6ed7fc9f5e18a4e20abb9c4f49f34f505b76cab42826c  b2b-ecommerce-stores-864-nov2026.csv
+ec1c6aecd654353305c8dc91f3c52520f5f267f675dc7ce176e3e0d8e677808b  b2b-ecommerce-stores-864-nov2026.xlsx

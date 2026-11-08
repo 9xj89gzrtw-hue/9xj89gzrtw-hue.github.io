@@ -1140,15 +1140,19 @@
    * ------------------------------------------------------------------ */
 
   function readUrlParams() {
-    var out = { key: "", download: "" };
+    var out = { key: "", download: "", pack: "" };
     try {
       var search = new URLSearchParams(window.location.search || "");
       var hash = String(window.location.hash || "").replace(/^#/, "");
       var hashParams = new URLSearchParams(hash);
       var key = (search.get("key") || hashParams.get("key") || search.get("license") || hashParams.get("license") || "").trim();
       var download = (search.get("download") || hashParams.get("download") || "").trim().toLowerCase();
+      /* pack selects which ready-made Excel pack a receipt link delivers:
+         b2b-stores | wb-sellers | freelance-it  (Digiseller lots 6378375/6378421/12) */
+      var pack = (search.get("pack") || hashParams.get("pack") || "").trim().toLowerCase();
       out.key = key.replace(/\s+/g, "");
       out.download = download;
+      out.pack = pack;
     } catch (e) { /* very old URL API: page works exactly as before */ }
     return out;
   }
@@ -1161,12 +1165,14 @@
       url.searchParams.delete("key");
       url.searchParams.delete("license");
       url.searchParams.delete("download");
+      url.searchParams.delete("pack");
       var hash = String(url.hash || "").replace(/^#/, "");
       if (hash) {
         var hp = new URLSearchParams(hash);
         hp.delete("key");
         hp.delete("license");
         hp.delete("download");
+        hp.delete("pack");
         var rest = hp.toString();
         url.hash = rest ? "#" + rest : "";
       }
@@ -1197,13 +1203,13 @@
         : await verifyAndUnlock(product, price, info.key);
       stripUrlKey();
       toast(RU ? "Ключ из чека принят. Pro включён в этом браузере." : "Receipt key accepted. Pro is on in this browser.");
-      if (o.onDone) { try { o.onDone({ key: info.key, download: info.download, result: res, product: product }); } catch (e) {} }
-      return { key: info.key, download: info.download, ok: true, result: res, product: product };
+      if (o.onDone) { try { o.onDone({ key: info.key, download: info.download, pack: info.pack, result: res, product: product }); } catch (e) {} }
+      return { key: info.key, download: info.download, pack: info.pack, ok: true, result: res, product: product };
     } catch (err) {
       var msg = RU ? ("Ключ из чека не принят: " + (err && err.message ? err.message : "ошибка")) : String(err && err.message || err);
       toast(msg, true);
       if (o.onError) { try { o.onError(msg); } catch (e) {} }
-      return { key: info.key, download: info.download, ok: false };
+      return { key: info.key, download: info.download, pack: info.pack, ok: false };
     }
   }
 
