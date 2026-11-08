@@ -383,7 +383,7 @@
               Два пути, оба без ручной работы. USDC на Base — кошелёк сам подтверждает перевод.
               Карта РФ / СБП — магазин автоматически отдаёт лицензионный ключ
               <code class="mono">TW1-…</code> сразу после оплаты: вставьте его в окно разблокировки,
-              подпись ECDSA проверяется в браузере, ждать никого не нужно.
+              страница проверяет его в браузере, ждать никого не нужно.
               <button class="btn btn-ghost btn-sm" id="key-cta" type="button" style="margin-top:8px; font-size:12px;">
                 Уже есть ключ TW1 — активировать
               </button>
@@ -402,7 +402,7 @@
         <div class="bookmarklet" style="background: var(--bg); color: var(--ink-2); white-space: normal; font-family: inherit; font-size: 13px; line-height: 1.6; border: 1px solid var(--line);">
           Оплата в 1 клик через кошелёк Base USDC или мгновенная автоматическая покупка лицензионного
           ключа <code class="mono">TW1-…</code> картой РФ / СБП (ключ выдаётся автоматически сразу после
-          оплаты и вводится в окно разблокировки). Ключ проверяется по подписи ECDSA P-256 прямо в
+          оплаты и вводится в окно разблокировки). Ключ проверяется прямо в
           браузере: ни бота, ни переписки, ни ручной выдачи.
         </div>
       </div>
@@ -500,6 +500,21 @@
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();
+})();
+</script>
+
+<script>
+/* Receipt link (?key=TW1-AUDIO-… / #key=TW1-AUDIO-…): Pro switches on without
+   the modal — the buyer clicks the link in the Plati.Market receipt. */
+(function () {
+  "use strict";
+  function go() {
+    if (window.Unlock && window.Unlock.autoActivateFromUrl) {
+      window.Unlock.autoActivateFromUrl({ product: "audio-dub-studio", price: 1.99 });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
+  else go();
 })();
 </script>
 </body>

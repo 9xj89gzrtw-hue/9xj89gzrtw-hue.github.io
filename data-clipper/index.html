@@ -140,26 +140,21 @@
         <span class="tag">без KYC и подписки</span>
       </div>
     </div>
-    <div class="shot" aria-hidden="true">
-      <div class="shot-bar">
-        <span class="dot f"></span><span class="dot"></span><span class="dot"></span>
-        <span class="shot-url">t.me/s/durov — окно расширения</span>
+    <div class="hero-card" aria-label="Пример отчёта селлера">
+      <div class="hero-card-head">
+        <span class="hero-card-kicker">Пример отчёта селлера · распродажа 11.11</span>
+        <span class="hero-card-badge">WB / Ozon</span>
       </div>
-      <div class="shot-body">
-        <div class="shot-feed">
-          <div class="minipost"><div class="t">Планы Telegram: что выйдет дальше</div><div class="m">durov · 14:02 · 41,2 тыс. просмотров · /post/roadmap-2027</div></div>
-          <div class="minipost"><div class="t">Почему обновления стали меньше</div><div class="m">durov · 12:31 · 28,7 тыс. просмотров · /post/ship-small</div></div>
-          <div class="minipost"><div class="t">Видеосообщения до 30 секунд</div><div class="m">durov · 10:05 · 33,9 тыс. просмотров · /post/vnotes-30s</div></div>
-        </div>
-        <div class="shot-csv">
-          <b>заголовок,автор,время,</b><b>просмотры</b><br>
-          Планы Telegram…,durov,14:02,41,2 тыс.<br>
-          Почему обновления…,durov,12:31,28,7 тыс.<br>
-          Видеосообщения…,durov,10:05,33,9 тыс.<br>
-          <br>→ 3 строки · 4 колонки<br>→ CSV готов
-        </div>
+      <div class="hero-card-flow">
+        <div class="hero-card-step"><b>120</b><span>товаров проверено</span></div>
+        <div class="hero-card-arrow" aria-hidden="true">→</div>
+        <div class="hero-card-step"><b>19</b><span>убыточных артикулов найдено</span></div>
+        <div class="hero-card-arrow" aria-hidden="true">→</div>
+        <div class="hero-card-step"><b>84 500&nbsp;₽</b><span>спасено от работы в минус</span></div>
       </div>
-      <div class="shot-foot"><span>НАЙТИ → ВЫБРАТЬ ПОЛЯ → ВЫГРУЗИТЬ</span><span>0 телеметрии</span></div>
+      <p class="hero-card-note">Цена, закуп, комиссия, логистика и акция 11.11 — красные товары видны до закупки.</p>
+      <a class="btn primary hero-card-btn" href="#unitcalc">Посчитать свои товары бесплатно</a>
+      <p class="hero-card-small">Бесплатно до 50 товаров. Отдельно ниже — выгрузка любой таблицы или ленты Telegram в Excel.</p>
     </div>
   </section>
 
@@ -520,6 +515,40 @@
     a.addEventListener("click", function (e) { e.preventDefault(); show("calc", true); });
   });
   if (location.hash === "#sandbox") show("export", false);
+})();
+</script>
+<script>
+/* Receipt link (?key=TW1-CLIP-… / #key=TW1-…): Pro switches on without the
+   modal — buyer clicks the link in the Plati.Market receipt and done. */
+(function () {
+  "use strict";
+  function paint() {
+    var pro = !!(window.Unlock && window.Unlock.isPro("data-clipper"));
+    var chip = document.getElementById("tier-chip");
+    if (chip) chip.textContent = pro ? "PRO" : "FREE";
+    var st = document.getElementById("tx-status");
+    if (pro && st) {
+      st.textContent = "ключ из чека принят — Pro включён, все лимиты сняты";
+      st.style.color = "var(--ok, #2c6b4f)";
+      st.style.opacity = "1";
+    }
+    if (pro && window.__UNITCALC_RUN__ && typeof window.__UNITCALC_RUN__ === "function") {
+      /* Re-run the sheet so the matrix and XLSX button pick up Pro limits. */
+      var runBtn = document.getElementById("uc-run");
+      if (runBtn) runBtn.click();
+    }
+  }
+  function go() {
+    if (!window.Unlock || !window.Unlock.autoActivateFromUrl) { paint(); return; }
+    window.Unlock.autoActivateFromUrl({
+      product: "data-clipper",
+      price: 2.99,
+      onDone: paint
+    }).then(paint, paint);
+  }
+  document.addEventListener("unlock:changed", paint);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
+  else go();
 })();
 </script>
 </body>

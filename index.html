@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Toolworks — 8 продуктов: таблицы, чаты Telegram, видео и рынки</title>
-<meta name="description" content="Восемь продуктов без регистрации: калькулятор прибыли WB/Ozon, 1 200+ проверенных чатов Telegram, выгрузка таблиц в Excel, звук и клипы из видео, дайджесты, рынки, налоговый отчёт по Base и игра про ИИ-стартап. Бесплатные версии работают сразу. Pro — один раз от 149 ₽: карта РФ, СБП или USDC на Base.">
+<meta name="description" content="Восемь продуктов без регистрации: калькулятор прибыли WB/Ozon, 1 429 проверенных чатов Telegram, выгрузка таблиц в Excel, звук и клипы из видео, дайджесты, рынки, налоговый отчёт по Base и игра про ИИ-стартап. Бесплатные версии работают сразу. Pro — один раз от 149 ₽: карта РФ, СБП или USDC на Base.">
 <link rel="canonical" href="https://9xj89gzrtw-hue.github.io/">
 <meta property="og:title" content="Toolworks — 8 продуктов, которые убирают рутину">
 <meta property="og:description" content="Калькулятор прибыли WB/Ozon, чаты Telegram, таблицы в Excel, звук из видео, рынки, налоги Base и игра про ИИ-стартап. Бесплатно — сразу, Pro — один раз от 149 ₽.">
@@ -202,7 +202,7 @@
           <a class="btn btn-ghost" href="#pricing">Цены — от 149 ₽</a>
         </div>
         <div class="hero-facts">
-          <span><b>1 200+</b> проверенных чатов</span>
+          <span><b>1 429</b> проверенных чатов</span>
           <span><b>0 ₽</b> навсегда</span>
           <span><b>0</b> аккаунтов и подписок</span>
           <span>Ключ TW1 — сразу после оплаты</span>
@@ -264,7 +264,7 @@
           </div>
           <ul class="lab-list" id="lab-list"></ul>
           <div class="lab-pane-foot">
-            <a class="btn btn-primary btn-sm" href="./tg-chats/">Все 1 200+ чатов</a>
+            <a class="btn btn-primary btn-sm" href="./tg-chats/">Все 1 429 чатов</a>
             <span class="lab-foot">Бесплатно: 35 чатов и 10 проверок ссылок. Pro — вся база и Excel.</span>
           </div>
         </div>
@@ -323,12 +323,12 @@
             </span>
             <div class="product-title">
               <h3>Чаты и клиенты из Telegram</h3>
-              <span class="badge badge-ok">1 200+ чатов</span>
+              <span class="badge badge-ok">1 429 чатов</span>
             </div>
           </div>
           <p class="pain"><b>Боль:</b> клиенты сидят в чатах, но половина ссылок из подборок — мёртвые или спам.</p>
           <div class="pp pp-free"><span class="pp-k">Бесплатно навсегда</span><span class="pp-v">35 проверенных чатов, поиск и 10 проверок ссылок</span></div>
-          <div class="product-price"><span class="pr-rub">490 ₽</span><span class="pr-note">Pro: все 1 200+ чатов и Excel</span></div>
+          <div class="product-price"><span class="pr-rub">490 ₽</span><span class="pr-note">Pro: все 1 429 чатов и Excel</span></div>
           <div class="product-actions">
             <a class="btn btn-primary btn-sm" href="./tg-chats/">Открыть бесплатно</a>
             <button class="btn btn-ghost btn-sm" type="button" data-unlock data-product="tg-chats" data-price="9" data-name="Чаты Telegram">Купить Pro</button>
@@ -618,5 +618,16 @@
 </footer>
 
 <script src="./assets/home-lab.js" defer></script>
+<script>
+/* Receipt link: ?key=TW1-...&download=xlsx activates Pro without the modal (1-клик из автовыдачи Plati). */
+(function(){ "use strict";
+  function go(){
+    if(window.Unlock && window.Unlock.autoActivateFromUrl){
+      window.Unlock.autoActivateFromUrl({product: "all-in-one", price: 14.99});
+    }
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",go); else go();
+})();
+</script>
 </body>
 </html>

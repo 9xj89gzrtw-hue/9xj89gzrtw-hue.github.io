@@ -1125,6 +1125,88 @@
     });
   }
 
+  /* ------------------------------------------------------------------
+   * Auto-activation from a Digiseller / Plati.Market receipt link.
+   *
+   * A buyer who paid by card gets a TW1-… key on screen at once and, in the
+   * receipt, a link like /tg-chats/?key=TW1-TG-...&download=xlsx (or the
+   * same inside the hash: #key=TW1-…). The standard flow asks them to find
+   * a modal and paste 86 characters. This helper reads the key straight
+   * from the URL, verifies it offline (same ECDSA check as the modal),
+   * grants the entitlement — so every page listening to unlock:changed
+   * opens Pro by itself — and strips the key back out of the address bar.
+   * Pages that ship a file (tg-chats) read the download format through
+   * getUrlParams() and start the download once their pack is open.
+   * ------------------------------------------------------------------ */
+
+  function readUrlParams() {
+    var out = { key: "", download: "" };
+    try {
+      var search = new URLSearchParams(window.location.search || "");
+      var hash = String(window.location.hash || "").replace(/^#/, "");
+      var hashParams = new URLSearchParams(hash);
+      var key = (search.get("key") || hashParams.get("key") || search.get("license") || hashParams.get("license") || "").trim();
+      var download = (search.get("download") || hashParams.get("download") || "").trim().toLowerCase();
+      out.key = key.replace(/\s+/g, "");
+      out.download = download;
+    } catch (e) { /* very old URL API: page works exactly as before */ }
+    return out;
+  }
+
+  function getUrlKey() { return readUrlParams().key; }
+
+  function stripUrlKey() {
+    try {
+      var url = new URL(window.location.href);
+      url.searchParams.delete("key");
+      url.searchParams.delete("license");
+      url.searchParams.delete("download");
+      var hash = String(url.hash || "").replace(/^#/, "");
+      if (hash) {
+        var hp = new URLSearchParams(hash);
+        hp.delete("key");
+        hp.delete("license");
+        hp.delete("download");
+        var rest = hp.toString();
+        url.hash = rest ? "#" + rest : "";
+      }
+      window.history.replaceState(window.history.state, "", url.toString());
+    } catch (e) { /* provenance toolbar / file:// — leaving the URL alone is fine */ }
+  }
+
+  var autoActivationDone = false;
+
+  /* Activates Pro from ?key=TW1-… / #key=TW1-… without opening a modal.
+   * Never rejects: resolves {key, download, ok} or null when there is no key,
+   * so a plain visit — tests included — is untouched. opts:
+   *   { product, price, onDone(info), onError(msg) }                        */
+  async function autoActivateFromUrl(opts) {
+    var o = opts || {};
+    if (autoActivationDone) return null;
+    var info = readUrlParams();
+    if (!info.key) return null;
+    autoActivationDone = true;
+    var product = o.product || ALL_SLUG;
+    var price = o.price == null ? 9 : o.price;
+    try {
+      var rec = null;
+      try { rec = state(product); } catch (e) { /* no storage yet */ }
+      var already = rec && rec.hash === "license:" + info.key;
+      var res = already
+        ? { license: true, key: info.key }
+        : await verifyAndUnlock(product, price, info.key);
+      stripUrlKey();
+      toast(RU ? "Ключ из чека принят. Pro включён в этом браузере." : "Receipt key accepted. Pro is on in this browser.");
+      if (o.onDone) { try { o.onDone({ key: info.key, download: info.download, result: res, product: product }); } catch (e) {} }
+      return { key: info.key, download: info.download, ok: true, result: res, product: product };
+    } catch (err) {
+      var msg = RU ? ("Ключ из чека не принят: " + (err && err.message ? err.message : "ошибка")) : String(err && err.message || err);
+      toast(msg, true);
+      if (o.onError) { try { o.onError(msg); } catch (e) {} }
+      return { key: info.key, download: info.download, ok: false };
+    }
+  }
+
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
   else bind();
 
@@ -1163,6 +1245,11 @@
     isLicenseKey: isLicenseKey,
     parseLicenseKey: parseLicenseKey,
     verifyLicenseKey: verifyLicenseKey,
+    /* receipt-link auto-activation (?key=TW1-… / #key=TW1-…) */
+    readUrlParams: readUrlParams,
+    getUrlKey: getUrlKey,
+    autoActivateFromUrl: autoActivateFromUrl,
+    stripUrlKey: stripUrlKey,
     /* unlock with a key from anywhere on the page, e.g. the userscript panel */
     unlockWithLicense: async function (product, key) {
       return verifyAndUnlock(product, 0, key);

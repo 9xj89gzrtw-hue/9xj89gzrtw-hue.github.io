@@ -52,7 +52,7 @@
   function subtle() {
     var c = root.crypto || {};
     if (!c.subtle || !c.subtle.importKey || !c.subtle.deriveKey) {
-      throw new Error("Браузер не поддерживает WebCrypto. Откройте страницу по HTTPS в актуальном браузере.");
+      throw new Error("Этот браузер не может открыть файл безопасно. Обновите браузер и откройте страницу по HTTPS.");
     }
     return c.subtle;
   }

@@ -226,7 +226,7 @@
     <div class="price-line"><b>$15</b><span>USDC на Base · один платёж, без подписки</span></div>
     <ul class="feature-list">
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>До 10 000 писем и документов в одном индексе</li>
-      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Сохранение индекса в IndexedDB — открыли и продолжили</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Сохранение индекса в браузере — открыли и продолжили</li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Экспорт реквизитов и договоров в CSV / Excel</li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Справки по архиву через ваш собственный API-ключ</li>
       <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12 5 5L20 6"/></svg>Без лимита 25 файлов и без водяных знаков в выгрузке</li>
@@ -289,5 +289,19 @@
 <script src="../assets/verify.js"></script>
 <script src="../assets/unlock.js"></script>
 <script src="app.js"></script>
+<script>
+/* Receipt link (?key=TW1-DOC-… / #key=TW1-DOC-…): Pro switches on without
+   hunting for the payment modal. */
+(function () {
+  "use strict";
+  function go() {
+    if (window.Unlock && window.Unlock.autoActivateFromUrl) {
+      window.Unlock.autoActivateFromUrl({ product: "docsearch", price: 15 });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
+  else go();
+})();
+</script>
 </body>
 </html>

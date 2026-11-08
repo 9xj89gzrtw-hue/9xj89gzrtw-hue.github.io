@@ -420,9 +420,9 @@
     }
     el.acceptTop.disabled = false;
     if (state.completed === 0) {
-      el.acceptTop.textContent = "▶ Принять первый заказ (+" + E.fmtRub(pay) + ")";
+      el.acceptTop.textContent = "Принять первый заказ (+" + E.fmtRub(pay) + ")";
     } else {
-      el.acceptTop.textContent = "▶ Взять «" + rec.title + "» (+" + E.fmtRub(pay) + ")";
+      el.acceptTop.textContent = "Взять «" + rec.title + "» (+" + E.fmtRub(pay) + ")";
     }
     el.acceptHint.textContent = "Нагрузка " + E.group(rec.load) + " · время " + E.fmtSec(E.durationMs(state, rec)) + " · оплата сразу на счёт.";
   }

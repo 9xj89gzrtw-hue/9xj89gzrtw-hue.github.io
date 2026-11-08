@@ -363,5 +363,19 @@
 
 <script src="../assets/unlock.js"></script>
 <script src="app.js"></script>
+<script>
+/* Receipt link (?key=TW1-RADAR-… / #key=TW1-RADAR-…): Pro switches on without
+   hunting for the payment modal. */
+(function () {
+  "use strict";
+  function go() {
+    if (window.Unlock && window.Unlock.autoActivateFromUrl) {
+      window.Unlock.autoActivateFromUrl({ product: "live-radar", price: 14 });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
+  else go();
+})();
+</script>
 </body>
 </html>

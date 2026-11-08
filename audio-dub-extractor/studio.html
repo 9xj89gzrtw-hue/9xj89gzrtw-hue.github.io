@@ -576,10 +576,13 @@
 
   async function applyHash() {
     var raw = String(location.hash || "").replace(/^#/, "");
-    if (!raw) return;
-    var parts = raw.split("&");
-    var clips = null;
     var key = null;
+    try {
+      key = new URLSearchParams(location.search || "").get("key") || null;
+    } catch (e) { /* old URL API: hash-only flow below still works */ }
+    if (!raw && !key) return;
+    var clips = null;
+    var parts = raw.split("&");
     parts.forEach(function (part) {
       var eq = part.indexOf("=");
       if (eq === -1) return;
@@ -614,7 +617,7 @@
         log("Проект из скрипта не загружен: " + e.message + " (Free — 2 файла, Pro снимает лимит).", "");
       }
     }
-    history.replaceState(null, "", location.pathname + location.search);
+    history.replaceState(null, "", location.pathname);
   }
   /* unlock.js is deferred and this block runs during parsing, so the key from
      the hash can only be redeemed after DOMContentLoaded. */

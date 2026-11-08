@@ -9,9 +9,24 @@
   var PRO_CHECKS = 50;
   var AHA_LIMIT = 10;
   var AHA_PREVIEW_ROWS = 5;
+  var FULL_XLSX_NAME = "telegram-chats-1429-full-nov2026.xlsx";
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  /* Receipt link (?key=TW1-… / #key=TW1-…&download=xlsx) is read now,
+     before Unlock.autoActivateFromUrl strips it from the address bar. */
+  var URL_PARAMS = (function () {
+    try {
+      if (window.Unlock && window.Unlock.readUrlParams) return window.Unlock.readUrlParams();
+      var search = new URLSearchParams(window.location.search || "");
+      var hash = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""));
+      return {
+        key: (search.get("key") || hash.get("key") || "").trim(),
+        download: (search.get("download") || hash.get("download") || "").trim().toLowerCase()
+      };
+    } catch (e) { return { key: "", download: "" }; }
+  })();
 
   var DATA = window.CHAT_CATALOG || { count: 0, chats: [], generated_at: "", total: 0 };
   var TOTAL = DATA.total || DATA.count || DATA.chats.length;
@@ -28,7 +43,13 @@
     "Авто/Спецтехника"
   ];
 
-  var state = { topic: "Все", city: "", query: "", sort: "members", view: "base", checking: false };
+  var state = {
+    topic: "Все", city: "", query: "", sort: "members", view: "base", checking: false,
+    urlKeyPresent: !!URL_PARAMS.key,
+    urlDownload: URL_PARAMS.download || "",
+    sessionLicense: false,
+    autoDownloaded: false
+  };
 
   function isPro() { return !!(window.Unlock && window.Unlock.isPro(PRODUCT)); }
 
@@ -122,8 +143,15 @@
     host.innerHTML = "";
     var counts = {};
     DATA.chats.forEach(function (c) { counts[c.topic] = (counts[c.topic] || 0) + 1; });
+    /* The free catalog ships only 35 rows, but the tabs must promise the
+       full base (catalog.js categories), not the free slice: a buyer who
+       taps "IT/Фриланс (1)" thinks the full base has one IT chat. */
+    var fullCounts = DATA.categories || {};
     TOPICS.forEach(function (topic) {
-      var n = topic === "Все" ? DATA.chats.length : (counts[topic] || 0);
+      var n;
+      if (topic === "Все") n = TOTAL;
+      else if (fullCounts[topic] != null) n = fullCounts[topic];
+      else n = counts[topic] || 0;
       if (!n) return;
       var b = document.createElement("button");
       b.type = "button";
@@ -132,7 +160,7 @@
       b.textContent = topic;
       var span = document.createElement("span");
       span.className = "count";
-      span.textContent = n;
+      span.textContent = fmt(n);
       b.appendChild(span);
       b.addEventListener("click", function () {
         state.topic = topic;
@@ -209,17 +237,31 @@
     if (!active) return;
 
     var rest = Math.max(0, TOTAL - shown.length);
-    $("#aha-title").textContent = "Найдено ещё " + fmt(rest) + " " +
-      plural(rest, "проверенный чат", "проверенных чата", "проверенных чатов") +
-      " в полной базе (" + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") + ") по вашей теме";
+    var catCount = state.topic === "Все"
+      ? TOTAL
+      : ((DATA.categories && DATA.categories[state.topic] != null)
+        ? DATA.categories[state.topic]
+        : all.length);
+    if (state.topic !== "Все") {
+      $("#aha-title").textContent = "В рубрике «" + state.topic + "» — " + fmt(catCount) + " " +
+        plural(catCount, "чат", "чата", "чатов") + ". Бесплатно видно первые " + shown.length +
+        ". Остальные — в готовом файле Excel.";
+    } else {
+      $("#aha-title").textContent = "Найдено ещё " + fmt(rest) + " " +
+        plural(rest, "проверенный чат", "проверенных чата", "проверенных чатов") +
+        " в полной базе (" + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") + ") по вашей теме";
+    }
     $("#aha-sub").textContent = shown.length + " " +
       plural(shown.length, "совпадение", "совпадения", "совпадений") +
       " открыты полностью. Остальные — в полной выгрузке с Excel.";
 
     var buy = $("#aha-buy");
     if (buy) {
-      buy.textContent = "🔓 Открыть все " + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") +
-        " и скачать Excel за 490 ₽ (СБП / Карта РФ — ключ сразу)";
+      buy.textContent = state.topic !== "Все"
+        ? "Скачать все " + fmt(catCount) + " " + plural(catCount, "чат", "чата", "чатов") +
+          " рубрики " + state.topic + " (и всю базу " + fmt(TOTAL) + " чатов) в готовом файле Excel за 490 ₽"
+        : "Скачать все " + fmt(TOTAL) + " " + plural(TOTAL, "чат", "чата", "чатов") +
+          " в готовом файле Excel за 490 ₽";
     }
 
     var host = $("#aha-rows");
@@ -334,6 +376,37 @@
     badge.textContent = pro ? fmt(all.length) + " чатов" : fmt(aha ? shown.length : all.length) + " из " + fmt(TOTAL);
     badge.className = "badge" + (!pro && more ? " badge-warn" : "");
     $("#check-quota").textContent = (isPro() ? PRO_CHECKS : FREE_CHECKS) + " ссылок за раз";
+    var dlXlsx = $("#dl-xlsx");
+    if (dlXlsx) {
+      dlXlsx.textContent = state.topic === "Все"
+        ? "Excel · " + fmt(TOTAL) + " чатов"
+        : "Excel · " + fmt(all.length) + " " + plural(all.length, "чат", "чата", "чатов") + " рубрики";
+    }
+  }
+
+  function exportTable(chats) {
+    return [["Название", "Ссылка", "Тематика", "Город", "Участники", "Проверен", "Описание"]]
+      .concat(chats.map(function (c) {
+        return [c.title, c.link, c.topic, c.city || "", c.members, dateShort(c.checked_at), c.about || ""];
+      }));
+  }
+
+  function downloadFullXlsx() {
+    if (!DATA.chats || !DATA.chats.length) { toast("База ещё не загружена", true); return; }
+    var rows = DATA.chats.slice().sort(function (a, b) { return b.members - a.members; });
+    window.XLSX.download(exportTable(rows), FULL_XLSX_NAME, "Chats");
+    toast("Скачано " + fmt(rows.length) + " чатов: " + FULL_XLSX_NAME);
+  }
+
+  /* Receipt link (?key=…&download=xlsx) or a key pasted into the modal
+     this session: once the encrypted pack is open, start the file. */
+  function maybeAutoDownload() {
+    if (state.autoDownloaded) return;
+    var wantsFile = state.urlKeyPresent || state.sessionLicense;
+    if (!wantsFile || !isPro()) return;
+    if (!window.ChatPack || !window.ChatPack.isLoaded()) return;
+    state.autoDownloaded = true;
+    downloadFullXlsx();
   }
 
   function download(format) {
@@ -341,13 +414,14 @@
     var pro = isPro();
     var rows = isAhaMode() ? all.slice(0, AHA_LIMIT) : all;
     if (!rows.length) { toast("Нет строк для выгрузки", true); return; }
-    var table = [["Название", "Ссылка", "Тематика", "Город", "Участники", "Проверен", "Описание"]];
-    rows.forEach(function (c) {
-      table.push([c.title, c.link, c.topic, c.city || "", c.members, dateShort(c.checked_at), c.about || ""]);
-    });
+    var table = exportTable(rows);
+    var isFullBase = state.topic === "Все" && !state.query.trim() && !state.city;
     var stamp = new Date().toISOString().slice(0, 10);
     if (format === "xlsx") {
-      window.XLSX.download(table, "telegram-chats-" + stamp + ".xlsx", "Chats");
+      var xlsxName = isFullBase && pro && DATA.chats.length >= TOTAL
+        ? FULL_XLSX_NAME
+        : ("telegram-chats-" + stamp + ".xlsx");
+      window.XLSX.download(table, xlsxName, "Chats");
       toast("Выгружено " + rows.length + " строк");
       return;
     }
@@ -550,6 +624,7 @@
       renderStats();
       renderRows();
       toast("Полная база открыта: " + fmt(DATA.chats.length) + " чатов");
+      maybeAutoDownload();
     }).catch(function (err) {
       $("#limit-text").textContent = "Полная база не открылась: " + (err && err.message ? err.message : "ошибка");
       toast("Не удалось открыть полную базу", true);
@@ -588,6 +663,28 @@
     $("#hero-check").addEventListener("click", function () { setView("check", true); });
     $("#check-run").addEventListener("click", runCheck);
 
+    var heroXlsx = $("#hero-xlsx");
+    if (heroXlsx) heroXlsx.addEventListener("click", function () {
+      if (!isPro()) {
+        toast("Excel с полной базой — в Pro за 490 ₽. Ключ придёт сразу после оплаты.", true);
+        var mb = document.querySelector('#view-base [data-unlock]');
+        if (mb) mb.click();
+        return;
+      }
+      if (window.ChatPack && window.ChatPack.isLoaded()) {
+        downloadFullXlsx();
+        return;
+      }
+      if (canLoadPack()) {
+        loadPro();
+        /* loadPro's then() calls maybeAutoDownload, which needs a buyer
+           signal — the explicit click is that signal. */
+        state.urlKeyPresent = true;
+      } else {
+        toast("База ещё не загружена", true);
+      }
+    });
+
     $("#dl-csv").addEventListener("click", function () { download("csv"); });
     $("#dl-xlsx").addEventListener("click", function () {
       if (!isPro()) {
@@ -596,10 +693,27 @@
         if (b) b.click();
         return;
       }
+      if (window.ChatPack && !window.ChatPack.isLoaded() && canLoadPack()) {
+        state.urlKeyPresent = true;
+        loadPro();
+        return;
+      }
       download("xlsx");
     });
 
-    document.addEventListener("unlock:changed", function () { renderRows(); if (canLoadPack()) loadPro(); });
+    window.__TGCHATS__ = {
+      downloadFullXlsx: downloadFullXlsx,
+      maybeAutoDownload: maybeAutoDownload,
+      fullName: FULL_XLSX_NAME
+    };
+
+    document.addEventListener("unlock:changed", function () {
+      renderRows();
+      var rec = window.Unlock && window.Unlock.state(PRODUCT);
+      if (rec && rec.hash && String(rec.hash).indexOf("license:") === 0) state.sessionLicense = true;
+      if (canLoadPack()) loadPro();
+      else maybeAutoDownload();
+    });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

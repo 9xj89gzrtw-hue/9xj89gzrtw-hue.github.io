@@ -56,8 +56,8 @@ const ITEMS = [
     slug: "tg-chats",
     url: "/tg-chats/index.html",
     kicker: "TG CHAT VALIDATOR",
-    headline: "1 200+ открытых чатов Telegram с проверкой ссылок",
-    sub: "Участники, тема, город и дата проверки — таблица готова к выгрузке",
+    headline: "1 429 живых открытых чатов Telegram в Excel",
+    sub: "Селлеры WB/Ozon, закупки, карго, ИТ, недвижимость — пишите бесплатно без заявок",
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
     scrollY: 330

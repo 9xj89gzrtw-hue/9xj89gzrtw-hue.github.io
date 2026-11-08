@@ -147,7 +147,7 @@
       </div>
     </div>
     <div class="hero-action">
-      <button class="btn primary pickup" id="accept-top" type="button">▶ Принять первый заказ (+250 ₽)</button>
+      <button class="btn primary pickup" id="accept-top" type="button">Принять первый заказ (+250 ₽)</button>
       <p class="hint" id="accept-hint">Один клик — и заказ уже крутится на вашей стойке.</p>
       <div class="speed-row">
         <span class="speed-label">Скорость игры</span>
@@ -308,6 +308,21 @@
   <span>© 2026 9xj89gzrtw-hue · MIT</span>
   <span><a href="../">остальные продукты</a> · v2.0.0 · офлайн-сохранение · без телеметрии</span>
 </footer>
+
+<script>
+/* Receipt link (?key=TW1-ALGO-… / #key=TW1-ALGO-…): Pro switches on without
+   hunting for the payment modal. */
+(function () {
+  "use strict";
+  function go() {
+    if (window.Unlock && window.Unlock.autoActivateFromUrl) {
+      window.Unlock.autoActivateFromUrl({ product: "algo-tycoon", price: 1.49 });
+    }
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go);
+  else go();
+})();
+</script>
 
 </body>
 </html>
