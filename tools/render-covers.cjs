@@ -73,8 +73,11 @@ const ITEMS = [
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
     scrollToSelector: "#catalog",
+    scrollOffset: 8,
+    hideSelectors: [".aha-block", ".limit-bar"],
     /* Filter to marketplace sellers before the shot so the table is rich & clean */
-    clickChips: "Селлеры WB/Ozon"
+    clickChips: "Селлеры WB/Ozon",
+    shotCss: ".result-row{padding:13px 16px}.chat-title{font-size:15px}.chat-handle{font-size:12.5px}.cell-topic,.cell-city,.cell-members,.cell-date{font-size:13.5px}"
   },
   {
     slug: "b2b-stores-leads",
@@ -84,18 +87,23 @@ const ITEMS = [
     sub: "Телефоны, Email, Telegram, VK и CMS — выгрузка в Excel в 1 клик",
     price: "249 ₽",
     priceAlt: "$2.49 · USDC на Base",
-    scrollToSelector: "#b2b"
+    scrollToSelector: ".b2b-table",
+    scrollOffset: 96,
+    shotCss: ".b2b-table{font-size:22px}.b2b-table th{font-size:19px}.b2b-table td{padding:13px 8px}.b2b-card h3{font-size:22px}.b2b-card>.small{font-size:14px}"
   },
   {
     slug: "wb-sellers-chats",
     url: "/tg-chats/index.html",
     kicker: "WB & OZON SELLERS CHATS",
-    headline: "240+ чатов селлеров Wildberries, Ozon и Карго",
+    headline: "230+ чатов селлеров Wildberries, Ozon и Карго",
     sub: "Поставщики, опт, склады и фуры — открытые группы без заявок",
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
     scrollToSelector: ".result-head",
-    clickChips: "Селлеры WB/Ozon"
+    scrollOffset: 54,
+    hideSelectors: [".aha-block", ".limit-bar"],
+    clickChips: "Селлеры WB/Ozon",
+    shotCss: ".result-row{padding:14px 16px}.chat-title{font-size:16px}.chat-handle{font-size:13px}.cell-topic,.cell-city,.cell-members,.cell-date{font-size:14px}"
   },
   {
     slug: "freelance-it-chats",
@@ -106,18 +114,24 @@ const ITEMS = [
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
     scrollToSelector: ".result-head",
-    clickChips: "IT и Фриланс"
+    scrollOffset: 54,
+    hideSelectors: [".aha-block", ".limit-bar"],
+    clickChips: "IT и Фриланс",
+    shotCss: ".result-row{padding:31px 16px}.chat-title{font-size:18px}.chat-handle{font-size:14px}.cell-topic,.cell-city,.cell-members,.cell-date{font-size:15px}.result-list{max-height:560px}"
   },
   {
     slug: "realty-jk-chats",
     url: "/tg-chats/index.html",
     kicker: "REALTY & JK CHATS",
-    headline: "210+ чатов ЖК, новостроек и недвижимости РФ",
+    headline: "320+ чатов ЖК, новостроек и недвижимости РФ",
     sub: "Москва, СПб и регионы: жильцы, ремонт, сдача и приёмка",
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
     scrollToSelector: ".result-head",
-    clickChips: "Недвижимость и ЖК"
+    scrollOffset: 54,
+    hideSelectors: [".aha-block", ".limit-bar"],
+    clickChips: "Недвижимость и ЖК",
+    shotCss: ".result-row{padding:14px 16px}.chat-title{font-size:16px}.chat-handle{font-size:13px}.cell-topic,.cell-city,.cell-members,.cell-date{font-size:14px}"
   },
   {
     slug: "docsearch",
@@ -279,6 +293,14 @@ async function shoot(browser, item) {
   try {
     await page.goto(`http://127.0.0.1:${PORT}${item.url}`, { waitUntil: "load", timeout: 30000 });
     await page.waitForTimeout(900);
+    if (item.hideSelectors && item.hideSelectors.length) {
+      await page.addStyleTag({
+        content: item.hideSelectors.map((s) => s + "{display:none !important}").join("\n")
+      });
+    }
+    if (item.shotCss) {
+      await page.addStyleTag({ content: item.shotCss });
+    }
     if (item.clickChips) {
       const picked = await page.evaluate((needle) => {
         const chips = Array.from(document.querySelectorAll(".chip"));
@@ -289,10 +311,10 @@ async function shoot(browser, item) {
       if (picked) await page.waitForTimeout(550);
     }
     if (item.scrollToSelector) {
-      await page.evaluate((sel) => {
+      await page.evaluate(({ sel, offset }) => {
         const el = document.querySelector(sel);
-        if (el) el.scrollIntoView({ block: "start" });
-      }, item.scrollToSelector);
+        if (el) window.scrollTo(0, Math.max(0, el.getBoundingClientRect().top + window.scrollY - offset));
+      }, { sel: item.scrollToSelector, offset: item.scrollOffset || 0 });
       await page.waitForTimeout(420);
     }
     if (item.scrollY) {

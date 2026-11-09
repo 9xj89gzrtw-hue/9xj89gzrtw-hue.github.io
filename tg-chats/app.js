@@ -9,7 +9,7 @@
   var PRO_CHECKS = 50;
   var AHA_LIMIT = 10;
   var AHA_PREVIEW_ROWS = 5;
-  var FULL_XLSX_NAME = "telegram-chats-1500-full-nov2026.xlsx";
+  var FULL_XLSX_NAME = "telegram-chats-full-nov2026.xlsx";
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -59,15 +59,24 @@
      after Pro is on — no modal, no extra click. Pack unlocks the full
      1 500+ chats base on the same page. */
   var PACK_FILES = {
-    "b2b-stores": "b2b-ecommerce-stores-1200-nov2026.xlsx",
-    "b2b": "b2b-ecommerce-stores-1200-nov2026.xlsx",
-    "wb-sellers": "tg-chats-marketplaces-wb-ozon.xlsx",
-    "wb": "tg-chats-marketplaces-wb-ozon.xlsx",
-    "freelance-it": "tg-chats-it-freelance.xlsx",
-    "freelance": "tg-chats-it-freelance.xlsx",
+    "b2b-stores": "b2b-ecommerce-stores-nov2026.xlsx",
+    "b2b": "b2b-ecommerce-stores-nov2026.xlsx",
+    "wb-sellers": "tg-chats-wb-ozon-opt-cargo.xlsx",
+    "wb": "tg-chats-wb-ozon-opt-cargo.xlsx",
+    "freelance-it": "tg-chats-it-freelance-realty.xlsx",
+    "freelance": "tg-chats-it-freelance-realty.xlsx",
     "realty-jk": "tg-chats-realty-jk-msk-spb.xlsx",
     "realty": "tg-chats-realty-jk-msk-spb.xlsx"
   };
+
+  /* Rubric packs are cut from the full base by exact topic, not by a loose
+     regex: a seller who bought "WB/Ozon + опт + карго" must receive every one
+     of those 234 chats and nothing unrelated. */
+  var PACK_TOPICS = {
+    "wb-sellers": ["Маркетплейсы WB/Ozon", "Закупки/Опт", "Логистика/Карго"],
+    "freelance-it": ["IT/Фриланс", "Недвижимость/Ремонт"]
+  };
+
 
   function isPro() { return !!(window.Unlock && window.Unlock.isPro(PRODUCT)); }
 
@@ -422,37 +431,49 @@
     });
   }
 
+  function rowsByTopics(topics) {
+    var wanted = {};
+    topics.forEach(function (t) { wanted[t] = true; });
+    return DATA.chats.filter(function (c) { return wanted[c.topic]; })
+      .sort(function (a, b) { return b.members - a.members; });
+  }
+
   function downloadWbXlsx() {
     if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
-    var rows = DATA.chats.filter(function (c) {
-      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
-      return /маркетплейс|wb|wildberries|ozon|озон|селлер|закупк|поставщик|опт|карго|фуры|грузоперевоз/i.test(t);
-    }).sort(function (a, b) { return b.members - a.members; });
-    var fileName = PACK_FILES["wb-sellers"] || "tg-chats-marketplaces-wb-ozon.xlsx";
+    var rows = rowsByTopics(PACK_TOPICS["wb-sellers"]);
+    var fileName = PACK_FILES["wb-sellers"];
     window.XLSX.download(exportTable(rows), fileName, "WB Ozon");
-    toast("Скачано " + fmt(rows.length) + " чатов селлеров: " + fileName);
+    toast("Скачано " + fmt(rows.length) + " чатов селлеров, опта и карго: " + fileName);
   }
 
   function downloadFreelanceXlsx() {
     if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
-    var rows = DATA.chats.filter(function (c) {
-      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
-      return /it|ит|разработ|программ|фриланс|дизайн|маркетинг|smm|digital|ваканси|заказ/i.test(t);
-    }).sort(function (a, b) { return b.members - a.members; });
-    var fileName = PACK_FILES["freelance-it"] || "tg-chats-it-freelance.xlsx";
+    var rows = rowsByTopics(PACK_TOPICS["freelance-it"]);
+    var fileName = PACK_FILES["freelance-it"];
     window.XLSX.download(exportTable(rows), fileName, "IT Freelance");
-    toast("Скачано " + fmt(rows.length) + " чатов IT и фриланса: " + fileName);
+    toast("Скачано " + fmt(rows.length) + " чатов IT, фриланса и недвижимости: " + fileName);
   }
 
+  /* Realty pack: the whole "Недвижимость/Ремонт" rubric (213 chats) plus every
+     Moscow/SPb local chat (113) = 326 rows, exactly the pack Agent 4 QA tested.
+     The body/description is deliberately not scanned: a loose regex pulled in
+     "Маркетплейсы. ЧАТ", "Такси Москва" and авторемонт noise. */
   function downloadRealtyXlsx() {
     if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
-    var rows = DATA.chats.filter(function (c) {
-      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
-      return /недвижим|жк|новострой|ремонт|риелтор|аренд|квартир/i.test(t);
-    }).sort(function (a, b) { return b.members - a.members; });
-    var fileName = PACK_FILES["realty-jk"] || "tg-chats-realty-jk-msk-spb.xlsx";
+    var seen = {};
+    var rows = [];
+    DATA.chats.forEach(function (c) {
+      if (seen[c.username]) return;
+      if (c.topic === "Недвижимость/Ремонт" ||
+          c.city === "Москва" || c.city === "Санкт-Петербург") {
+        seen[c.username] = true;
+        rows.push(c);
+      }
+    });
+    rows.sort(function (a, b) { return b.members - a.members; });
+    var fileName = PACK_FILES["realty-jk"];
     window.XLSX.download(exportTable(rows), fileName, "Realty JK");
-    toast("Скачано " + fmt(rows.length) + " чатов недвижимости и ЖК: " + fileName);
+    toast("Скачано " + fmt(rows.length) + " чатов недвижимости, ЖК и ремонта: " + fileName);
   }
 
   /* Receipt link (?key=…&download=xlsx) or a key pasted into the modal
