@@ -59,6 +59,30 @@ footer{margin-top:56px;border-top:1px solid var(--line);padding:26px 0 40px;colo
 footer a{color:var(--muted)}
 .badge{display:inline-block;background:rgba(34,211,238,.14);color:var(--accent);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700}
 .warnbox{background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);border-radius:12px;padding:12px 14px;font-size:13.5px;color:#fde68a}
+
+/* NEW HIT: WB & Ozon margin + competitor export vs monthly analytics */
+.hit-cmp{margin:28px 0 8px;padding:26px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,rgba(34,211,238,.07),rgba(34,211,238,0) 42%),var(--panel)}
+.hit-cmp-kicker{display:inline-block;font:800 11px/1.2 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.hit-cmp h2{margin:10px 0 8px;font-size:clamp(24px,3.6vw,34px);line-height:1.12;letter-spacing:-.03em}
+.hit-cmp-head p{margin:0;max-width:76ch;color:var(--muted);font-size:15px}
+.hit-cmp-grid{display:grid;grid-template-columns:1fr 1.08fr;gap:14px;margin-top:20px}
+.hit-cmp-col{border:1px solid var(--line);border-radius:14px;padding:18px;background:rgba(11,18,32,.55)}
+.hit-cmp-good{border-color:rgba(34,211,238,.55);background:linear-gradient(180deg,rgba(34,211,238,.1),rgba(34,211,238,.02));box-shadow:0 18px 40px -30px rgba(34,211,238,.55)}
+.hit-cmp-label{display:block;font:800 10px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hit-cmp-good .hit-cmp-label{color:var(--accent)}
+.hit-cmp-col h3{margin:8px 0 0;font-size:17px}
+.hit-cmp-price{margin:12px 0 0;font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.hit-cmp-price small{display:block;margin-top:4px;font-size:12px;font-weight:500;letter-spacing:0;color:var(--muted)}
+.hit-cmp-once{margin:9px 0 0;font:800 12.5px/1.3 var(--mono);letter-spacing:.02em}
+.hit-cmp-once b{color:var(--ok)}
+.hit-cmp-col ul{margin:13px 0 0;padding:0;list-style:none;display:grid;gap:7px;font-size:13.5px;color:var(--muted)}
+.hit-cmp-col li{position:relative;padding-left:19px}
+.hit-cmp-col li::before{content:"×";position:absolute;left:0;top:-1px;font-weight:800;color:#fb7185}
+.hit-cmp-good li::before{content:"✓";color:var(--ok)}
+.hit-cmp-cta{display:inline-flex;align-items:center;justify-content:center;margin-top:16px;padding:12px 16px;border-radius:11px;background:var(--accent);color:#06202a;font-weight:800;text-decoration:none}
+.hit-cmp-cta:hover{filter:brightness(1.05)}
+.hit-cmp-fine{margin:13px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+@media(max-width:760px){.hit-cmp{padding:18px}.hit-cmp-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -89,6 +113,38 @@ footer a{color:var(--muted)}
       Скачивание MP3 с YouTube/VK — бесплатно и без лимита. Выгрузка таблиц и Telegram-каналов в CSV —
       бесплатно до 50 строк, дальше Pro-ключ. Оба ставятся из Tampermonkey одним нажатием.
     </p>
+  </section>
+
+  <!-- NEW HIT: WB & Ozon margin + competitor export vs monthly analytics -->
+  <section class="hit-cmp" id="wb-ozon-hit" aria-labelledby="wb-ozon-hit-title">
+    <span class="hit-cmp-kicker">Новый хит · альтернатива MPStats и Маяк</span>
+    <h2 id="wb-ozon-hit-title">WB &amp; Ozon: маржа + выгрузка конкурентов в Excel — 299 ₽ навсегда вместо 12 990 ₽/мес</h2>
+    <p class="hit-cmp-head">Подписка на аналитику стоит как ещё один сотрудник. Плагин TW1-CLIP считает чистую маржу WB/Ozon и выгружает карточки конкурентов прямо со страниц wildberries.ru и ozon.ru в Excel в 1 клик — без регистрации, карты и ежемесячных списаний.</p>
+    <div class="hit-cmp-grid">
+      <div class="hit-cmp-col">
+        <span class="hit-cmp-label">Подписки на аналитику</span>
+        <h3>MPStats / Маяк / MarketGuru</h3>
+        <p class="hit-cmp-price">от 4 990 до 15 000 ₽ <small>каждый месяц</small></p>
+        <ul>
+          <li>Регистрация и привязка карты</li>
+          <li>Автосписание снова и снова</li>
+          <li>Доступ живёт, пока платите</li>
+        </ul>
+      </div>
+      <div class="hit-cmp-col hit-cmp-good">
+        <span class="hit-cmp-label">Наш плагин + веб-студия · TW1-CLIP</span>
+        <h3>WB &amp; Ozon: маржа + конкуренты в Excel</h3>
+        <p class="hit-cmp-price">0 ₽ <small>бесплатно до 50 карточек</small></p>
+        <p class="hit-cmp-once">или <b>299 ₽ ОДИН РАЗ НАВСЕГДА</b></p>
+        <ul>
+          <li>Чистая маржа с комиссией, логистикой и СПП 11.11</li>
+          <li>Карточки конкурентов из поиска — в Excel в 1 клик</li>
+          <li>Без регистрации, карты и подписки</li>
+        </ul>
+        <a class="hit-cmp-cta" href="../data-clipper/">Попробовать бесплатно</a>
+      </div>
+    </div>
+    <p class="hit-cmp-fine">Публичные тарифы ноября 2026: MPStats — 12 990 ₽/мес, Маяк — 45 000 ₽ за 3 месяца, MarketGuru — 990 ₽/мес за расширение; Moneyplace закрылся. Цены конкурентов проверяйте на их сайтах. Выгрузка работает на страницах поиска WB/Ozon, маржа считается в калькуляторе 11.11.</p>
   </section>
 
   <section class="grid">

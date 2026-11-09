@@ -386,3 +386,46 @@ body.testing #tests { display: block; padding: 20px 0 40px; }
 @media (max-width: 720px) {
   .app-tab { font-size: 11px; padding: 9px 10px; }
 }
+
+/* ---------- NEW HIT: WB & Ozon vs MPStats / Маяк ---------- */
+.hit-cmp {
+  margin: 26px 0 6px; padding: 22px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background:
+    radial-gradient(520px 220px at 96% -10%, #FFF0E6 0%, rgba(255,240,230,0) 70%),
+    var(--panel2);
+}
+.hit-cmp-kicker {
+  display: inline-block; font: 700 10px/1.2 var(--mono); letter-spacing: .16em;
+  text-transform: uppercase; color: var(--orange);
+}
+.hit-cmp h2 { margin: 8px 0 6px; font-size: clamp(22px, 3.2vw, 31px); letter-spacing: -.03em; line-height: 1.1; }
+.hit-cmp-head p { margin: 0; max-width: 74ch; color: #3a3a35; font-size: 14px; }
+.hit-cmp-grid { display: grid; grid-template-columns: 1fr 1.08fr; gap: 12px; margin-top: 16px; }
+.hit-cmp-col { border: 1px solid var(--line); border-radius: 6px; padding: 16px; background: #FBFBF7; }
+.hit-cmp-bad { background: #FAF7F4; }
+.hit-cmp-good { border-color: var(--ink); background: #141414; color: #fff; box-shadow: 0 10px 26px -18px rgba(20,20,20,.7); }
+.hit-cmp-label { display: block; font: 700 10px/1.2 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.hit-cmp-good .hit-cmp-label { color: var(--orange); }
+.hit-cmp-col h3 { margin: 7px 0 4px; font-size: 16px; letter-spacing: -.01em; }
+.hit-cmp-price { margin: 10px 0 0; font-size: 26px; font-weight: 750; letter-spacing: -.03em; line-height: 1.1; }
+.hit-cmp-price small { display: block; margin-top: 3px; font-size: 11.5px; font-weight: 500; letter-spacing: 0; color: var(--muted); }
+.hit-cmp-good .hit-cmp-price small { color: #b9b9b3; }
+.hit-cmp-once { margin: 8px 0 0; font: 700 12px/1.3 var(--mono); letter-spacing: .02em; }
+.hit-cmp-once b { color: var(--orange); }
+.hit-cmp-col ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 12.5px; color: #454540; }
+.hit-cmp-good ul { color: #d8d8d2; }
+.hit-cmp-col li { position: relative; padding-left: 17px; }
+.hit-cmp-col li::before { content: "×"; position: absolute; left: 0; top: -1px; font-weight: 700; color: #B04000; }
+.hit-cmp-good li::before { content: "✓"; color: #6EE7A8; }
+.hit-cmp-cta {
+  display: inline-flex; align-items: center; justify-content: center; margin-top: 14px;
+  padding: 10px 14px; border-radius: 4px; background: var(--orange); color: #141414;
+  font: 700 12.5px/1.2 var(--font); text-decoration: none; border: 1px solid var(--ink);
+}
+.hit-cmp-cta:hover { filter: brightness(.96); }
+.hit-cmp-fine { margin: 12px 0 0; font-size: 10.5px; line-height: 1.5; color: var(--muted); }
+@media (max-width: 720px) {
+  .hit-cmp { padding: 16px; }
+  .hit-cmp-grid { grid-template-columns: 1fr; }
+}

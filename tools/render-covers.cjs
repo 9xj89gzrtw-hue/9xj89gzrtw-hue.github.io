@@ -88,8 +88,9 @@ const ITEMS = [
     price: "249 ₽",
     priceAlt: "$2.49 · USDC на Base",
     scrollToSelector: ".b2b-table",
-    scrollOffset: 96,
-    shotCss: ".b2b-table{font-size:22px}.b2b-table th{font-size:19px}.b2b-table td{padding:13px 8px}.b2b-card h3{font-size:22px}.b2b-card>.small{font-size:14px}"
+    scrollOffset: 12,
+    hideSelectors: [".b2b-card h3", ".b2b-card>.small"],
+    shotCss: ".b2b-table{font-size:26px}.b2b-table th{font-size:22px}.b2b-table td{padding:15px 8px}"
   },
   {
     slug: "wb-sellers-chats",
@@ -229,7 +230,7 @@ function serve() {
    URI so the composed page needs no network at all. */
 function coverHtml(item, shot, w, h) {
   const wide = w > h;
-  const pad = wide ? 56 : 52;
+  const pad = wide ? 44 : 52;
   return `<!doctype html><html><head><meta charset="utf-8"><style>
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{width:${w}px;height:${h}px;overflow:hidden}
@@ -241,20 +242,20 @@ function coverHtml(item, shot, w, h) {
       padding:${pad}px;
       background-image:radial-gradient(760px 420px at 88% -12%,#e8f1ff 0%,rgba(232,241,255,0) 62%);
     }
-    .top{display:flex;align-items:center;gap:10px;font-weight:700;font-size:${wide ? 19 : 20}px;letter-spacing:-.01em}
-    .mark{width:${wide ? 22 : 24}px;height:${wide ? 22 : 24}px;background:#2563eb;border-radius:6px;position:relative;flex:none}
-    .mark::after{content:"";position:absolute;inset:${wide ? 6 : 7}px;border:2px solid #fff;border-radius:2px}
+    .top{display:flex;align-items:center;gap:10px;font-weight:700;font-size:${wide ? 18 : 20}px;letter-spacing:-.01em}
+    .mark{width:${wide ? 20 : 24}px;height:${wide ? 20 : 24}px;background:#2563eb;border-radius:6px;position:relative;flex:none}
+    .mark::after{content:"";position:absolute;inset:${wide ? 5 : 7}px;border:2px solid #fff;border-radius:2px}
     .brand{color:#0f172a}
     .brand span{color:#64748b;font-weight:500}
-    .kicker{margin-top:${wide ? 26 : 30}px;font-size:${wide ? 12 : 12.5}px;font-weight:700;letter-spacing:.14em;color:#2563eb}
+    .kicker{margin-top:${wide ? 18 : 30}px;font-size:${wide ? 11.5 : 12.5}px;font-weight:700;letter-spacing:.14em;color:#2563eb}
     h1{
-      margin-top:${wide ? 12 : 14}px;
-      font-size:${wide ? 46 : 44}px;line-height:1.06;letter-spacing:-.035em;font-weight:780;
-      max-width:${wide ? 720 : 660}px;
+      margin-top:${wide ? 10 : 14}px;
+      font-size:${wide ? 40 : 44}px;line-height:1.05;letter-spacing:-.035em;font-weight:780;
+      max-width:${wide ? 820 : 660}px;
     }
-    .sub{margin-top:${wide ? 14 : 16}px;font-size:${wide ? 17 : 17}px;line-height:1.45;color:#475569;max-width:${wide ? 660 : 600}px}
+    .sub{margin-top:${wide ? 10 : 16}px;font-size:${wide ? 16 : 17}px;line-height:1.4;color:#475569;max-width:${wide ? 700 : 600}px}
     .shot{
-      margin-top:${wide ? 26 : 28}px;
+      margin-top:${wide ? 18 : 28}px;
       flex:1;min-height:0;
       border:1px solid #dbe4ef;border-radius:14px;overflow:hidden;background:#fff;
       box-shadow:0 30px 60px -34px rgba(15,23,42,.45),0 2px 6px rgba(15,23,42,.06);
@@ -262,17 +263,17 @@ function coverHtml(item, shot, w, h) {
     }
     .shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
     .shot::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(15,23,42,.04);border-radius:14px}
-    .bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:${wide ? 22 : 24}px}
+    .bottom{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:${wide ? 16 : 24}px}
     .badge{
       display:inline-flex;align-items:center;gap:8px;
-      padding:${wide ? 9 : 10}px ${wide ? 13 : 14}px;border-radius:999px;
+      padding:${wide ? 8 : 10}px ${wide ? 12 : 14}px;border-radius:999px;
       background:#ecfdf5;border:1px solid #bde5d2;color:#14532d;
-      font-size:${wide ? 13.5 : 13.5}px;font-weight:600;line-height:1.2;
+      font-size:${wide ? 12.5 : 13.5}px;font-weight:600;line-height:1.2;
     }
     .badge b{font-weight:800}
     .price{text-align:right;flex:none}
-    .price b{display:block;font-size:${wide ? 30 : 34}px;letter-spacing:-.03em;line-height:1}
-    .price span{display:block;margin-top:5px;font-size:${wide ? 12.5 : 13}px;color:#64748b}
+    .price b{display:block;font-size:${wide ? 28 : 34}px;letter-spacing:-.03em;line-height:1}
+    .price span{display:block;margin-top:5px;font-size:${wide ? 12 : 13}px;color:#64748b}
   </style></head><body>
     <div class="top"><span class="mark"></span><span class="brand">Toolworks <span>· 8 продуктов</span></span></div>
     <div class="kicker">${item.kicker}</div>

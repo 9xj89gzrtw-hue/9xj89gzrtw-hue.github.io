@@ -39,7 +39,7 @@ const CASES = [
   {
     page: "tg-chats", product: "tgchats", id: 6354600, rub: 490,
     keys: "tg-chats", code: "TG",
-    open: '[data-unlock][data-product="tgchats"]',
+    open: '#pricing-pro [data-unlock][data-product="tgchats"]',
     card: "#unlock-card", cardLabel: "#unlock-card-label", cardHint: "#unlock-card-hint",
     field: "#unlock-hash", submit: "#unlock-go", error: "#unlock-error",
     storage: "unlock:tg-chats"
