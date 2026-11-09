@@ -81,8 +81,9 @@
   box-shadow: 0 1px 3px rgba(2, 132, 199, 0.25);
 }
 
-.chips-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
-.chips-row .chip { font-size: 12.5px; padding: 4px 10px; }
+.chips-row { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+.chips-row::-webkit-scrollbar { display: none; }
+.chips-row .chip { flex-shrink: 0; white-space: nowrap; font-size: 12.5px; padding: 4px 10px; }
 .chip .count { color: var(--faint); font-size: 11.5px; }
 .chip[aria-pressed="true"] .count { color: rgba(255, 255, 255, 0.6); }
 

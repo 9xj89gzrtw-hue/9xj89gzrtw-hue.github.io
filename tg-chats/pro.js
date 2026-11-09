@@ -69,13 +69,13 @@
     );
   }
 
-  async function load() {
-    var res = await fetch("./pro-pack.json.enc", { cache: "no-store" });
-    if (!res.ok) throw new Error("Не удалось загрузить пакет Pro (" + res.status + ").");
+  async function loadFile(fileName, typeName, arrayField) {
+    var res = await fetch("./" + fileName, { cache: "no-store" });
+    if (!res.ok) throw new Error("Не удалось загрузить пакет " + typeName + " (" + res.status + ").");
     var pkg = await res.json();
-    if (!pkg || pkg.v !== 1 || !pkg.iv || !pkg.ciphertext) throw new Error("Пакет Pro повреждён.");
+    if (!pkg || pkg.v !== 1 || !pkg.iv || !pkg.ciphertext) throw new Error("Пакет " + typeName + " повреждён.");
     var salt = b64ToBytes(pkg.kdf.salt);
-    if (salt.length < SALT_LEN) throw new Error("Пакет Pro повреждён: соль.");
+    if (salt.length < SALT_LEN) throw new Error("Пакет " + typeName + " повреждён: соль.");
     var key = await deriveKey(salt);
     var plain;
     try {
@@ -85,11 +85,19 @@
         b64ToBytes(pkg.ciphertext)
       );
     } catch (e) {
-      throw new Error("Не удалось расшифровать пакет Pro.");
+      throw new Error("Не удалось расшифровать пакет " + typeName + ".");
     }
     var data = JSON.parse(new TextDecoder().decode(plain));
-    if (!data || !Array.isArray(data.chats)) throw new Error("Пакет Pro пуст.");
+    if (!data || !Array.isArray(data[arrayField])) throw new Error("Пакет " + typeName + " пуст.");
     return data;
+  }
+
+  async function load() {
+    return loadFile("pro-pack.json.enc", "Pro", "chats");
+  }
+
+  async function loadB2B() {
+    return loadFile("b2b-pack.json.enc", "B2B", "stores");
   }
 
   /* Returns the decrypted catalogue once per page load.
@@ -138,8 +146,53 @@
     return loading;
   }
 
+  var b2bCache = null;
+  var b2bLoading = null;
+
+  function ensureB2B(hash) {
+    if (b2bCache) return Promise.resolve(b2bCache);
+    if (b2bLoading) return b2bLoading;
+    if (!hash) {
+      return Promise.reject(new Error("Нет подтверждённого платежа. Откройте Pro и вставьте хеш транзакции или ключ TW1-…"));
+    }
+    var asLicense = /^license:/i.test(String(hash));
+    var gate;
+    if (asLicense) {
+      var raw = String(hash).replace(/^license:/i, "");
+      if (!root.Unlock || !root.Unlock.verifyLicenseKey) {
+        var err0 = new Error("Не загрузился проверщик ключей. Обновите страницу.");
+        err0.paymentFailed = true;
+        return Promise.reject(err0);
+      }
+      gate = root.Unlock.verifyLicenseKey(raw, { product: "tgchats" }).then(function (lic) {
+        if (lic && lic.valid) return { ok: true };
+        return { ok: false, reason: "Ключ TW1-… не подходит к этой базе (" + (lic && lic.error) + ")." };
+      });
+    } else {
+      gate = checkPayment(hash);
+    }
+    b2bLoading = gate.then(async function (chk) {
+      if (!chk.ok) {
+        var err = new Error(chk.reason || "Платёж не подтверждён.");
+        err.paymentFailed = true;
+        throw err;
+      }
+      var data = await loadB2B();
+      b2bCache = data;
+      b2bLoading = null;
+      return data;
+    }).catch(function (err) {
+      b2bLoading = null;
+      throw err;
+    });
+    return b2bLoading;
+  }
+
   root.ChatPack = {
     ensure: ensure,
-    isLoaded: function () { return !!cache; }
+    ensureB2B: ensureB2B,
+    isLoaded: function () { return !!cache; },
+    isB2BLoaded: function () { return !!b2bCache; },
+    getB2B: function () { return b2bCache; }
   };
 })(window);

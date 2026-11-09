@@ -72,11 +72,52 @@ const ITEMS = [
     sub: "Селлеры WB/Ozon, закупки, карго, ИТ, недвижимость — пишите бесплатно без заявок",
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
-    scrollY: 0,
-    /* The free slice ranks the cashback-spam chat ("КЭШбЫК…", 105k members,
-       local-services topic) 2nd — filter to marketplace sellers before the
-       shot so the cover never shows it. */
+    scrollToSelector: "#catalog",
+    /* Filter to marketplace sellers before the shot so the table is rich & clean */
     clickChips: "Селлеры WB/Ozon"
+  },
+  {
+    slug: "b2b-stores-leads",
+    url: "/tg-chats/index.html",
+    kicker: "B2B LEADS & STORES 2026",
+    headline: "1 200+ интернет-магазинов и оптовиков РФ",
+    sub: "Телефоны, Email, Telegram, VK и CMS — выгрузка в Excel в 1 клик",
+    price: "249 ₽",
+    priceAlt: "$2.49 · USDC на Base",
+    scrollToSelector: "#b2b"
+  },
+  {
+    slug: "wb-sellers-chats",
+    url: "/tg-chats/index.html",
+    kicker: "WB & OZON SELLERS CHATS",
+    headline: "240+ чатов селлеров Wildberries, Ozon и Карго",
+    sub: "Поставщики, опт, склады и фуры — открытые группы без заявок",
+    price: "149 ₽",
+    priceAlt: "$1.49 · USDC на Base",
+    scrollToSelector: ".result-head",
+    clickChips: "Селлеры WB/Ozon"
+  },
+  {
+    slug: "freelance-it-chats",
+    url: "/tg-chats/index.html",
+    kicker: "IT & FREELANCE CHATS",
+    headline: "400+ чатов IT, фриланса и удалённой работы",
+    sub: "Разработчики, дизайнеры, SMM, заказы и проекты в Telegram",
+    price: "149 ₽",
+    priceAlt: "$1.49 · USDC на Base",
+    scrollToSelector: ".result-head",
+    clickChips: "IT и Фриланс"
+  },
+  {
+    slug: "realty-jk-chats",
+    url: "/tg-chats/index.html",
+    kicker: "REALTY & JK CHATS",
+    headline: "210+ чатов ЖК, новостроек и недвижимости РФ",
+    sub: "Москва, СПб и регионы: жильцы, ремонт, сдача и приёмка",
+    price: "149 ₽",
+    priceAlt: "$1.49 · USDC на Base",
+    scrollToSelector: ".result-head",
+    clickChips: "Недвижимость и ЖК"
   },
   {
     slug: "docsearch",
@@ -246,6 +287,13 @@ async function shoot(browser, item) {
         return false;
       }, item.clickChips);
       if (picked) await page.waitForTimeout(550);
+    }
+    if (item.scrollToSelector) {
+      await page.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        if (el) el.scrollIntoView({ block: "start" });
+      }, item.scrollToSelector);
+      await page.waitForTimeout(420);
     }
     if (item.scrollY) {
       await page.evaluate((y) => window.scrollTo(0, y), item.scrollY);

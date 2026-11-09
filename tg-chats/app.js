@@ -59,12 +59,14 @@
      after Pro is on — no modal, no extra click. Pack unlocks the full
      1 500+ chats base on the same page. */
   var PACK_FILES = {
-    "b2b-stores": "b2b-ecommerce-stores-864-nov2026.xlsx",
-    "b2b": "b2b-ecommerce-stores-864-nov2026.xlsx",
+    "b2b-stores": "b2b-ecommerce-stores-1200-nov2026.xlsx",
+    "b2b": "b2b-ecommerce-stores-1200-nov2026.xlsx",
     "wb-sellers": "tg-chats-marketplaces-wb-ozon.xlsx",
     "wb": "tg-chats-marketplaces-wb-ozon.xlsx",
     "freelance-it": "tg-chats-it-freelance.xlsx",
-    "freelance": "tg-chats-it-freelance.xlsx"
+    "freelance": "tg-chats-it-freelance.xlsx",
+    "realty-jk": "tg-chats-realty-jk-msk-spb.xlsx",
+    "realty": "tg-chats-realty-jk-msk-spb.xlsx"
   };
 
   function isPro() { return !!(window.Unlock && window.Unlock.isPro(PRODUCT)); }
@@ -397,46 +399,90 @@
     toast("Скачано " + fmt(rows.length) + " чатов: " + FULL_XLSX_NAME);
   }
 
-  /* Download a ready-made pack file from /downloads/ (Digiseller lots
-     6378375 / 6378421 / 12). Fetched as blob so the saved filename is exact. */
-  function downloadPackFile(fileName) {
-    var url = "../downloads/" + encodeURIComponent(fileName);
-    fetch(url).then(function (res) {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.blob();
-    }).then(function (blob) {
-      var obj = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = obj;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(function () { URL.revokeObjectURL(obj); }, 4000);
-      toast("Скачан готовый файл: " + fileName + " (база " + fmt(TOTAL) + " чатов тоже открыта)");
-    }).catch(function () {
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+  function downloadB2BXlsx() {
+    var rec = window.Unlock && window.Unlock.state(PRODUCT);
+    var hash = rec && rec.hash;
+    toast("Расшифровка базы B2B-магазинов...");
+    if (!window.ChatPack || !window.ChatPack.ensureB2B) {
+      toast("Модуль расшифровки недоступен", true);
+      return;
+    }
+    window.ChatPack.ensureB2B(hash).then(function (pack) {
+      var stores = (pack && pack.stores) || [];
+      if (!stores.length) { toast("База B2B пуста", true); return; }
+      var headers = ["domain", "url", "shop_name", "city", "category", "cms", "cms_hint", "email", "phone", "telegram", "vk", "whatsapp", "http_status", "live_http200", "shop_score", "major_bot_blocked", "checked_at"];
+      var table = [headers].concat(stores.map(function (s) {
+        return [s.domain, s.url, s.shop_name, s.city || "", s.category || "", s.cms || "unknown", s.cms_hint || "", s.email || "", s.phone || "", s.telegram || "", s.vk || "", s.whatsapp || "", s.http_status || 200, s.live_http200 || 1, s.shop_score || 2, s.major_bot_blocked || "0", s.checked_at || ""];
+      }));
+      var fileName = PACK_FILES["b2b-stores"] || "b2b-ecommerce-stores-1200-nov2026.xlsx";
+      window.XLSX.download(table, fileName, "B2B leads Nov 2026");
+      toast("Скачано " + fmt(stores.length) + " B2B-магазинов: " + fileName);
+    }).catch(function (err) {
+      toast("Ошибка расшифровки B2B: " + (err.message || err), true);
     });
+  }
+
+  function downloadWbXlsx() {
+    if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
+    var rows = DATA.chats.filter(function (c) {
+      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
+      return /маркетплейс|wb|wildberries|ozon|озон|селлер|закупк|поставщик|опт|карго|фуры|грузоперевоз/i.test(t);
+    }).sort(function (a, b) { return b.members - a.members; });
+    var fileName = PACK_FILES["wb-sellers"] || "tg-chats-marketplaces-wb-ozon.xlsx";
+    window.XLSX.download(exportTable(rows), fileName, "WB Ozon");
+    toast("Скачано " + fmt(rows.length) + " чатов селлеров: " + fileName);
+  }
+
+  function downloadFreelanceXlsx() {
+    if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
+    var rows = DATA.chats.filter(function (c) {
+      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
+      return /it|ит|разработ|программ|фриланс|дизайн|маркетинг|smm|digital|ваканси|заказ/i.test(t);
+    }).sort(function (a, b) { return b.members - a.members; });
+    var fileName = PACK_FILES["freelance-it"] || "tg-chats-it-freelance.xlsx";
+    window.XLSX.download(exportTable(rows), fileName, "IT Freelance");
+    toast("Скачано " + fmt(rows.length) + " чатов IT и фриланса: " + fileName);
+  }
+
+  function downloadRealtyXlsx() {
+    if (!DATA.chats || !DATA.chats.length) { toast("База чатов ещё не загружена", true); return; }
+    var rows = DATA.chats.filter(function (c) {
+      var t = ((c.topic || "") + " " + (c.title || "")).toLowerCase();
+      return /недвижим|жк|новострой|ремонт|риелтор|аренд|квартир/i.test(t);
+    }).sort(function (a, b) { return b.members - a.members; });
+    var fileName = PACK_FILES["realty-jk"] || "tg-chats-realty-jk-msk-spb.xlsx";
+    window.XLSX.download(exportTable(rows), fileName, "Realty JK");
+    toast("Скачано " + fmt(rows.length) + " чатов недвижимости и ЖК: " + fileName);
   }
 
   /* Receipt link (?key=…&download=xlsx) or a key pasted into the modal
      this session: once the encrypted pack is open, start the file.
-     With &pack=… the profile Excel pack goes first (B2B 864 shops /
-     WB-Ozon niche / IT-freelance niche); Pro also opens the full base. */
+     With &pack=… the profile Excel pack goes first (B2B stores /
+     WB-Ozon niche / IT-freelance niche / Realty-JK niche); Pro also opens the full base. */
   function maybeAutoDownload() {
     if (state.autoDownloaded) return;
     var wantsFile = state.urlKeyPresent || state.sessionLicense;
     if (!wantsFile || !isPro()) return;
-    if (!window.ChatPack || !window.ChatPack.isLoaded()) return;
-    var packFile = state.urlPack ? PACK_FILES[state.urlPack] : null;
-    if (packFile) {
+    var pack = (state.urlPack || "").trim().toLowerCase();
+    if (pack === "b2b-stores" || pack === "b2b") {
       state.autoDownloaded = true;
-      downloadPackFile(packFile);
+      downloadB2BXlsx();
+      return;
+    }
+    if (!window.ChatPack || !window.ChatPack.isLoaded()) return;
+    if (pack === "wb-sellers" || pack === "wb") {
+      state.autoDownloaded = true;
+      downloadWbXlsx();
+      return;
+    }
+    if (pack === "freelance-it" || pack === "freelance") {
+      state.autoDownloaded = true;
+      downloadFreelanceXlsx();
+      return;
+    }
+    if (pack === "realty-jk" || pack === "realty") {
+      state.autoDownloaded = true;
+      downloadRealtyXlsx();
       return;
     }
     state.autoDownloaded = true;
@@ -744,7 +790,10 @@
 
     window.__TGCHATS__ = {
       downloadFullXlsx: downloadFullXlsx,
-      downloadPackFile: downloadPackFile,
+      downloadB2BXlsx: downloadB2BXlsx,
+      downloadWbXlsx: downloadWbXlsx,
+      downloadFreelanceXlsx: downloadFreelanceXlsx,
+      downloadRealtyXlsx: downloadRealtyXlsx,
       maybeAutoDownload: maybeAutoDownload,
       packFiles: PACK_FILES,
       urlPack: state.urlPack,
