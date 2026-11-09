@@ -1,0 +1,7 @@
+{
+  "name": "wb-ozon-seller-inspector",
+  "version": "1.0.0",
+  "description": "WB & Ozon seller inspector: product cards, seller, unit margin, Excel-friendly CSV export",
+  "license": "MIT",
+  "sources": ["core.js", "panel.js"]
+}

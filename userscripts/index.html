@@ -109,7 +109,7 @@ footer a{color:var(--muted)}
     </div>
     <h1>Юзерскрипты: установка в один клик</h1>
     <p class="lead">
-      Два самостоятельных скрипта, которые работают прямо в браузере и ничего не отправляют наружу.
+      Три самостоятельных скрипта, которые работают прямо в браузере и ничего не отправляют наружу.
       Скачивание MP3 с YouTube/VK — бесплатно и без лимита. Выгрузка таблиц и Telegram-каналов в CSV —
       бесплатно до 50 строк, дальше Pro-ключ. Оба ставятся из Tampermonkey одним нажатием.
     </p>
@@ -186,6 +186,26 @@ footer a{color:var(--muted)}
         <a class="btn ghost small" href="../data-clipper/">Страница продукта</a>
       </div>
       <p class="note">Скрипт виден только там, где есть что выгружать; крестик убирает его навсегда.</p>
+    </article>
+
+    <article class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2>WB &amp; Ozon: продавцы, маржа, конкуренты → Excel</h2>
+        <span class="badge">v1.0.0</span>
+      </div>
+      <p>На страницах поиска <span class="mono">wildberries.ru</span> и <span class="mono">ozon.ru</span>
+        пилюля считает карточки товаров, показывает продавца и считает чистую маржу по вашим параметрам.
+        Один клик — Excel-дружелюбный CSV (BOM, разделитель <span class="mono">;</span>).</p>
+      <ul>
+        <li>Комиссия, СПП, налог, логистика и закуп — пять полей, состояние сохраняется</li>
+        <li>Дедупликация по SKU: повторная выдача не дублирует строки</li>
+        <li>Free: 50 карточек за экспорт · Pro (TW1-CLIP/TW1-ALL): без лимита, офлайн</li>
+      </ul>
+      <div class="row">
+        <a class="btn install" href="../downloads/wb-ozon-seller-inspector.user.js" data-userscript>Установить в Tampermonkey</a>
+        <a class="btn ghost small" href="../data-clipper/">Справка и калькулятор маржи</a>
+      </div>
+      <p class="note">Работает и на товарной странице, и на выдаче; ничего не отправляет наружу.</p>
     </article>
   </section>
 
@@ -272,6 +292,15 @@ footer a{color:var(--muted)}
           "operatingSystem": "Any (Tampermonkey)",
           "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"},
           "downloadUrl": "https://9xj89gzrtw-hue.github.io/downloads/table-tg-clipper.user.js"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "position": 3,
+          "name": "WB & Ozon Seller Inspector",
+          "applicationCategory": "BrowserApplication",
+          "operatingSystem": "Any (Tampermonkey)",
+          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"},
+          "downloadUrl": "https://9xj89gzrtw-hue.github.io/downloads/wb-ozon-seller-inspector.user.js"
         }
       ]
     }
