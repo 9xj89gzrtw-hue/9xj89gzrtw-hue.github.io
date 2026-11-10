@@ -47,7 +47,7 @@ const ITEMS = [
     slug: "all-in-one",
     url: "/index.html",
     kicker: "ALL-IN-ONE PRO PASS",
-    headline: "8 продуктов. Один ключ. Без подписки.",
+    headline: "9 инструментов. Один ключ. Без подписки.",
     sub: "Telegram, звук, таблицы, рынки, игра — всё в браузере",
     price: "1 290 ₽",
     priceAlt: "$14.99 · USDC на Base",
@@ -83,7 +83,7 @@ const ITEMS = [
     slug: "b2b-stores-leads",
     url: "/tg-chats/index.html",
     kicker: "B2B LEADS & STORES 2026",
-    headline: "1 200+ интернет-магазинов и оптовиков РФ",
+    headline: "1 240 интернет-магазинов и оптовиков РФ",
     sub: "Телефоны, Email, Telegram, VK и CMS — выгрузка в Excel в 1 клик",
     price: "249 ₽",
     priceAlt: "$2.49 · USDC на Base",
@@ -193,6 +193,16 @@ const ITEMS = [
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
     scrollY: 0
+  },
+  {
+    slug: "net-whitelist",
+    url: "/net-whitelist/index.html",
+    kicker: "SNI WHITELIST · LTE RU 2026",
+    headline: "Белые списки SNI и генератор VLESS",
+    sub: "25 доменов с живым пингом из браузера, Happ / v2rayNG / Sing-Box, база 1 384 доменов",
+    price: "99 ₽",
+    priceAlt: "$0.99 · USDC на Base",
+    scrollY: 0
   }
 ];
 
@@ -275,7 +285,7 @@ function coverHtml(item, shot, w, h) {
     .price b{display:block;font-size:${wide ? 28 : 34}px;letter-spacing:-.03em;line-height:1}
     .price span{display:block;margin-top:5px;font-size:${wide ? 12 : 13}px;color:#64748b}
   </style></head><body>
-    <div class="top"><span class="mark"></span><span class="brand">Toolworks <span>· 8 продуктов</span></span></div>
+    <div class="top"><span class="mark"></span><span class="brand">Toolworks <span>· 9 инструментов</span></span></div>
     <div class="kicker">${item.kicker}</div>
     <h1>${item.headline}</h1>
     <div class="sub">${item.sub}</div>

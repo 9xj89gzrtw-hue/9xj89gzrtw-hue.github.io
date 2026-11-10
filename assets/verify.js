@@ -152,6 +152,7 @@
     "live-radar": "RADAR",
     "data-clipper": "CLIP",
     "base-tax-audit": "TAX",
+    "sni-whitelist": "SNI",
     "all-in-one": "ALL"
   };
   const LICENSE_CODE_SLUG = Object.fromEntries(
@@ -198,7 +199,11 @@
   /** Does a verified code open this product? `ALL` opens everything. */
   function licenseCovers(code, product) {
     if (!product) return true;
-    const want = LICENSE_PRODUCTS[String(product).toLowerCase()] ||
+    const slug = String(product).toLowerCase();
+    /* See assets/unlock.js: the SNI pack ships with TG Pro, and a standalone
+       TW1-SNI key works as well. */
+    if (slug === "sni-whitelist" && (code === "SNI" || code === "TG")) return true;
+    const want = LICENSE_PRODUCTS[slug] ||
       (/^[A-Z0-9]{2,8}$/.test(product) ? product : null);
     if (!want) return false;
     return code === UNIVERSAL_CODE || code === want;

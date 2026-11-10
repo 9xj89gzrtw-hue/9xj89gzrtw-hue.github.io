@@ -61,7 +61,7 @@ function keysOf(product) {
   }
 
   console.log("карта продуктов");
-  ok("8 продуктов", Object.keys(V.LICENSE_PRODUCTS).length === 8);
+  ok("9 продуктов", Object.keys(V.LICENSE_PRODUCTS).length === 9);
   ok("audio-dub-studio = AUDIO", V.LICENSE_PRODUCTS["audio-dub-studio"] === "AUDIO");
   ok("unlock.js знает все продукты verify.js", Object.keys(V.LICENSE_PRODUCTS).every(slug => U.LICENSE_PRODUCTS[slug] === V.LICENSE_PRODUCTS[slug]),
     JSON.stringify(U.LICENSE_PRODUCTS));
@@ -72,6 +72,9 @@ function keysOf(product) {
     JSON.stringify(shared.map(s => [s, U.LICENSE_PRODUCTS[s], V.LICENSE_PRODUCTS[s]])));
   ok("ALL универсален", V.licenseCovers("ALL", "newsflow") && U.licenseCovers("ALL", "audio-dub-studio"));
   ok("чужой код не универсален", !V.licenseCovers("NEWS", "audio-dub-studio"));
+
+  ok("чужие коды не открывают sni-whitelist", !V.licenseCovers("NEWS", "sni-whitelist") && !V.licenseCovers("AUDIO", "sni-whitelist"));
+  ok("TG-ключ покрывает sni-whitelist (пакет в комплекте TG Pro)", V.licenseCovers("TG", "sni-whitelist") && U.licenseCovers("TG", "sni-whitelist"));
 
   console.log("разбор ключа");
   const first = keysOf("audio-dub-studio")[0];
@@ -110,7 +113,7 @@ function keysOf(product) {
       }
     }
   }
-  ok("все ключи проверяются", good === total && total === 1600, good + "/" + total);
+  ok("все ключи проверяются", good === total && total === 1800, good + "/" + total);
   ok("ключи не открывают чужой продукт", foreignRejected === foreign, foreignRejected + "/" + foreign);
   ok("универсальный ALL открывает любой продукт", universalCross === 200, universalCross);
 

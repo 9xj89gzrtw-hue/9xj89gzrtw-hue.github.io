@@ -1,0 +1,114 @@
+/* net-whitelist — Белые списки SNI (LTE РФ).
+   Self-contained styles; no external fonts, no CDN. */
+:root {
+  --bg: #0b1020;
+  --bg2: #101733;
+  --card: #151d3b;
+  --card2: #1a2450;
+  --line: #2a3565;
+  --text: #e8ecff;
+  --muted: #9aa7d0;
+  --acc: #4f8cff;
+  --acc2: #22d3a7;
+  --warn: #ffb84f;
+  --bad: #ff5f7a;
+  --good: #34d17e;
+}
+* { box-sizing: border-box; }
+/* [hidden] must beat component display rules (.btn is inline-block). */
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: radial-gradient(1200px 600px at 80% -10%, #1b2a5e 0%, var(--bg) 55%) fixed, var(--bg);
+  color: var(--text);
+  font: 16px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 80px; }
+a { color: var(--acc); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1 { font-size: 30px; margin: 10px 0 6px; line-height: 1.2; }
+h2 { font-size: 21px; margin: 26px 0 10px; }
+h3 { font-size: 17px; margin: 18px 0 8px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono, code, textarea, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.topnav { display: flex; gap: 14px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.topnav .brand { font-weight: 700; letter-spacing: .2px; }
+.topnav .right { margin-left: auto; display: flex; gap: 12px; }
+
+.hero { padding: 22px 0 6px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.pill {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--muted);
+}
+.pill b { color: var(--text); }
+
+.card {
+  background: linear-gradient(180deg, var(--card) 0%, var(--bg2) 100%);
+  border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; margin: 14px 0;
+}
+.card--flat { background: var(--card); }
+
+.btn {
+  display: inline-block; border: 1px solid var(--line); background: var(--card2);
+  color: var(--text); border-radius: 10px; padding: 9px 14px; font-size: 14px; cursor: pointer;
+}
+.btn:hover { border-color: var(--acc); }
+.btn:disabled { opacity: .55; cursor: default; }
+.btn-primary {
+  background: linear-gradient(180deg, var(--acc) 0%, #3f74d8 100%);
+  border-color: #66a0ff; color: #fff; font-weight: 600;
+}
+.btn-good { background: linear-gradient(180deg, #2fbf7f 0%, #20965f 100%); border-color: #4fe39a; color: #06281a; font-weight: 700; }
+.btn-ghost { background: transparent; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.grow { flex: 1 1 auto; }
+
+input[type="text"], input[type="password"], textarea, select {
+  width: 100%; background: #0d1430; color: var(--text);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 14px;
+}
+textarea { min-height: 110px; resize: vertical; }
+label.lbl { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+
+table.grid { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.grid th, table.grid td {
+  text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px;
+}
+table.grid th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; }
+table.grid tr:hover td { background: #182250; }
+
+.badge-ok { color: var(--good); font-weight: 700; }
+.badge-warn { color: var(--warn); font-weight: 700; }
+.badge-bad { color: var(--bad); font-weight: 700; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+.dot--ok { background: var(--good); }
+.dot--warn { background: var(--warn); }
+.dot--bad { background: var(--bad); }
+.dot--idle { background: #4a5688; }
+
+.summary { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+.summary .kpi { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; }
+.summary .kpi b { font-size: 18px; display: block; }
+
+.out { background: #0c1330; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; word-break: break-all; font-size: 12.5px; max-height: 260px; overflow: auto; }
+.tabs { display: flex; gap: 6px; margin: 10px 0 6px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: var(--card2); border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; color: var(--muted); }
+.tab[aria-selected="true"], .tab:hover { color: var(--text); border-color: var(--acc); }
+
+.qrbox { background: #fff; display: inline-block; padding: 10px; border-radius: 12px; }
+.qrbox svg { display: block; width: 220px; height: 220px; max-width: 100%; }
+
+.note { border-left: 3px solid var(--acc); background: #13204d; padding: 10px 12px; border-radius: 0 10px 10px 0; font-size: 13.5px; color: #c7d2f5; margin: 10px 0; }
+.note--warn { border-color: var(--warn); }
+
+footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 14px; color: var(--muted); font-size: 13px; }
+.sep { opacity: .45; margin: 0 6px; }
+
+/* modal skeleton — unlock.js paints content into it */
+.umodal { position: fixed; inset: 0; background: rgba(4,8,20,.72); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.umodal .ubox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; max-width: 520px; width: calc(100% - 32px); max-height: 86vh; overflow: auto; padding: 18px; }

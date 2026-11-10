@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<style>
+  :root{
+    --ink:#0b1220; --panel:#111c31; --line:#22314d; --muted:#9fb0c9;
+    --wb:#cb11ab; --oz:#005bff; --ok:#34d399; --warn:#fbbf24;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{width:800px;height:800px;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(900px 500px at 15% -10%, rgba(203,17,171,.35), transparent 60%),
+      radial-gradient(800px 520px at 100% 10%, rgba(0,91,255,.35), transparent 60%),
+      linear-gradient(160deg,#0a0f1c 0%,#0d1730 55%,#0a1224 100%);
+    color:#eef3fb;position:relative}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:40px 40px;mask-image:linear-gradient(#000 55%,transparent)}
+  .wrap{position:relative;padding:44px 46px;height:100%;display:flex;flex-direction:column}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;font-size:19px}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--wb),var(--oz));display:grid;place-items:center;font-size:16px;box-shadow:0 6px 20px rgba(0,91,255,.45)}
+  .brand span{color:#8fb4ff}
+  .kicker{margin-top:26px;font-size:13.5px;letter-spacing:2.2px;font-weight:800;color:#ff9ee6}
+  h1{margin-top:10px;font-size:45px;line-height:1.08;letter-spacing:-.6px;font-weight:900;text-wrap:balance}
+  h1 em{font-style:normal;color:#7ea6ff}
+  .sub{margin-top:14px;font-size:18px;line-height:1.35;color:#c7d4ea;max-width:660px}
+  .stage{position:relative;flex:1;margin-top:22px;perspective:1100px}
+  .card{position:absolute;background:rgba(17,28,49,.92);border:1px solid rgba(126,166,255,.28);border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(6px)}
+  .main{left:0;right:172px;top:6px;padding:16px 18px 14px;transform:rotateX(4deg) rotateY(-5deg) rotateZ(.4deg)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;padding:6px 11px;border-radius:999px;background:rgba(52,211,153,.14);color:#7ef0c4;border:1px solid rgba(52,211,153,.35)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 12px var(--ok)}
+  .mk{display:flex;gap:8px}
+  .mk b{font-size:12.5px;font-weight:800;padding:5px 10px;border-radius:8px}
+  .wb{background:rgba(203,17,171,.18);color:#ff9ee6;border:1px solid rgba(203,17,171,.45)}
+  .oz{background:rgba(0,91,255,.18);color:#9dc0ff;border:1px solid rgba(0,91,255,.5)}
+  .prod{display:flex;gap:16px;margin-top:16px}
+  .thumb{width:104px;height:126px;border-radius:12px;background:linear-gradient(150deg,#1b2a46,#0e1a30);border:1px solid #26385a;position:relative;overflow:hidden;flex:none}
+  .thumb:before{content:"";position:absolute;inset:14px 18px 34px;border-radius:8px;background:linear-gradient(160deg,#2b3f63,#16233b)}
+  .thumb:after{content:"4.9 ★";position:absolute;left:12px;bottom:9px;font-size:12px;font-weight:800;color:#ffd479}
+  .meta{flex:1;min-width:0}
+  .name{font-size:17.5px;font-weight:800;line-height:1.22}
+  .seller{margin-top:6px;font-size:13px;color:var(--muted)}
+  .nums{display:flex;gap:22px;margin-top:12px}
+  .num b{display:block;font-size:23px;font-weight:900;letter-spacing:-.3px}
+  .num s{display:block;font-size:11.5px;color:#8fa2bf;text-decoration:none;margin-top:2px;letter-spacing:.3px;text-transform:uppercase}
+  .good{color:#5ff0b5}
+  .bad{color:#ff8f8f}
+  .calc{margin-top:14px;border-top:1px dashed #2a3b5c;padding-top:12px;display:grid;grid-template-columns:1fr auto;gap:10px 14px;align-items:center}
+  .slider{height:8px;border-radius:999px;background:#1a2942;position:relative;overflow:hidden}
+  .slider i{position:absolute;left:0;top:0;bottom:0;width:64%;background:linear-gradient(90deg,var(--wb),var(--oz));border-radius:999px}
+  .slider b{position:absolute;left:63%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .calcval{font-size:13px;color:#c7d4ea;white-space:nowrap}
+  .calcval b{color:#fff}
+  .cta{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+  .btn{font-size:14.5px;font-weight:800;padding:11px 16px;border-radius:11px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#04220f;box-shadow:0 10px 24px rgba(34,197,94,.35)}
+  .note{font-size:12.5px;color:#9fb0c9}
+  .float{right:0;top:150px;width:160px;padding:12px 14px;transform:rotateY(-14deg) rotateX(6deg) rotateZ(-2deg);border-color:rgba(203,17,171,.4);box-shadow:0 26px 60px rgba(0,0,0,.6)}
+  .float .t{font-size:11.5px;letter-spacing:1.6px;color:#ff9ee6;font-weight:800}
+  .float .v{font-size:31px;font-weight:900;margin-top:4px;letter-spacing:-.5px}
+  .float .d{font-size:12.5px;color:#b9c8e0;margin-top:4px;line-height:1.35}
+  .badge{position:absolute;left:0;bottom:2px;background:rgba(9,16,30,.92);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;color:#cfe0ff;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  .price{position:absolute;right:0;bottom:0;text-align:right}
+  .price .p{font-size:40px;font-weight:900;letter-spacing:-1px;line-height:1}
+  .price .u{font-size:13px;color:#9fb0c9;margin-top:6px}
+  .foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px}
+  .chip{font-size:13.5px;font-weight:800;color:#0a2417;background:linear-gradient(135deg,#a7f3d0,#6ee7b7);padding:10px 16px;border-radius:999px;box-shadow:0 12px 30px rgba(110,231,183,.25)}
+  .tiny{font-size:12.5px;color:#8fa2bf}
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+    <div class="brand"><div class="logo">⚡</div>Toolworks <span>· WB &amp; Ozon</span></div>
+    <div class="kicker">SELLER PLUGIN 2026 · 11.11</div>
+    <h1>Маржа конкурента —<br><em>за 2 секунды</em> на карточке</h1>
+    <div class="sub">Плагин для Wildberries и Ozon: комиссия, СПП, налог, логистика и закуп — и выгрузка конкурентов в Excel одним кликом.</div>
+
+    <div class="stage">
+      <div class="card main">
+        <div class="row">
+          <div class="pill"><span class="dot"></span> пилюля активна · 48 карточек</div>
+          <div class="mk"><b class="wb">Wildberries</b><b class="oz">Ozon</b></div>
+        </div>
+        <div class="prod">
+          <div class="thumb"></div>
+          <div class="meta">
+            <div class="name">Кашемировый свитер oversize, молочный</div>
+            <div class="seller">Продавец: OOO «Текстиль-Опт» · 4.8 · 12 400 отзывов</div>
+            <div class="nums">
+              <div class="num"><b>4 290 ₽</b><s>цена</s></div>
+              <div class="num"><b>1 450 ₽</b><s>закуп</s></div>
+              <div class="num"><b class="good">1 579 ₽</b><s>маржа</s></div>
+              <div class="num"><b class="good">37%</b><s>маржа %</s></div>
+            </div>
+          </div>
+        </div>
+        <div class="calc">
+          <div class="slider"><i></i><b></b></div>
+          <div class="calcval">комиссия <b>22%</b> · СПП <b>7%</b> · налог <b>6%</b></div>
+        </div>
+        <div class="cta">
+          <div class="btn">Выгрузить 48 конкурентов в Excel</div>
+          <div class="note"></div>
+        </div>
+      </div>
+
+      <div class="card float">
+        <div class="t">ЧИСТАЯ МАРЖА</div>
+        <div class="v">127 ₽</div>
+        <div class="d">на единицу после комиссии, СПП, налога и логистики</div>
+      </div>
+
+      <div class="badge">Бесплатно до 50 карточек · ключ TW1-CLIP снимает лимит навсегда</div>
+      <div class="price"><div class="p">199 ₽</div><div class="u">$1.99 · USDC на Base</div></div>
+    </div>
+
+    <div class="foot">
+      <div class="chip">Установка в 1 клик · Tampermonkey</div>
+      <div class="tiny">9xj89gzrtw-hue.github.io/data-clipper</div>
+    </div>
+  </div>
+</body>
+</html>

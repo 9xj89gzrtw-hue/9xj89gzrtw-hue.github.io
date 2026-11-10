@@ -1,0 +1,26 @@
+domain,category,tls13_alpn,ping_ms,asn_org,operator_whitelist,recommended_client,http_status,checked
+nalog.gov.ru,Госуслуги,"TLSv1.3, h2",264,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+mos.ru,Госуслуги,"TLSv1.3, h2",270,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+sberbank.ru,Банки,"TLSv1.3, h2",266,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+wildberries.ru,Маркетплейсы,"TLSv1.3, h2",75,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",307,2026-11-10
+ozon.ru,Маркетплейсы,"TLSv1.3, h2",84,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",307,2026-11-10
+market.yandex.ru,Маркетплейсы,"TLSv1.3, h2",1089,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+yandex.ru,Порталы,"TLSv1.3, h2",315,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",302,2026-11-10
+vk.com,Соцсети,"TLSv1.3, h2",55,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / Streisand / FoXray (h2)",418,2026-11-10
+avito.ru,Объявления,"TLSv1.3, h2",177,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+2gis.ru,Карты,"TLSv1.3, h2",200,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",302,2026-11-10
+mts.ru,Телеком,"TLSv1.2, —",,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Sing-Box / Nekoray (транспорт-CDN, h2/gRPC)",302,2026-11-10
+megafon.ru,Телеком,"TLSv1.2, http/1.1",550,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Sing-Box / Nekoray (транспорт-CDN, h2/gRPC)",301,2026-11-10
+beeline.ru,Телеком,"TLSv1.3, h2",268,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Sing-Box / Nekoray (транспорт-CDN, h2/gRPC)",301,2026-11-10
+t2.ru,Телеком,"TLSv1.3, h2",262,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Sing-Box / Nekoray (транспорт-CDN, h2/gRPC)",503,2026-11-10
+rostelecom.ru,Телеком,"TLSv1.2, —",,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Sing-Box / Nekoray (транспорт-CDN, h2/gRPC)",302,2026-11-10
+rzd.ru,Транспорт,"TLSv1.2, —",,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+aeroflot.ru,Транспорт,"TLSv1.3, h2",251,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",308,2026-11-10
+cbr.ru,Финансы,"TLSv1.3, h2",5162,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+moex.com,Финансы,"TLSv1.2, —",,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+domclick.ru,Недвижимость,"TLSv1.3, http/1.1",35,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+cian.ru,Недвижимость,"TLSv1.3, h2",48,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",301,2026-11-10
+hh.ru,Работа,"TLSv1.2, —",,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+kinopoisk.ru,Видео,"TLSv1.3, h2",315,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / Streisand / FoXray (h2)",301,2026-11-10
+161.ru,Регионы,"TLSv1.3, h2",40,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10
+1c.ru,Софт,"TLSv1.3, h2",32,"","МТС, Мегафон, Билайн, Т2 (экспертная классификация)","Happ / v2rayNG / Sing-Box / Nekoray (Reality fp=chrome)",200,2026-11-10

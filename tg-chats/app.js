@@ -66,7 +66,9 @@
     "freelance-it": "tg-chats-it-freelance-realty.xlsx",
     "freelance": "tg-chats-it-freelance-realty.xlsx",
     "realty-jk": "tg-chats-realty-jk-msk-spb.xlsx",
-    "realty": "tg-chats-realty-jk-msk-spb.xlsx"
+    "realty": "tg-chats-realty-jk-msk-spb.xlsx",
+    "sni-whitelist": "sni-whitelist-500-rf-nov2026.xlsx",
+    "sni": "sni-whitelist-500-rf-nov2026.xlsx"
   };
 
   /* Rubric packs are cut from the full base by exact topic, not by a loose
@@ -431,8 +433,32 @@
     });
   }
 
-  function rowsByTopics(topics) {
-    var wanted = {};
+  /* SNI white-list pack: same container as B2B, bundled with TG Pro.
+     `?key=TW1-TG-...&pack=sni-whitelist&download=xlsx` → instant .xlsx. */
+  function downloadSniXlsx() {
+    var rec = window.Unlock && window.Unlock.state(PRODUCT);
+    var hash = rec && rec.hash;
+    toast("Расшифровка базы SNI-доменов...");
+    if (!window.ChatPack || !window.ChatPack.ensureSNI) {
+      toast("Модуль расшифровки SNI недоступен", true);
+      return;
+    }
+    window.ChatPack.ensureSNI(hash).then(function (pack) {
+      var domains = (pack && pack.domains) || [];
+      if (!domains.length) { toast("База SNI пуста", true); return; }
+      var headers = ["domain", "category", "note", "tier", "https", "checked"];
+      var table = [headers].concat(domains.map(function (d) {
+        return [d.domain, d.category || "", d.note || "", d.tier || "", d.https == null ? "" : d.https, d.checked || ""];
+      }));
+      var fileName = PACK_FILES["sni-whitelist"];
+      window.XLSX.download(table, fileName, "SNI LTE RU");
+      toast("Скачано " + fmt(domains.length) + " SNI-доменов: " + fileName);
+    }).catch(function (err) {
+      toast("Ошибка расшифровки SNI: " + (err.message || err), true);
+    });
+  }
+
+  function rowsByTopics(topics) {    var wanted = {};
     topics.forEach(function (t) { wanted[t] = true; });
     return DATA.chats.filter(function (c) { return wanted[c.topic]; })
       .sort(function (a, b) { return b.members - a.members; });
@@ -488,6 +514,11 @@
     if (pack === "b2b-stores" || pack === "b2b") {
       state.autoDownloaded = true;
       downloadB2BXlsx();
+      return;
+    }
+    if (pack === "sni-whitelist" || pack === "sni") {
+      state.autoDownloaded = true;
+      downloadSniXlsx();
       return;
     }
     if (!window.ChatPack || !window.ChatPack.isLoaded()) return;
@@ -812,6 +843,7 @@
     window.__TGCHATS__ = {
       downloadFullXlsx: downloadFullXlsx,
       downloadB2BXlsx: downloadB2BXlsx,
+      downloadSniXlsx: downloadSniXlsx,
       downloadWbXlsx: downloadWbXlsx,
       downloadFreelanceXlsx: downloadFreelanceXlsx,
       downloadRealtyXlsx: downloadRealtyXlsx,

@@ -104,16 +104,24 @@ const SHOP = (() => {
     return JSON.parse(src.slice(src.indexOf("{"), src.lastIndexOf("}") + 1));
   } catch (e) { return null; }
 })();
+/* The label prints the storefront price, the cash desk may charge kopecks
+   (492,74 ₽ for a "490 ₽" lot) because Plati converts USD at the daily rate.
+   shop.json therefore ships both: price_rub = exact checkout total,
+   display_rub = rounded number printed on the card. Both spellings are
+   accepted, so the test still fails if the page invents a third price. */
 function liveRub(c) {
   const alias = { tgchats: "tg-chats", "archive-studio": "docsearch" };
   const slug = alias[c.product] || c.product;
   const entry = SHOP && SHOP.products ? SHOP.products[slug] : null;
-  const rub = entry && Number(entry.price_rub) ? Number(entry.price_rub) : c.rub;
-  /* The cash desk may charge kopecks while the label prints whole rubles,
-     so both spellings of the same live price are acceptable. */
-  const forms = [Number.isInteger(rub) ? String(rub) : rub.toFixed(2)];
-  const rounded = String(Math.round(rub));
-  if (!forms.includes(rounded)) forms.push(rounded);
+  const exact = entry && Number(entry.price_rub) ? Number(entry.price_rub) : c.rub;
+  const display = entry && Number(entry.display_rub)
+    ? Number(entry.display_rub)
+    : Math.round(exact / 10) * 10;
+  const forms = [String(Math.round(display))];
+  const whole = String(Math.round(exact));
+  if (!forms.includes(whole)) forms.push(whole);
+  const precise = Number.isInteger(exact) ? String(exact) : exact.toFixed(2);
+  if (!forms.includes(precise)) forms.push(precise);
   return forms;
 }
 

@@ -73,7 +73,7 @@
     var res = await fetch("./" + fileName, { cache: "no-store" });
     if (!res.ok) throw new Error("Не удалось загрузить пакет " + typeName + " (" + res.status + ").");
     var pkg = await res.json();
-    if (!pkg || pkg.v !== 1 || !pkg.iv || !pkg.ciphertext) throw new Error("Пакет " + typeName + " повреждён.");
+    if (!pkg || (pkg.v !== 1 && pkg.v !== 2) || !pkg.iv || !pkg.ciphertext) throw new Error("Пакет " + typeName + " повреждён.");
     var salt = b64ToBytes(pkg.kdf.salt);
     if (salt.length < SALT_LEN) throw new Error("Пакет " + typeName + " повреждён: соль.");
     var key = await deriveKey(salt);
@@ -98,6 +98,12 @@
 
   async function loadB2B() {
     return loadFile("b2b-pack.json.enc", "B2B", "stores");
+  }
+
+  /* SNI white-list pack is a bonus for every TG Pro buyer: the same TW1-TG /
+     TW1-ALL key opens it, and the file is the same encrypted container. */
+  async function loadSNI() {
+    return loadFile("sni-pack.json.enc", "SNI", "domains");
   }
 
   /* Returns the decrypted catalogue once per page load.
@@ -149,6 +155,48 @@
   var b2bCache = null;
   var b2bLoading = null;
 
+  var sniCache = null;
+  var sniLoading = null;
+
+  function ensureSNI(hash) {
+    if (sniCache) return Promise.resolve(sniCache);
+    if (sniLoading) return sniLoading;
+    if (!hash) {
+      return Promise.reject(new Error("Нет подтверждённого платежа. Откройте Pro и вставьте хеш транзакции или ключ TW1-…"));
+    }
+    var asLicense = /^license:/i.test(String(hash));
+    var gate;
+    if (asLicense) {
+      var raw = String(hash).replace(/^license:/i, "");
+      if (!root.Unlock || !root.Unlock.verifyLicenseKey) {
+        var err1 = new Error("Не загрузился проверщик ключей. Обновите страницу.");
+        err1.paymentFailed = true;
+        return Promise.reject(err1);
+      }
+      gate = root.Unlock.verifyLicenseKey(raw, { product: "tgchats" }).then(function (lic) {
+        if (lic && lic.valid) return { ok: true };
+        return { ok: false, reason: "Ключ TW1-… не подходит к SNI-базе (" + (lic && lic.error) + ")." };
+      });
+    } else {
+      gate = checkPayment(hash);
+    }
+    sniLoading = gate.then(async function (chk) {
+      if (!chk.ok) {
+        var err = new Error(chk.reason || "Платёж не подтверждён.");
+        err.paymentFailed = true;
+        throw err;
+      }
+      var data = await loadSNI();
+      sniCache = data;
+      sniLoading = null;
+      return data;
+    }).catch(function (err) {
+      sniLoading = null;
+      throw err;
+    });
+    return sniLoading;
+  }
+
   function ensureB2B(hash) {
     if (b2bCache) return Promise.resolve(b2bCache);
     if (b2bLoading) return b2bLoading;
@@ -191,8 +239,11 @@
   root.ChatPack = {
     ensure: ensure,
     ensureB2B: ensureB2B,
+    ensureSNI: ensureSNI,
     isLoaded: function () { return !!cache; },
     isB2BLoaded: function () { return !!b2bCache; },
-    getB2B: function () { return b2bCache; }
+    isSNILoaded: function () { return !!sniCache; },
+    getB2B: function () { return b2bCache; },
+    getSNI: function () { return sniCache; }
   };
 })(window);

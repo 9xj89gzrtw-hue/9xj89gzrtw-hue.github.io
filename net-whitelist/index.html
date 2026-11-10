@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SNI Wh RU 2026 — белые списки SNI для LTE РФ, генератор и чекер конфигов</title>
+<meta name="description" content="Проверенные живыми пробами SNI-домены для белых списков МТС, Мегафон, Билайн, Т2: TLS 1.3 / h2, живой тестер задержки из вашей сети, генератор vless/Happ/Sing-Box с QR и белым SNI. Бесплатное демо: 25 доменов.">
+<link rel="stylesheet" href="./style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "SNI Wh RU 2026 — белые списки SNI, LTE РФ",
+  "operatingSystem": "Web",
+  "applicationCategory": "NetworkApplication",
+  "offers": [
+    { "@type": "Offer", "price": "0", "priceCurrency": "RUB", "description": "Демо: 25 доменов, тестер задержки, генератор ссылок" },
+    { "@type": "Offer", "price": "99", "priceCurrency": "RUB", "description": "Полная база 1 384 доменов, Excel/JSON, пакетная генерация 50 профилей" }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <span class="brand"><a href="/">Toolworks</a> <span class="sep">·</span> SNI Wh RU</span>
+    <div class="right small">
+      <a href="/">Магазин</a>
+      <a href="/tg-chats/">TG-базы</a>
+      <a href="/data-clipper/">Парсер</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <h1>Белые списки SNI <span class="muted">(LTE РФ 2026)</span></h1>
+    <p class="muted">Домены для подстановки в VLESS Reality, ShadowTLS, Hysteria2, AmneziaWG и Happ при ограничениях мобильного интернета — каждая строка прошла живые DNS + TLS + HTTPS-пробы при сборке, TLS 1.3 / h2 отмечены в таблице. Живой тестер замеряет отклик <b>из вашей сети</b>; ключ vless:// остаётся в браузере.</p>
+    <div class="pills">
+      <span class="pill">База: <b id="st-total">…</b></span>
+      <span class="pill">Core: <b id="st-core">…</b></span>
+      <span class="pill">Профиль: <b id="st-tls">…</b></span>
+      <span class="pill">Демо: <b id="st-free">…</b></span>
+    </div>
+  </header>
+
+  <div class="card" id="tester">
+    <h2 style="margin-top:0">① Живой тестер задержки ваших узлов</h2>
+    <p class="muted small">Браузер сам подключается к 25 демо-доменам и замеряет отклик с вашего интернета (SIM/Wi-Fi). Зелёные — самые быстрые кандидаты в белый SNI. Ничего не отправляется на наш сервер.</p>
+    <div class="row">
+      <button class="btn btn-primary" id="run-tester" type="button">Проверить доступность узлов из моей сети прямо сейчас</button>
+      <span id="tester-status" class="small muted grow">Нажмите кнопку — потребуется ~2–4 с.</span>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="lbl" for="filter-cat" style="margin:0">Категория</label>
+      <select id="filter-cat" style="max-width:230px"></select>
+      <input id="filter-q" type="search" placeholder="Найти домен" style="max-width:240px" autocomplete="off">
+      <span class="small muted grow">Фильтр по базе: банки, госуслуги, маркетплейсы, магазины.</span>
+    </div>
+    <div style="overflow:auto;margin-top:12px">
+      <table class="grid" id="tbl"><thead><tr>
+        <th>Домен</th><th>Категория</th><th>TLS / ALPN</th><th>Замер при сборке, ms</th><th>Сеть (RDAP, core)</th><th>Ожидаемый белый список</th><th>Рекомендованный клиент</th><th></th>
+      </tr></thead><tbody id="tbl-body"></tbody></table>
+    </div>
+    <p class="small muted" id="tbl-note" style="margin:8px 0 0"></p>
+    <div class="note note--warn small">Честно о методике: строки базы — это живые DNS+TLS+HTTPS-пробы при сборке (дата в колонке), а попадание домена в белый список LTE решает только оператор. Проверяйте финальный выбор из сети своей SIM кнопкой выше.</div>
+  </div>
+
+  <div class="card" id="generator">
+    <h2 style="margin-top:0">② Генератор ссылок и QR-кодов с белым SNI</h2>
+    <div class="row">
+      <div class="grow">
+        <label class="lbl" for="gen-input">Ваш vless://-ключ (локально, в память браузера; о сети — только попытки до узлов, выбранных вами)</label>
+        <textarea id="gen-input" rows="3" placeholder="vless://uuid@server:443?type=tcp&pbk=...#tag"></textarea>
+      </div>
+      <div style="width:270px">
+        <label class="lbl" for="gen-sni">Лучший проверенный SNI</label>
+        <select id="gen-sni"></select>
+        <label class="lbl">или выберите из таблицы ↑ (кнопка «SNI →»)</label>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-primary" id="gen-run" type="button">Собрать конфиги с подстановкой SNI</button>
+      <span class="small muted">fp=chrome · TLS 1.3 · routing-правила RU-direct</span>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" data-tab="vless" type="button">vless:// ссылка</button>
+      <button class="tab" data-tab="clients" type="button">Все клиенты</button>
+      <button class="tab" data-tab="singbox" type="button">Sing-Box JSON</button>
+      <button class="tab" data-tab="routing" type="button">Routing JSON</button>
+    </div>
+    <div id="gen-out"></div>
+    <div class="row" style="margin-top:14px;align-items:flex-start">
+      <div>
+        <div class="qrbox" id="qr-box" hidden><div id="qr-holder"></div></div>
+        <div class="small muted" id="qr-cap" style="margin-top:6px"></div>
+        <a class="btn small" style="margin-top:6px" id="qr-blob" hidden download>Скачать QR (SVG)</a>
+      </div>
+      <div class="grow">
+        <a class="btn" id="dl-link" hidden download>Скачать конфиг .txt</a>
+        <p class="small muted" style="margin:10px 0 0">Импорт: <b>Happ</b> — «+» → буфер обмена; <b>v2rayNG</b> — «+» → «Импорт из буфера»; <b>Streisand / FoXray</b> — «+» → ссылка; <b>Nekoray</b> — Add → Brief scan; <b>Sing-Box</b> — вставить JSON из вкладки. Ключ не покидает браузер: страница статическая, бэкенда нет.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="pro">
+    <div class="row">
+      <h2 style="margin:0" class="grow">③ Pro: полная база <span id="pro-total-label" class="muted">1 384</span> доменов в Excel/JSON</h2>
+      <span class="pill"><b>99 ₽</b> · СБП / Карта РФ</span>
+    </div>
+    <div class="small muted" style="margin:8px 0 12px">
+      Полный пак открывается ключом <b>TW1-SNI-…</b>, <b>TW1-TG-…</b> (сборка с TG Pro) или <b>TW1-ALL-…</b>. Ключ выдаётся сразу после оплаты. Внутри: каждый домен с <span class="mono">tls13_alpn</span>, <span class="mono">ping_ms</span>, HTTP-статусом, ожидаемым белым списком оператора и рекомендованным клиентом; для core-доменов ещё и сеть по RDAP. Плюс готовые шаблоны маршрутизации для Happ / Sing-Box / v2rayNG / Nekoray / Amnezia и пакетная генерация 50 резервных профилей.
+    </div>
+    <div class="row">
+      <button class="btn btn-good" type="button" data-unlock data-product="sni-whitelist" data-price="0.99"
+        data-name="SNI Wh RU 2026 Pro"
+        data-sub="Полная база 1 384 доменов белых списков SNI (LTE РФ) в Excel/JSON + шаблоны маршрутизации + пакет генерации 50 профилей. 99 ₽, ключ TW1 сразу.">Открыть полную базу за 99 ₽ (СБП / Карта РФ — ключ сразу)</button>
+      <button class="btn" type="button" data-unlock data-product="sni-whitelist" data-price="0.99"
+        data-name="SNI Wh RU 2026 Pro" data-sub="Хеш OTZPYZNA ZXCK TC $0.99 USDC на Base.">Оплатить в Base USDC ($0.99)</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <input id="pro-key" type="text" style="max-width:420px" placeholder="Вставьте ключ TW1-SNI-… / TW1-TG-… / TW1-ALL-…">
+      <button class="btn btn-primary" id="pro-key-apply" type="button">Открыть по ключу</button>
+    </div>
+    <div id="pro-status" style="margin-top:10px" hidden></div>
+    <div class="row" style="margin-top:12px" id="pro-actions">
+      <button class="btn btn-primary" id="btn-xlsx" type="button" hidden>Скачать базу .xlsx</button>
+      <button class="btn" id="btn-json" type="button" hidden>Скачать базу + шаблоны .json</button>
+      <button class="btn" id="btn-batch" type="button" hidden>50 резервных профилей .txt</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <a class="btn small" href="../downloads/sni-whitelist-demo-25.csv" download>Демо CSV: 25 доменов</a>
+      <span class="small muted">Полный .xlsx открывается после оплаты кнопками выше или по ссылке-чеку <span class="mono">?key=TW1-…&amp;pack=sni-whitelist&amp;download=xlsx</span>.</span>
+    </div>
+  </div>
+
+  <div class="card card--flat" id="how">
+    <h2 style="margin-top:0">Как это работает — и какие рамки не нарушаем</h2>
+    <ul class="small muted" style="margin:6px 0 0;padding-left:20px;line-height:1.8">
+      <li>База собрана из инфраструктурных доменов РФ-операторов (CDN, банки, госуслуги, маркетплейсы, облака), которым нужен приоритетный проход при трафаретном фильтре LTE; она не «обходит» блокировку — она подбирает узел, чтобы ваш трафик шёл через легальный кэш-эдж оператора, как будто им и назначен.</li>
+      <li>Генератор не подделывает DPI и не вмешивается в чужие сети: ключ остаётся вашим, серверная подмена не используется.</li>
+      <li>Всё рекомендуемое действие — стандартные возможности Happ / v2rayNG / Sing-Box / Nekoray / Amnezia (подстановка SNI, routing), ничего патентованного не взломано.</li>
+      <li>«operator_whitelist» — экспертная классификация, а не обещание оператора: попадание в белый список решает сам оператор. Доступность проверяйте живым тестером из сети своей SIM.</li>
+    </ul>
+  </div>
+
+  <footer>
+    <div>Toolworks · база собрана <span id="gen-date"></span> · <a href="/tests/">QA</a></div>
+    <div class="small" style="margin-top:6px">Продавец: seller 1481449 (Digiseller/Plati.Market). Оплата USDC на Base: <span class="mono">0x72Aa…4d1a</span>.</div>
+  </footer>
+
+</div>
+
+<dialog class="umodal" id="unlock-modal" style="display:none;border:none;padding:0;background:transparent"></dialog>
+
+<script src="/assets/verify.js"></script>
+<script src="/assets/unlock.js"></script>
+<script src="/assets/xlsx.js"></script>
+<script src="./vendor/qrcode.js"></script>
+<script src="./catalog.js"></script>
+<script src="./pack.js"></script>
+<script src="./app.js"></script>
+<script>
+(function () {
+  "use strict";
+  var META = window.SNI_META || {};
+  var el = document.getElementById("gen-date");
+  if (el && META.generated_at) el.textContent = String(META.generated_at).slice(0, 10);
+  var lbl = document.getElementById("pro-total-label");
+  if (lbl && META.total) lbl.textContent = META.total + "";
+})();
+</script>
+</body>
+</html>

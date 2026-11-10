@@ -148,6 +148,7 @@
     "data-clipper": "CLIP",
     "base-tax-audit": "TAX",
     "algo-tycoon": "ALGO",
+    "sni-whitelist": "SNI",
     "all-in-one": "ALL"
   };
 
@@ -165,17 +166,17 @@
    * "not listed yet": the button is not rendered instead of pointing at a 404.
    */
   var SHOP_DEFAULTS = {
-    "audio-dub-studio": { id: 6354599, rub: 199.04 },
-    "tgchats": { id: 6354600, rub: 490.44 },
-    "tg-chats": { id: 6354600, rub: 490.44 },
-    "docsearch": { id: 6354601, rub: 690.46 },
-    "archive-studio": { id: 6354601, rub: 690.46 },
-    "data-clipper": { id: 6354602, rub: 299.51 },
-    "newsflow": { id: 6358143, rub: 390.42 },
-    "live-radar": { id: 6358155, rub: 390.42 },
-    "base-tax-audit": { id: 6358164, rub: 490.44 },
-    "algo-tycoon": { id: 6365339, rub: 148.79 },
-    "all-in-one": { id: 6326936, rub: 1289.55 }
+    "audio-dub-studio": { id: 6354599, rub: 199.04, display: 199 },
+    "tgchats": { id: 6354600, rub: 490.44, display: 490 },
+    "tg-chats": { id: 6354600, rub: 490.44, display: 490 },
+    "docsearch": { id: 6354601, rub: 690.46, display: 690 },
+    "archive-studio": { id: 6354601, rub: 690.46, display: 690 },
+    "data-clipper": { id: 6354602, rub: 299.51, display: 299 },
+    "newsflow": { id: 6358143, rub: 390.42, display: 390 },
+    "live-radar": { id: 6358155, rub: 390.42, display: 390 },
+    "base-tax-audit": { id: 6358164, rub: 490.44, display: 490 },
+    "algo-tycoon": { id: 6365339, rub: 148.79, display: 149 },
+    "all-in-one": { id: 6326936, rub: 1289.55, display: 1290 }
   };
   var SELLER_ID = 1481449;
   var BUNDLE_PRICE_USD = 14.99;
@@ -193,12 +194,21 @@
         return {
           id: Number(e.id) || null,
           rub: Number(e.price_rub || e.rub) || null,
+          /* price_rub is the exact cash-desk total (with kopecks, follows the
+             rouble rate); display_rub is the rounded price printed on the
+             storefront. Both are shown, so 490 ₽ never turns into 493 ₽. */
+          display: Number(e.display_rub) || Number(e.price_rub || e.rub) || null,
           note: e.note || ""
         };
       }
       var b = ext.bundle;
       if (slug === "all-in-one" && b) {
-        return { id: Number(b.id) || null, rub: Number(b.price_rub || b.rub) || null, note: b.note || "" };
+        return {
+          id: Number(b.id) || null,
+          rub: Number(b.price_rub || b.rub) || null,
+          display: Number(b.display_rub) || Number(b.price_rub || b.rub) || null,
+          note: b.note || ""
+        };
       }
     }
     return has(SHOP_DEFAULTS, slug) ? SHOP_DEFAULTS[slug] : null;
@@ -206,6 +216,12 @@
 
   function cardUrl(id) {
     return "https://oplata.info/asp2/pay_wm.asp?id_d=" + id + "&ai=" + SELLER_ID + "&lang=ru-RU";
+  }
+
+  /* Rounded storefront price: 490 ₽ while the cash desk may charge 492,74 ₽. */
+  function rubDisplay(shop) {
+    var n = Number(shop && (shop.display || shop.rub));
+    return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
   }
   var LICENSE_CODE_SLUG = (function () {
     var out = {};
@@ -325,6 +341,10 @@
   function licenseCovers(code, product) {
     if (!product) return true;
     var slug = String(product).toLowerCase();
+    /* The SNI/white-list pack is bundled with TG Pro: buyers who already hold
+       a TW1-TG key must not need a second purchase. A dedicated TW1-SNI key
+       (issued later) is accepted too, so the pack can also be sold alone. */
+    if (slug === "sni-whitelist" && (code === "SNI" || code === "TG")) return true;
     var want = LICENSE_PRODUCTS[slug] || (/^[A-Z0-9]{2,8}$/i.test(product) ? String(product).toUpperCase() : null);
     if (!want) return false;
     return code === UNIVERSAL_CODE || code === want;
@@ -579,7 +599,7 @@
     cardNote: "Ключ действует бессрочно. Он привязан к вашему заказу — не публикуйте его.",
     cardPending: "Оплата картой для этого инструмента ещё не открыта. USDC на Base и ключ TW1-… работают уже сейчас.",
     bundleTitle: "All-in-One Pro Pass — $14.99",
-    bundleSub: "Все 8 инструментов одним ключом TW1-ALL-…, бессрочно. Один платёж вместо восьми.",
+    bundleSub: "Все 9 инструментов одним ключом TW1-ALL-…, бессрочно. Один платёж вместо девяти.",
     bundlePay: "Всё за $14.99 в 1 клик",
     bundleCard: "Карта РФ / СБП",
     bundleSoon: "Лот бандла ещё не открыт. Base USDC в 1 клик работает уже сейчас, ключ TW1-ALL-… принимается на любой странице.",
@@ -798,7 +818,7 @@
     var priceNode = modalEl.querySelector("#unlock-price");
     var priceAlt = modalEl.querySelector("#unlock-price-alt");
     if (RU && shop && shop.rub) {
-      priceNode.textContent = Math.round(shop.rub) + " ₽";
+      priceNode.textContent = rubDisplay(shop) + " ₽";
       priceAlt.textContent = "$" + opts.price + " · USDC на Base";
     } else {
       priceNode.textContent = "$" + opts.price;
@@ -830,7 +850,7 @@
       card.hidden = false;
       cardHint.hidden = true;
       cardLabel.textContent = T.cardPay +
-        (shop.rub ? " (" + Math.round(shop.rub) + " ₽ · ключ TW1 сразу на экране)" : "");
+        (shop.rub ? " (" + rubDisplay(shop) + " ₽ · ключ TW1 сразу на экране)" : "");
       card.setAttribute("data-license-code", slug);
     } else {
       card.hidden = true;
@@ -854,7 +874,7 @@
         bcard.hidden = false;
         bnote.hidden = true;
         modalEl.querySelector("#unlock-bundle-card-label").textContent =
-          T.bundleCard + (bshop.rub ? " · " + Math.round(bshop.rub) + " ₽" : "");
+          T.bundleCard + (bshop.rub ? " · " + rubDisplay(bshop) + " ₽" : "");
       } else {
         bcard.hidden = true;
         bnote.hidden = false;
@@ -992,7 +1012,7 @@
         if (lot && lot.id) {
           el.href = cardUrl(lot.id);
           el.hidden = false;
-          var rub = lot.rub ? " · " + Math.round(lot.rub).toLocaleString("ru-RU") + " ₽" : "";
+          var rub = rubDisplay(lot) ? " · " + rubDisplay(lot).toLocaleString("ru-RU") + " ₽" : "";
           var label = el.querySelector("[data-shop-label]") || el;
           /* The baseline is captured once, before the first price is written,
              so re-binding on unlock:changed never doubles the price or the

@@ -1,12 +1,13 @@
 {
   "source": "gemini/agent2_out/digiseller_tw1_stock.json",
-  "updated": "2026-11-09T18:38:09.929Z",
+  "updated": "2026-11-10T19:36:49.462Z",
   "seller_id": 1481449,
   "currency_note": "price_rub is what the checkout shows; price_usd is what the page charges in USDC on Base",
   "products": {
     "audio-dub-studio": {
       "id": 6354599,
       "price_rub": 199.04,
+      "display_rub": 199,
       "price_usd": 1.99,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354599&ai=1481449&lang=ru-RU",
@@ -16,6 +17,7 @@
     "tg-chats": {
       "id": 6354600,
       "price_rub": 492.74,
+      "display_rub": 490,
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354600&ai=1481449&lang=ru-RU",
@@ -25,6 +27,7 @@
     "docsearch": {
       "id": 6354601,
       "price_rub": 693.92,
+      "display_rub": 690,
       "price_usd": 15,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354601&ai=1481449&lang=ru-RU",
@@ -34,6 +37,7 @@
     "data-clipper": {
       "id": 6354602,
       "price_rub": 299.71,
+      "display_rub": 299,
       "price_usd": 2.99,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6354602&ai=1481449&lang=ru-RU",
@@ -43,33 +47,37 @@
     "newsflow": {
       "id": 6358143,
       "price_rub": 392.39,
+      "display_rub": 390,
       "price_usd": 12,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358143&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/auto-digest-builder-from-telegram-channels-and-rss-for-tg-vk-no-duplicates/6358143",
+      "card_url": "https://plati.market/itm/6358143",
       "title": "Авто-сборщик дайджестов и постов из Telegram-каналов и RSS для ТГ/ВК без дублей (TW1-"
     },
     "live-radar": {
       "id": 6358155,
       "price_rub": 390.42,
+      "display_rub": 390,
       "price_usd": 14,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358155&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/real-time-scanner-of-arbitrage-spreads-and-momentum-on-polymarket-telegram-gifts/6358155",
+      "card_url": "https://plati.market/itm/6358155",
       "title": "Сканер вилок, спредов и импульсов Polymarket + Telegram Gifts в реальном времени (TW1"
     },
     "base-tax-audit": {
       "id": 6358164,
       "price_rub": 492.9,
+      "display_rub": 490,
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358164&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/base-wallet-dangerous-approval-revoke-scanner-transactions-export-to-excel-csv/6358164",
+      "card_url": "https://plati.market/itm/6358164",
       "title": "Сканер опасных разрешений (Revoke) кошелька Base + Выгрузка транзакций в Excel/CSV (T"
     },
     "algo-tycoon": {
       "id": 6365339,
       "price_rub": 148.84,
+      "display_rub": 149,
       "price_usd": 1.49,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6365339&ai=1481449&lang=ru-RU",
@@ -77,8 +85,9 @@
       "title": "AI &amp; Market Tycoon Pro — Симулятор ИИ-стартапа и алго-биржи + Песочница $1M (TW1-ALGO"
     },
     "wb-sellers-chats": {
+      "display_rub": 149,
       "id": 6378375,
-      "price_rub": 148.89,
+      "price_rub": 148.97,
       "price_usd": 1.49,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6378375&ai=1481449&lang=ru-RU",
@@ -86,15 +95,17 @@
       "title": "База 230+ чатов Селлеров Wildberries, Ozon, Поставщиков и Карго 2026 (Excel/CSV) + Ва"
     },
     "b2b-stores-leads": {
+      "display_rub": 249,
       "id": 6379842,
-      "price_rub": 249.44,
+      "price_rub": 249.22,
       "price_usd": 2.49,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6379842&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/database-of-860-russian-e-commerce-stores-wholesalers-2026-excel-phones-emails/6379842",
-      "title": "База 860+ Интернет-Магазинов и Оптовиков РФ 2026 (Excel): Телефоны, Email, TG, CMS +"
+      "card_url": "https://plati.market/itm/database-of-1-240-russian-e-commerce-stores-wholesalers-2026-excel-phones-email/6379842",
+      "title": "База 1 240 интернет-магазинов и оптовиков РФ 2026 (Excel): телефоны, email, TG, CMS"
     },
     "freelance-it-chats": {
+      "display_rub": 149,
       "id": 6378421,
       "price_rub": 148.89,
       "price_usd": 1.49,
@@ -104,6 +115,7 @@
       "title": "База 530+ открытых чатов Фриланса, IT, Заказов и Недвижимости РФ 2026 (Excel/CSV)"
     },
     "realty-jk-chats": {
+      "display_rub": 149,
       "id": 6384989,
       "price_rub": 148.98,
       "price_usd": 1.49,
@@ -111,15 +123,36 @@
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6384989&ai=1481449&lang=ru-RU",
       "card_url": "https://plati.market/itm/database-of-320-residential-complexes-repair-real-estate-telegram-chats-moscow-sp/6384989",
       "title": "База 320+ чатов ЖК, Новостроек, Ремонта и Недвижимости Москвы, СПб и РФ 2026 (Excel/C"
+    },
+    "sni-whitelist": {
+      "display_rub": 99,
+      "id": 6390371,
+      "price_rub": 99.22,
+      "price_usd": 0.99,
+      "stocked": 100,
+      "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6390371&ai=1481449&lang=ru-RU",
+      "card_url": "https://plati.market/itm/6390371",
+      "title": "VLESS / Reality / Happ / AmneziaWG: База 500+ Белых Списков SNI LTE РФ 2026 + Генерат"
+    },
+    "wb-ozon-extension-pro": {
+      "display_rub": 199,
+      "id": 6390375,
+      "price_rub": 198.79,
+      "price_usd": 1.99,
+      "stocked": 100,
+      "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6390375&ai=1481449&lang=ru-RU",
+      "card_url": "https://plati.market/itm/wildberries-ozon-seller-plugin-2026-profit-margin-calculator-competitor-export-t/6390375",
+      "title": "Плагин Wildberries и Ozon 2026: Расчёт Маржи 11.11 + Выгрузка Конкурентов в Excel (На"
     }
   },
   "bundle": {
     "id": 6326936,
     "price_rub": 1295.62,
+    "display_rub": 1290,
     "price_usd": 14.99,
     "stocked": 100,
     "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6326936&ai=1481449&lang=ru-RU",
     "card_url": "https://plati.market/itm/8-in-1-bundle-pro-2026-1000-telegram-chats-table-parser-youtube-vk-audio-one-k/6326936",
-    "title": "All-in-One Pro Pass — все 8 инструментов, один ключ TW1-ALL-…"
+    "title": "All-in-One Pro Pass — все 9 инструментов, один ключ TW1-ALL-…"
   }
 }

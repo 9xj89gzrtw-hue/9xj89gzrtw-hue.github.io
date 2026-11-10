@@ -23,6 +23,12 @@ function node(tag, attrs, text, className) {
     children: [],
     parentElement: null,
     _own: text || "",
+    get nextElementSibling() {
+      const p = this.parentElement;
+      if (!p) return null;
+      const i = p.children.indexOf(this);
+      return i >= 0 && i + 1 < p.children.length ? p.children[i + 1] : null;
+    },
     getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
     append(c) { c.parentElement = this; this.children.push(c); return c; },
     get innerText() { return this._own; },
@@ -44,6 +50,7 @@ function node(tag, attrs, text, className) {
 }
 function matches(n, sel) {
   if (sel === "a[href]") return n.tagName === "A" && n.getAttribute("href") != null;
+  if (sel === "[href]") return n.getAttribute("href") != null;
   if (sel === "[aria-label]") return n.getAttribute("aria-label") != null;
   if (sel === "[data-seller], [data-sellertype], [class*=seller]") {
     return n.getAttribute("data-seller") != null ||
@@ -183,6 +190,69 @@ try {
   ok("поддельная подпись -> signature", v.valid === false && v.error === "signature", JSON.stringify(v));
   v = await C.verifyKey("TW1-ALL-ABC123-AAAA");
   ok("ALL принимается форматом", v.valid === false && v.error === "signature", JSON.stringify(v));
+
+  console.log("9. фолбэк v1.1 (sibling-цена + [href])");
+  const snap = (rs) => rs.map((r) => { const o = Object.assign({}, r); delete o.container; return o; });
+  /* Классы/обёртки поменяли: цена «уехала» в соседний блок. SKU в href + ₽
+     в соседнем малом блоке — карточка обязана собраться. */
+  function bf1() {
+    const body = node("body");
+    const row = node("div", {}, "");
+    const a = node("a", { href: "/catalog/55512344/detail.aspx", "aria-label": "Кроссовки белые" });
+    a.innerText = "";
+    row.append(a);
+    const price = node("div", { class: "price-2026" }, "1 299 ₽");
+    body.append(row);
+    body.append(price);
+    return body;
+  }
+  let rows = C.collect(bf1());
+  ok("sibling-фолбэк: карточка найдена", rows.length === 1, JSON.stringify(snap(rows)));
+  ok("sibling-фолбэк: SKU и цена", rows.length === 1 && rows[0].sku === "55512344" && rows[0].price === 1299);
+  ok("sibling-фолбэк: помечен fallback", rows.length === 1 && rows[0].fallback === "sibling");
+
+  /* Ozon-вариант с ценой «новая/старая» в соседнем блоке */
+  function bf2() {
+    const body = node("body");
+    const row = node("div", {}, "");
+    const a = node("a", { href: "/product/stol-derevyannyy-777888999/" });
+    a.innerText = "";
+    row.append(a);
+    const price = node("div", {}, "14 900 ₽ 17 000 ₽");
+    body.append(row);
+    body.append(price);
+    return body;
+  }
+  rows = C.collect(bf2());
+  ok("ozon sibling: карточка найдена", rows.length === 1 && rows[0].price === 14900 && rows[0].oldPrice === 17000, JSON.stringify(snap(rows)));
+
+  /* Сосед-«широкий»: в блоке с ценой два чужих SKU — цена не приваривается */
+  function busy() {
+    const body = node("body");
+    const row = node("div", {}, "");
+    const a = node("a", { href: "/catalog/11122233/detail.aspx" });
+    a.innerText = "";
+    row.append(a);
+    const wide = node("div", {}, "13 900 ₽");
+    wide.append(node("a", { href: "/catalog/88889999/detail.aspx" }));
+    wide.append(node("a", { href: "/product/tonometras-66665551/" }));
+    body.append(row);
+    body.append(wide);
+    return body;
+  }
+  rows = C.collect(busy());
+  ok("не сварить чужую цену", rows.length === 0, JSON.stringify(snap(rows)));
+
+  /* Карточка-«area»: href есть, <a> нет — [href]-фолбэк находит */
+  function area() {
+    const body = node("body");
+    const card = node("div", {}, "Пиджак серый 5 400 ₽");
+    card.append(node("area", { href: "/catalog/31415926/detail.aspx" }));
+    body.append(card);
+    return body;
+  }
+  rows = C.collect(area());
+  ok("[href]-фолбэк: карточка найдена", rows.length === 1 && rows[0].sku === "31415926" && rows[0].price === 5400, JSON.stringify(snap(rows)));
 
   console.log("\n" + pass + " ok, " + fail + " fail");
   process.exit(fail ? 1 : 0);

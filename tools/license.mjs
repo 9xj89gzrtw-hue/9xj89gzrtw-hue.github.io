@@ -34,6 +34,7 @@ export const PRODUCTS = [
   { code: "CLIP", slug: "data-clipper", name: "Data Clipper", price: "$9 / 399 ₽" },
   { code: "TAX", slug: "base-tax-audit", name: "Base Tax Audit", price: "$29 / 1190 ₽" },
   { code: "ALGO", slug: "algo-tycoon", name: "Algo Tycoon Pro", price: "249 ₽" },
+  { code: "SNI", slug: "sni-whitelist", name: "SNI White List LTE RU", price: "99 ₽" },
   { code: "ALL", slug: "all-in-one", name: "All Products (universal key)", price: "$49 / 1990 ₽" }
 ];
 
@@ -145,6 +146,7 @@ const HEADERS = {
   RADAR: "Live Radar — Pro ($9 / 399 ₽)",
   CLIP: "Data Clipper — Pro ($9 / 399 ₽)",
   TAX: "Base Tax Audit — Pro ($29 / 1190 ₽)",
+  SNI: "SNI White List LTE RU — Pro (99 ₽)",
   ALL: "Универсальный ключ — открывает все продукты ($49 / 1990 ₽)"
 };
 

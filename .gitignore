@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 tools/.cover-shots/
 build/itch/
+# Paid pack exports land in downloads/ when a browser test clicks "download".
+# The free demo files (tg-chats-demo-30.csv, sni-whitelist-demo-25.csv) stay tracked.
+downloads/telegram-chats-*-full-*.csv
+downloads/telegram-chats-*-full-*.xlsx
+downloads/tg-chats-*.csv
+downloads/tg-chats-*.xlsx

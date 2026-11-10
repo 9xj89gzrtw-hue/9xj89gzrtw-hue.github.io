@@ -25,6 +25,7 @@ const PAGES = [
   ["tg-chats", "/tg-chats/index.html"],
   ["data-clipper", "/data-clipper/index.html"],
   ["base-tax-audit", "/base-tax-audit/index.html"],
+  ["net-whitelist", "/net-whitelist/index.html"],
   ["fee-audit", "/fee-audit/index.html"]
 ];
 

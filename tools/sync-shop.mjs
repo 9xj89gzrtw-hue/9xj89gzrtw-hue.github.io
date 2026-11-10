@@ -67,7 +67,12 @@ const SLUG_ALIAS = {
   algo: "algo-tycoon",
   "algo-tycoon": "algo-tycoon",
   allinone: "all-in-one",
-  bundle: "all-in-one"
+  bundle: "all-in-one",
+  /* Digiseller lot slugs of the November 2026 batch (deploy_tw1_lineup.py) ->
+     storefront shop keys (assets/unlock.js LICENSE_PRODUCTS / shop cards). */
+  "sni-whitelist-pro": "sni-whitelist",
+  "wb-ozon-extension-pro": "wb-ozon-extension-pro",
+  "wb-ozon": "wb-ozon-extension-pro"
 };
 
 function slugFor(product, key) {
@@ -163,21 +168,69 @@ const KNOWN = {
   "algo-tycoon": { id: null, price_rub: null }
 };
 
+/* Storefront prices. price_rub is the exact cash-desk total (it moves with the
+   rouble rate); display_rub is the number printed on cards, the catalog and
+   the CTA. Keeping both means a 492,74 ₽ charge no longer turns "490 ₽" into
+   "493 ₽" on the page, and e2e-card-pay can assert the printed value. */
+const DISPLAY_RUB = {
+  "audio-dub-studio": 199,
+  "tg-chats": 490,
+  docsearch: 690,
+  "data-clipper": 299,
+  newsflow: 390,
+  "live-radar": 390,
+  "base-tax-audit": 490,
+  "algo-tycoon": 149,
+  "wb-sellers-chats": 149,
+  "b2b-stores-leads": 249,
+  "freelance-it-chats": 149,
+  "realty-jk-chats": 149,
+  "all-in-one": 1290,
+  "sni-whitelist": 99,
+  "wb-ozon-extension-pro": 199
+};
+
+/* Listing titles are public metadata. The shop API still carries the old
+   "860 stores" headline on lot 6379842; the data behind it is 1 240. */
+const TITLE_OVERRIDES = {
+  "b2b-stores-leads": "База 1 240 интернет-магазинов и оптовиков РФ 2026 (Excel): телефоны, email, TG, CMS"
+};
+
 const merged = {};
 for (const [slug, def] of Object.entries(KNOWN)) {
   const got = products[slug] || {};
   merged[slug] = {
     id: got.id != null ? got.id : def.id,
     price_rub: got.price_rub != null ? got.price_rub : def.price_rub,
+    display_rub: DISPLAY_RUB[slug] != null ? DISPLAY_RUB[slug] : null,
     price_usd: got.price_usd != null ? got.price_usd : null,
     stocked: got.stocked || 0,
     pay_url: got.pay_url || null,
     card_url: got.card_url || null,
-    title: got.title || null
+    title: TITLE_OVERRIDES[slug] || got.title || null
   };
 }
 for (const [slug, got] of Object.entries(products)) {
-  if (!merged[slug]) merged[slug] = got;
+  if (!merged[slug]) {
+    merged[slug] = Object.assign({ display_rub: DISPLAY_RUB[slug] != null ? DISPLAY_RUB[slug] : null }, got,
+      TITLE_OVERRIDES[slug] ? { title: TITLE_OVERRIDES[slug] } : {});
+  }
+}
+
+/* Product sold on the site without a Digiseller lot yet: the card renders the
+   price, the modal hides the card button (id: null) instead of linking to a
+   checkout that does not exist. */
+if (!merged["sni-whitelist"]) {
+  merged["sni-whitelist"] = {
+    id: null,
+    price_rub: 99,
+    display_rub: 99,
+    price_usd: 0.99,
+    stocked: 0,
+    pay_url: null,
+    card_url: null,
+    title: "Белые списки SNI (LTE РФ) + генератор VLESS / Reality / Happ / AmneziaWG"
+  };
 }
 
 const out = {
@@ -191,11 +244,12 @@ const out = {
     return {
       id: b.id || null,
       price_rub: b.price_rub || (b.id ? 1490 : null),
+      display_rub: DISPLAY_RUB["all-in-one"],
       price_usd: b.price_usd || 14.99,
       stocked: b.stocked || 0,
       pay_url: b.pay_url || null,
       card_url: b.card_url || null,
-      title: b.title || "All-in-One Pro Pass — all 8 tools, one TW1-ALL-… key"
+      title: "All-in-One Pro Pass — все 9 инструментов, один ключ TW1-ALL-…"
     };
   })()
 };

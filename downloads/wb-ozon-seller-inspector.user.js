@@ -2,7 +2,7 @@
 // @name         WB & Ozon Seller Inspector — margin + competitor export to Excel
 // @name:ru      WB и Ozon: продавцы, чистая маржа и выгрузка конкурентов в Excel
 // @namespace    https://9xj89gzrtw-hue.github.io/data-clipper/
-// @version      1.0.0
+// @version      1.1.0
 // @description  On wildberries.ru and ozon.ru the pill counts product cards, shows seller info, computes unit margin (commission, SPP, tax, logistics, cost) and exports them to Excel-friendly CSV in one click. Free tier stops at 50 cards; a TW1-CLIP key removes the limit offline.
 // @description:ru На wildberries.ru и ozon.ru пилюля считает карточки товаров, показывает продавца, считает чистую маржу (комиссия, СПП, налог, логистика, закуп) и выгружает их в Excel-дружелюбный CSV одним кликом. Бесплатно до 50 карточек; ключ TW1-CLIP снимает лимит офлайн.
 // @author       Toolworks
@@ -35,7 +35,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "1.0.0";
+  var VERSION = "1.1.0";
   var FREE_ROWS = 50;
   var PRODUCT = "wb-ozon-inspector";
   var SITE = "https://9xj89gzrtw-hue.github.io/data-clipper/";
@@ -56,9 +56,20 @@
      on. WB: /catalog/27030630/detail.aspx ( optionally -<n> suffix ),
      Ozon: /product/<slug>-<digits>/. */
   var HREF_RE = {
-    wb: /\/catalog\/(\d{4,})(?:-[^/?#]*)?\/(?:detail)?/i,
+    wb: /\/catalog\/(\d{4,})(?:-[^/?#]*)?\/detail(?:\.aspx)?(?:-[^/?#]*)?/i,
     ozon: /\/product\/[^/]*?-{1}(\d{6,})(?:\/|$)/i
   };
+
+  /* FALLBACK pair — v1.1. When WB / Ozon shuffle CSS classes and wrappers,
+     two things never change at the same time: the numbers in the href and
+     the ₽ price pattern in the card text. These are the templates used by
+     the universal fallback collector below.
+     WB href: /catalog/<digits>/detail(.aspx)  ·  Ozon: /product/<slug>-<digits> */
+  var FALLBACK_HREF_RE = {
+    wb: /\/catalog\/(\d{5,})\/detail/i,
+    ozon: /\/product\/(?:[^/]*?-)?(\d{6,})(?:\/|$)/i
+  };
+  var PRICE_CHROME_RE = /[0-9][0-9\s\u00A0\u202F\u2009\u200A\u200B]*₽/;
 
   function siteOf(loc) {
     if (!loc || !loc.hostname) return null;
@@ -68,10 +79,11 @@
     return null;
   }
 
-  function skuFromHref(href) {
+  function skuFromHref(href, fallback) {
     if (!href) return null;
-    for (var id in HREF_RE) {
-      var m = HREF_RE[id].exec(href);
+    var set = fallback ? FALLBACK_HREF_RE : HREF_RE;
+    for (var id in set) {
+      var m = set[id].exec(href);
       if (m) return { site: id, sku: m[1] };
     }
     return null;
@@ -142,21 +154,34 @@
     };
   }
 
-  /* Harvest every product card of the page: every anchor to a detail URL is
-     considered, and its numbers come from the widest ancestor that still
-     contains exactly one product. That stops a grid from lending its
-     cheapest neighbour's price to the card. */
+  /* Harvest every product card of the page.
+   *
+   * Primary pass — every anchor to a detail URL is considered, and its
+   * numbers come from the widest ancestor that still contains exactly one
+   * product (stops a grid from lending its cheapest neighbour's price to
+   * the card).
+   *
+   * Fallback pass (v1.1) — for anchors whose own subtree carries no ₽-price
+   * (classes/wrappers changed), walk two more ancestors and then the next
+   * priced siblings. The sibling is only accepted when it holds at most one
+   * product SKU, so a sibling grid never welds a foreign price onto a card.
+   */
   function collect(root, site) {
     if (!root || !root.querySelectorAll) return [];
     if (!site) site = { id: "wb" };
-    var seen = {}, rows = [], anchors = root.querySelectorAll("a[href]");
-    for (var i = 0; i < anchors.length; i++) {
-      var direct = cardFromAnchor(anchors[i], null);
-      var box = anchors[i], best = null, hop = 0;
-      while (box && hop < 5) {
+    var seen = {}, rows = [], hrefs = [];
+    hrefs.push.apply(hrefs, root.querySelectorAll("a[href]"));
+    var extra = root.querySelectorAll("[href]");
+    for (var k = 0; k < extra.length; k++) {
+      if (hrefs.indexOf(extra[k]) === -1) hrefs.push(extra[k]);
+    }
+    for (var i = 0; i < hrefs.length; i++) {
+      var direct = cardFromAnchor(hrefs[i], null);
+      var box = hrefs[i], best = null, hop = 0;
+      while (box && hop < 8) {
         var tag = String(box.tagName || "").toUpperCase();
         if (tag === "BODY" || tag === "HTML") break;
-        var probe = cardFromAnchor(anchors[i], box);
+        var probe = cardFromAnchor(hrefs[i], box);
         if (probe && probe.price != null) {
           if (probe.raw.length > 600 || countSkus(box) > 1) break;
           best = probe;
@@ -164,13 +189,72 @@
         box = box.parentElement || null;
         hop++;
       }
-      if (!best) best = direct;
-      if (!best) continue;
+      /* fallback: SKU found, price lives in a neighbouring block */
+      if (!best) {
+        var ref = skuFromHref(rawHref(hrefs[i])) ||
+                  (skuFromHref(rawHref(hrefs[i]), true) || null);
+        if (ref) {
+          var near = pricedBetween(parentChain(hrefs[i], 3));
+          if (near && near.text) {
+            var pr = pricesFromText(near.text);
+            if (pr.price != null) {
+              best = cardFromAnchor(hrefs[i], null) || {};
+              best.site = ref.site;
+              best.sku = ref.sku;
+              best.price = pr.price;
+              best.oldPrice = pr.oldPrice;
+              best.discount = pr.discount;
+              best.raw = near.text.replace(/\s+/g, " ").trim().slice(0, 300);
+              if (!best.name || /^sku \d+$/.test(best.name)) {
+                best.name = best.raw.replace(/\s*\d[\d\s.,]*₽.*$/, "").trim().slice(0, 180) || ("sku " + ref.sku);
+              }
+              best.href = best.href || rawHref(hrefs[i]);
+              best.container = near.node;
+              best.fallback = "sibling";
+            }
+          }
+        }
+      }
+      if (!best || best.sku == null) continue;
       if (seen[best.sku]) continue;
       seen[best.sku] = true;
       rows.push(best);
     }
     return rows;
+  }
+
+  function rawHref(node) {
+    if (!node || !node.getAttribute) return null;
+    return node.getAttribute("href") || node.getAttribute("data-href") || null;
+  }
+
+  function parentChain(node, levels) {
+    var out = [], cur = node;
+    for (var i = 0; cur && i <= (levels || 0); i++) {
+      out.push(cur);
+      cur = cur.parentElement || null;
+    }
+    return out;
+  }
+
+  /* First block reachable from the anchor's closest container (its next
+   * siblings, then the container's own next siblings) that contains a ₽
+   * price and at most one product SKU. Anchored to the DOM order: cards on
+   * WB/Ozon are laid out as [img][info] or [link][price-stripe] side by
+   * side, so "next in document order" is where the price lives. */
+  function pricedBetween(block, hops) {
+    var horizon = hops == null ? 3 : hops;
+    for (var l = 0; l < block.length && l < horizon; l++) {
+      var sib = block[l].nextElementSibling;
+      while (sib) {
+        var text = (sib.innerText || sib.textContent || "");
+        if (text && PRICE_CHROME_RE.test(text) && countSkus(sib) <= 1) {
+          return { node: sib, text: text };
+        }
+        sib = sib.nextElementSibling;
+      }
+    }
+    return null;
   }
 
   function countSkus(node) {
