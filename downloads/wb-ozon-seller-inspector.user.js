@@ -2,7 +2,7 @@
 // @name         WB & Ozon Seller Inspector — margin + competitor export to Excel
 // @name:ru      WB и Ozon: продавцы, чистая маржа и выгрузка конкурентов в Excel
 // @namespace    https://9xj89gzrtw-hue.github.io/data-clipper/
-// @version      1.1.0
+// @version      1.2.0
 // @description  On wildberries.ru and ozon.ru the pill counts product cards, shows seller info, computes unit margin (commission, SPP, tax, logistics, cost) and exports them to Excel-friendly CSV in one click. Free tier stops at 50 cards; a TW1-CLIP key removes the limit offline.
 // @description:ru На wildberries.ru и ozon.ru пилюля считает карточки товаров, показывает продавца, считает чистую маржу (комиссия, СПП, налог, логистика, закуп) и выгружает их в Excel-дружелюбный CSV одним кликом. Бесплатно до 50 карточек; ключ TW1-CLIP снимает лимит офлайн.
 // @author       Toolworks
@@ -35,7 +35,7 @@
 (function (global) {
   "use strict";
 
-  var VERSION = "1.1.0";
+  var VERSION = "1.2.0";
   var FREE_ROWS = 50;
   var PRODUCT = "wb-ozon-inspector";
   var SITE = "https://9xj89gzrtw-hue.github.io/data-clipper/";
