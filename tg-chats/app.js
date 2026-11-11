@@ -57,7 +57,7 @@
      deliver a ready-made Excel pack instead of re-building the chats file.
      `?key=TW1-TG-...&pack=b2b-stores&download=xlsx` downloads that exact file
      after Pro is on — no modal, no extra click. Pack unlocks the full
-     1 500+ chats base on the same page. */
+     1 608 chats base on the same page. */
   var PACK_FILES = {
     "b2b-stores": "b2b-ecommerce-stores-nov2026.xlsx",
     "b2b": "b2b-ecommerce-stores-nov2026.xlsx",
