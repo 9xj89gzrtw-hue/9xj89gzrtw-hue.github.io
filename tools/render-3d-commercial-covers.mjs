@@ -14,12 +14,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const OUT_COVERS = path.join(ROOT, "assets", "covers");
 const OUT_OG = path.join(ROOT, "assets", "og");
-const BRAIN = "/Users/evgenijdanilov/.gemini/antigravity/brain/0a404807-456a-43a1-ad2b-bfc6ef7885e4";
+const RAW_DIR = path.join(ROOT, "assets", "covers", "raw");
 
 // Nano Banana raw image paths
-const NANO_ALL_IN_ONE = path.join(BRAIN, "all_in_one_raw_png_1794334423825.jpg");
-const NANO_WB_SELLERS = path.join(BRAIN, "wb_sellers_chats_raw_png_1794334791158.jpg");
-const NANO_TG_CHATS = path.join(BRAIN, "tg_chats_raw_png_1794334823381.jpg");
+const NANO_ALL_IN_ONE = path.join(RAW_DIR, "all-in-one-raw.jpg");
+const NANO_WB_SELLERS = path.join(RAW_DIR, "wb-sellers-chats-raw.jpg");
+const NANO_TG_CHATS = path.join(RAW_DIR, "tg-chats-raw.jpg");
+const NANO_SNI_WHITELIST = path.join(RAW_DIR, "sni-whitelist-raw.jpg");
+const NANO_WB_OZON = path.join(RAW_DIR, "wb-ozon-extension-raw.jpg");
+const NANO_B2B_LEADS = path.join(RAW_DIR, "b2b-stores-leads-raw.jpg");
+const NANO_AUDIO = path.join(RAW_DIR, "audio-dub-studio-raw.jpg");
 
 function toDataUri(filePath) {
   if (fs.existsSync(filePath)) {
@@ -59,19 +63,20 @@ const ITEMS = [
   {
     slug: "b2b-stores-leads",
     kicker: "B2B LEADS & STORES 2026",
-    title: "1 240 интернет-магазинов и оптовиков РФ",
+    title: "1 240 интернет-магазинов и оптовиков РФ в Excel",
     sub: "Телефоны, Email, Telegram, VK и CMS — проверенные юрлица",
     price: "249 ₽",
     priceAlt: "$2.49 · USDC на Base",
     badge: "100% ЖИВЫЕ САЙТЫ · EXCEL",
     glowColor: "rgba(16, 185, 129, 0.45)",
     accentColor: "#10b981",
-    visualType: "b2b-storefront"
+    nanoImage: toDataUri(NANO_B2B_LEADS),
+    visualType: "nano"
   },
   {
     slug: "realty-jk-chats",
     kicker: "REALTY & JK CHATS 2026",
-    title: "410+ чатов ЖК, новостроек Москвы и СПб",
+    title: "410 чатов ЖК, Новостроек и Ремонта Москвы и СПб",
     sub: "ПИК, Самолёт, А101, ФСК, Setl, ЛСР — жильцы, ремонт, сдача",
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
@@ -83,7 +88,7 @@ const ITEMS = [
   {
     slug: "freelance-it-chats",
     kicker: "IT & FREELANCE CHATS 2026",
-    title: "600+ чатов IT, фриланса и удалёнки",
+    title: "620+ чатов Фриланса, IT, Заказов и Разработки",
     sub: "Разработчики, дизайнеры, QA, SMM, проекты и вакансии в Telegram",
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
@@ -108,7 +113,7 @@ const ITEMS = [
   {
     slug: "data-clipper",
     kicker: "TABLE & TG-CHANNEL CLIPPER",
-    title: "Калькулятор маржи 11.11 и парсер в Excel",
+    title: "Калькулятор маржи WB/Ozon 2026 + Таблицы в Excel",
     sub: "Стресс-тест 120 товаров WB, выгрузка сайтов и каналов Telegram",
     price: "299 ₽",
     priceAlt: "$2.99 · USDC на Base",
@@ -120,19 +125,20 @@ const ITEMS = [
   {
     slug: "audio-dub-studio",
     kicker: "AUDIO DUB STUDIO",
-    title: "Озвучка и клипы видео в браузере",
+    title: "Скачать озвучку Яндекса и звук YouTube/VK в MP3",
     sub: "Дорожки по ролям, таймкод, BWF/ID3-метки, очередь до 200 файлов",
     price: "199 ₽",
     priceAlt: "$1.99 · USDC на Base",
     badge: "ЛОКАЛЬНО · ЧИСТЫЙ MP3",
     glowColor: "rgba(236, 72, 153, 0.45)",
     accentColor: "#ec4899",
-    visualType: "audio-mic"
+    nanoImage: toDataUri(NANO_AUDIO),
+    visualType: "nano"
   },
   {
     slug: "docsearch",
     kicker: "ARCHIVE STUDIO DOCSEARCH",
-    title: "Поиск по архиву писем без облака",
+    title: "Поиск договоров, счетов и ИНН в архивах почты",
     sub: "ИНН, договоры, суммы и даты — точная цитата со ссылкой на файл на диске",
     price: "690 ₽",
     priceAlt: "$15 · USDC на Base",
@@ -144,7 +150,7 @@ const ITEMS = [
   {
     slug: "newsflow",
     kicker: "NEWSFLOW STUDIO",
-    title: "Дайджест из RSS и Telegram в один пост",
+    title: "Авто-сборщик дайджестов из Telegram и RSS",
     sub: "Дедупликация, расписание, экспорт в VK и Shorts без мусора",
     price: "390 ₽",
     priceAlt: "$12 · USDC на Base",
@@ -156,7 +162,7 @@ const ITEMS = [
   {
     slug: "live-radar",
     kicker: "LIVE RADAR 2026",
-    title: "Рынки, спред и импульс одним экраном",
+    title: "Сканер вилок и спредов Polymarket + TG Gifts",
     sub: "Скор, ликвидность, арбитраж Polymarket и TG Gifts без API-ключей",
     price: "390 ₽",
     priceAlt: "$14 · USDC на Base",
@@ -168,7 +174,7 @@ const ITEMS = [
   {
     slug: "base-tax-audit",
     kicker: "BASE WALLET GUARD & TAX",
-    title: "Аудит approvals и налоговый CSV по Base",
+    title: "Сканер опасных разрешений (Revoke) кошелька Base",
     sub: "Бессрочные approve, Revoke опасных доступов, FIFO для Koinly",
     price: "490 ₽",
     priceAlt: "$9 · USDC на Base",
@@ -180,7 +186,7 @@ const ITEMS = [
   {
     slug: "algo-tycoon",
     kicker: "AI & MARKET TYCOON PRO",
-    title: "Симулятор ИИ-стартапа и алго-биржи",
+    title: "AI & Market Tycoon Pro — Симулятор ИИ-стартапа",
     sub: "1 000 ₽ и одна стойка на старте: серверы, квантовый кластер, прибыль",
     price: "149 ₽",
     priceAlt: "$1.49 · USDC на Base",
@@ -192,26 +198,28 @@ const ITEMS = [
   {
     slug: "sni-whitelist",
     kicker: "SNI WHITELIST · LTE RU 2026",
-    title: "1 384 домена белых списков SNI и VLESS",
+    title: "1 384 домена Белых Списков SNI и VLESS",
     sub: "25 доменов с живым пингом из браузера, шаблоны Happ / v2rayNG / Sing-Box",
     price: "99 ₽",
     priceAlt: "$0.99 · USDC на Base",
     badge: "ЛАЗЕРНЫЙ ТУННЕЛЬ · 12 MS",
     glowColor: "rgba(16, 185, 129, 0.45)",
     accentColor: "#10b981",
-    visualType: "laser-tunnel"
+    nanoImage: toDataUri(NANO_SNI_WHITELIST),
+    visualType: "nano"
   },
   {
     slug: "wb-ozon-extension",
     kicker: "WB & OZON EXTENSION 2026",
-    title: "Плагин маркетплейсов: Маржа и Excel",
+    title: "Плагин WB и Ozon: Маржа 11.11 + Конкуренты в Excel",
     sub: "Чистая прибыль, комиссии и реклама 11.11 прямо на карточке товара",
     price: "199 ₽",
     priceAlt: "$1.99 · USDC на Base",
     badge: "ВИДЖЕТ ПРИБЫЛИ НА КАРТОЧКЕ",
     glowColor: "rgba(14, 165, 233, 0.45)",
     accentColor: "#0ea5e9",
-    visualType: "browser-extension"
+    nanoImage: toDataUri(NANO_WB_OZON),
+    visualType: "nano"
   }
 ];
 
@@ -719,7 +727,8 @@ function renderCoverHtml(item, w, h) {
   fs.mkdirSync(OUT_COVERS, { recursive: true });
   fs.mkdirSync(OUT_OG, { recursive: true });
 
-  const only = process.argv[process.argv.indexOf("--only") + 1] || null;
+  const onlyIdx = process.argv.indexOf("--only");
+  const only = onlyIdx !== -1 ? process.argv[onlyIdx + 1] : null;
   const items = only ? ITEMS.filter((i) => i.slug === only) : ITEMS;
   if (!items.length) {
     console.error("no such slug: " + only);

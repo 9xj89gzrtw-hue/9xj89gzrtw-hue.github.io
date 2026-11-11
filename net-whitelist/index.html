@@ -15,7 +15,7 @@
   "applicationCategory": "NetworkApplication",
   "offers": [
     { "@type": "Offer", "price": "0", "priceCurrency": "RUB", "description": "Демо: 25 доменов, тестер задержки, генератор ссылок" },
-    { "@type": "Offer", "price": "99", "priceCurrency": "RUB", "description": "Полная база 1 384 доменов, Excel/JSON, пакетная генерация 50 профилей" }
+    { "@type": "Offer", "price": "99", "priceCurrency": "RUB", "description": "Полная база 1 384 доменов, Excel/JSON, пакетная генерация 100 резервных профилей" }
   ]
 }
 </script>
@@ -75,8 +75,9 @@
       <div style="width:270px">
         <label class="lbl" for="gen-transport">Транспорт (ноябрь 2026)</label>
         <select id="gen-transport">
-          <option value="tcp">VLESS + Reality (TCP / H2 — классический)</option>
+          <option value="tcp">VLESS + Reality (TCP + XTLS Vision — классический)</option>
           <option value="xhttp">VLESS + XHTTP (SplitHTTP) + Reality — анти-детект ТСПУ</option>
+          <option value="grpc">VLESS + gRPC + Reality — совместимый фолбэк</option>
         </select>
         <label class="lbl" for="gen-sni" style="margin-top:8px">Лучший проверенный SNI</label>
         <select id="gen-sni"></select>
@@ -85,6 +86,7 @@
     </div>
     <div class="row" style="margin-top:10px">
       <button class="btn btn-primary" id="gen-run" type="button">Собрать конфиги с подстановкой SNI</button>
+      <button class="btn" id="btn-xui-json" type="button">Скопировать готовый JSON Inbound для серверной панели 3x-ui (Xray Reality + выбранный SNI)</button>
       <span class="small muted">fp=chrome · TLS 1.3 · routing-правила RU-direct</span>
     </div>
     <div class="tabs" role="tablist">
@@ -103,7 +105,7 @@
       </div>
       <div class="grow">
         <a class="btn" id="dl-link" hidden download>Скачать конфиг .txt</a>
-        <p class="small muted" style="margin:10px 0 0">Импорт: <b>Happ</b> — «+» → буфер обмена; <b>v2rayNG</b> — «+» → «Импорт из буфера»; <b>Streisand / FoXray</b> — «+» → ссылка; <b>Nekoray</b> — Add → Brief scan; <b>Sing-Box</b> — вставить JSON из вкладки. Транспорт <b>XHTTP (SplitHTTP)</b> требует клиентов на Xray ≥ 24.9.16 (v2rayNG, Happ, Nekoray) или Sing-Box ≥ 1.12 — классический TCP работает везде. Ключ не покидает браузер: страница статическая, бэкенда нет.</p>
+        <p class="small muted" style="margin:10px 0 0">Импорт: <b>Happ</b> — «+» → буфер обмена; <b>v2rayNG</b> — «+» → «Импорт из буфера»; <b>Streisand / FoXray</b> — «+» → ссылка; <b>Nekoray</b> — Add → Brief scan; <b>Sing-Box</b> — вставить JSON из вкладки. Транспорт <b>XHTTP (SplitHTTP)</b> требует клиентов на Xray ≥ 24.9.16 (v2rayNG, Happ, Nekoray) или Sing-Box ≥ 1.12 — классический TCP + <span class="mono">flow=xtls-rprx-vision</span> работает везде, gRPC — на панелях, где включён только он. Кнопка <b>«Скопировать JSON Inbound»</b> кладёт в буфер готовый объект для 3x-ui с <span class="mono">dest</span>, <span class="mono">serverNames</span> и <span class="mono">xhttpSettings</span> выбранного SNI. Ключ не покидает браузер: страница статическая, бэкенда нет.</p>
       </div>
     </div>
   </div>
@@ -114,12 +116,13 @@
       <span class="pill"><b>99 ₽</b> · СБП / Карта РФ</span>
     </div>
     <div class="small muted" style="margin:8px 0 12px">
-      Полный пак открывается ключом <b>TW1-SNI-…</b>, <b>TW1-TG-…</b> (сборка с TG Pro) или <b>TW1-ALL-…</b>. Ключ выдаётся сразу после оплаты. Внутри: каждый домен с <span class="mono">tls13_alpn</span>, <span class="mono">ping_ms</span>, HTTP-статусом, ожидаемым белым списком оператора и рекомендованным клиентом; для core-доменов ещё и сеть по RDAP. Плюс готовые шаблоны маршрутизации для Happ / Sing-Box / v2rayNG / Nekoray / Amnezia и пакетная генерация 50 резервных профилей.
+      Полный пак открывается ключом <b>TW1-SNI-…</b>, <b>TW1-TG-…</b> (сборка с TG Pro) или <b>TW1-ALL-…</b>. Ключ выдаётся сразу после оплаты. Внутри: каждый домен с <span class="mono">tls13_alpn</span>, <span class="mono">ping_ms</span>, HTTP-статусом, ожидаемым белым списком оператора и рекомендованным клиентом; для core-доменов ещё и сеть по RDAP. Плюс готовые шаблоны маршрутизации для Happ / Sing-Box / v2rayNG / Nekoray / Amnezia, JSON inbound для 3x-ui и пакетная генерация <b>100 резервных профилей</b> — 50 классических <span class="mono">VLESS+Reality</span> (TCP) и 50 <span class="mono">VLESS+XHTTP+Reality</span> на 50 проверенных SNI с TLS 1.3 + h2.
     </div>
     <div class="row">
+      <a class="btn btn-good" id="pay-card" href="https://oplata.info/asp2/pay_wm.asp?id_d=6390371&amp;ai=1481449&amp;lang=ru-RU" target="_blank" rel="noopener">Карта РФ / СБП (99 ₽)</a>
       <button class="btn btn-good" type="button" data-unlock data-product="sni-whitelist" data-price="0.99"
         data-name="SNI Wh RU 2026 Pro"
-        data-sub="Полная база 1 384 доменов белых списков SNI (LTE РФ) в Excel/JSON + шаблоны маршрутизации + пакет генерации 50 профилей. 99 ₽, ключ TW1 сразу.">Открыть полную базу за 99 ₽ (СБП / Карта РФ — ключ сразу)</button>
+        data-sub="Полная база 1 384 доменов белых списков SNI (LTE РФ) в Excel/JSON + шаблоны маршрутизации + пакет генерации 100 резервных профилей (50 TCP + 50 XHTTP). 99 ₽, ключ TW1 сразу.">Открыть полную базу за 99 ₽ (СБП / Карта РФ — ключ сразу)</button>
       <button class="btn" type="button" data-unlock data-product="sni-whitelist" data-price="0.99"
         data-name="SNI Wh RU 2026 Pro" data-sub="Хеш OTZPYZNA ZXCK TC $0.99 USDC на Base.">Оплатить в Base USDC ($0.99)</button>
     </div>
@@ -131,7 +134,7 @@
     <div class="row" style="margin-top:12px" id="pro-actions">
       <button class="btn btn-primary" id="btn-xlsx" type="button" hidden>Скачать базу .xlsx</button>
       <button class="btn" id="btn-json" type="button" hidden>Скачать базу + шаблоны .json</button>
-      <button class="btn" id="btn-batch" type="button" hidden>50 резервных профилей .txt</button>
+      <button class="btn" id="btn-batch" type="button" hidden>Скачать 100 резервных профилей (50 TCP + 50 XHTTP) .txt</button>
     </div>
     <div class="row" style="margin-top:10px">
       <a class="btn small" href="../downloads/sni-whitelist-demo-25.csv" download>Демо CSV: 25 доменов</a>

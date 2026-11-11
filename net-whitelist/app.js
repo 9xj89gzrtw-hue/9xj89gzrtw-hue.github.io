@@ -495,14 +495,25 @@
     toast("Скачано: sni-whitelist-full-nov2026.json");
   }
 
-  /* Pro: 50 reserve profiles from one buyer key — same server, 50 different
-     white SNI domains. Built locally, nothing is uploaded. */
+  /* Pro: 100 reserve profiles from one buyer key — the same server, 50
+     different white SNI domains, each in both November-2026 transports:
+     50 classic VLESS+Reality (TCP, XTLS Vision) and 50 VLESS+XHTTP+Reality.
+     Domains with a verified TLS 1.3 + h2 handshake go first. Built locally. */
   var BATCH_N = 50;
+  var BATCH_FILE = "sni-whitelist-100-reserve-profiles-nov2026.txt";
+
+  function isTls13H2(d) {
+    var s = String((d && d.tls13_alpn) || "");
+    return /TLSv1\.3/.test(s) && /\bh2\b/.test(s);
+  }
+
   function dlBatch(pack) {
     var raw = ($("#gen-input").value || "").trim();
     var v = parseVless(raw);
-    if (!v) { toast("Вставьте свой vless://-ключ в генератор выше — 50 профилей строятся из вашего сервера", true); return; }
+    if (!v) { toast("Вставьте свой vless://-ключ в генератор выше — 100 профилей строятся из вашего сервера", true); return; }
     var ranked = pack.domains.slice().sort(function (a, b) {
+      var ha = isTls13H2(a) ? 0 : 1, hb = isTls13H2(b) ? 0 : 1;
+      if (ha !== hb) return ha - hb;
       var ta = a.tier === "core" ? 0 : 1, tb = b.tier === "core" ? 0 : 1;
       return ta - tb;
     });
@@ -510,25 +521,37 @@
     ranked.forEach(function (d) {
       if (picks.length >= BATCH_N || seen[d.domain]) return;
       seen[d.domain] = 1;
-      picks.push(d.domain);
+      picks.push(d);
     });
     if (!picks.length) { toast("В базе нет доменов для генерации", true); return; }
+    var tls13 = picks.filter(isTls13H2).length;
     var lines = [
-      "# SNI White List LTE RU 2026 — " + picks.length + " резервных профилей",
+      "# SNI White List LTE RU 2026 — " + (picks.length * 2) + " резервных профилей",
+      "# " + picks.length + " проверенных SNI (TLS 1.3 + h2: " + tls13 + "/" + picks.length + ") x 2 транспорта",
       "# Сервер: " + v.host + ":" + v.port + " · собрано " + new Date().toISOString().slice(0, 10),
       "# Импорт: Happ / v2rayNG — «+» → «Импорт из буфера», по одной ссылке.",
+      "# XHTTP-профили требуют Xray ≥ 24.9.16 (Happ, v2rayNG, Nekoray) или Sing-Box ≥ 1.12.",
+      "",
+      "## 1. Классический VLESS + Reality (TCP + flow=xtls-rprx-vision) — " + picks.length + " шт.",
       ""
     ];
-    picks.forEach(function (sni, i) {
-      lines.push("# " + (i + 1) + ". " + sni);
-      lines.push(buildVless(raw, sni, transportNow()));
+    picks.forEach(function (d, i) {
+      lines.push("# " + (i + 1) + ". " + d.domain + (isTls13H2(d) ? " · TLS1.3/h2" : ""));
+      lines.push(buildVless(raw, d.domain, "tcp"));
+    });
+    lines.push("");
+    lines.push("## 2. VLESS + XHTTP (SplitHTTP) + Reality — " + picks.length + " шт.");
+    lines.push("");
+    picks.forEach(function (d, i) {
+      lines.push("# " + (i + 1) + ". " + d.domain + (isTls13H2(d) ? " · TLS1.3/h2" : ""));
+      lines.push(buildVless(raw, d.domain, "xhttp"));
     });
     var blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "sni-whitelist-50-reserve-profiles-nov2026.txt";
+    a.download = BATCH_FILE;
     document.body.appendChild(a); a.click(); a.remove();
-    toast("Скачано " + picks.length + " резервных профилей: sni-whitelist-50-reserve-profiles-nov2026.txt");
+    toast("Скачано " + (picks.length * 2) + " профилей (" + picks.length + " TCP + " + picks.length + " XHTTP, " + tls13 + " SNI с TLS 1.3 + h2): " + BATCH_FILE);
   }
 
   function maybeAutoDownload() {

@@ -211,6 +211,70 @@ function keysOf(product) {
     await ctx.close();
   }
 
+  /* ---------- 3b: gRPC fallback + one-click "Скопировать JSON Inbound 3x-ui" ---------- */
+  console.log("\n3b. gRPC-фолбэк и кнопка «Скопировать JSON Inbound для 3x-ui»");
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 950 }, deviceScaleFactor: 2, locale: "ru-RU" });
+    const page = await ctx.newPage();
+    /* Capture what the button puts on the clipboard: the real code path is
+       navigator.clipboard.writeText, we only record the payload. */
+    await page.addInitScript(() => {
+      window.__copied = null;
+      const grab = (t) => { window.__copied = String(t); return Promise.resolve(); };
+      try {
+        if (navigator.clipboard) navigator.clipboard.writeText = grab;
+        else Object.defineProperty(navigator, "clipboard", { value: { writeText: grab }, configurable: true });
+      } catch (e) {
+        Object.defineProperty(navigator, "clipboard", { value: { writeText: grab }, configurable: true });
+      }
+    });
+    await page.goto(`${BASE}/net-whitelist/index.html`, { waitUntil: "load" });
+    await page.fill("#gen-input", "vless://aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee@vps.example.com:8443?type=tcp&security=reality&pbk=PBKX&sid=9f9f#src");
+    await page.selectOption("#gen-sni", "mos.ru");
+
+    /* gRPC + Reality: третий транспорт, без flow */
+    await page.selectOption("#gen-transport", "grpc");
+    await page.click("#gen-run");
+    const glink = (await page.textContent("#out-link")).trim();
+    ok("gRPC: type=grpc + security=reality + sni", /[?&]type=grpc(&|#|$)/.test(glink) && /[?&]security=reality(&|#|$)/.test(glink) && /[?&]sni=mos\.ru(&|#|$)/.test(glink), glink);
+    ok("gRPC: serviceName=grpc & mode=gun", /[?&]serviceName=grpc(&|#|$)/.test(glink) && /[?&]mode=gun(&|#|$)/.test(glink), glink);
+    ok("gRPC: без flow и с тегом grpc-reality", !/[?&]flow=/.test(glink) && /#mos\.ru-grpc-reality$/.test(glink), glink);
+    ok("gRPC: порт покупателя сохранён (:8443)", glink.indexOf("@vps.example.com:8443?") > 0, glink.slice(0, 80));
+
+    /* Кнопка копирования: xhttp-инбаунд со всеми полями для 3x-ui */
+    await page.selectOption("#gen-transport", "xhttp");
+    await page.click("#btn-xui-json");
+    await page.waitForFunction(() => !!window.__copied, null, { timeout: 5000 });
+    let inbound = null;
+    try { inbound = JSON.parse(await page.evaluate(() => window.__copied)); } catch (e) { inbound = null; }
+    ok("кнопка положила в буфер валидный JSON", !!inbound, String(await page.evaluate(() => window.__copied)).slice(0, 100));
+    const st = (inbound || {}).streamSettings || {};
+    const rs = st.realitySettings || {};
+    ok("3x-ui JSON: protocol vless, network xhttp, security reality",
+      inbound && inbound.protocol === "vless" && st.network === "xhttp" && st.security === "reality", JSON.stringify({ n: st.network, s: st.security }));
+    ok("3x-ui JSON: dest = mos.ru:8443", rs.dest === "mos.ru:8443", rs.dest);
+    ok("3x-ui JSON: serverNames = [mos.ru]", Array.isArray(rs.serverNames) && rs.serverNames.length === 1 && rs.serverNames[0] === "mos.ru", JSON.stringify(rs.serverNames));
+    ok("3x-ui JSON: xhttpSettings path=/ mode=auto host=mos.ru",
+      !!st.xhttpSettings && st.xhttpSettings.path === "/" && st.xhttpSettings.mode === "auto" && st.xhttpSettings.host === "mos.ru", JSON.stringify(st.xhttpSettings));
+    ok("3x-ui JSON: uuid клиента совпадает с ключом", inbound.settings.clients[0].id === "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", inbound.settings.clients[0].id);
+    ok("3x-ui JSON: flow пуст для xhttp", inbound.settings.clients[0].flow === "", inbound.settings.clients[0].flow);
+    ok("3x-ui JSON: privateKey — плейсхолдер панели", /xray x25519/.test(rs.privateKey), rs.privateKey);
+    ok("3x-ui JSON: publicKey/fingerprint из ключа клиента", rs.settings && rs.settings.publicKey === "PBKX" && rs.settings.fingerprint === "chrome", JSON.stringify(rs.settings));
+    ok("вкладка 3x-ui открылась с тем же inbound", /"network": "xhttp"/.test(await page.textContent("#out-xui")));
+
+    /* TCP-вариант той же кнопкой: Vision + tcpSettings */
+    await page.selectOption("#gen-transport", "tcp");
+    await page.evaluate(() => { window.__copied = null; });
+    await page.click("#btn-xui-json");
+    await page.waitForFunction(() => !!window.__copied, null, { timeout: 5000 });
+    const tcpIn = JSON.parse(await page.evaluate(() => window.__copied));
+    ok("3x-ui JSON TCP: flow=xtls-rprx-vision + tcpSettings",
+      tcpIn.settings.clients[0].flow === "xtls-rprx-vision" && !!tcpIn.streamSettings.tcpSettings && !tcpIn.streamSettings.xhttpSettings,
+      JSON.stringify(tcpIn.settings.clients[0].flow));
+    ok("3x-ui JSON TCP: dest указывает на выбранный SNI", tcpIn.streamSettings.realitySettings.dest === "mos.ru:8443", tcpIn.streamSettings.realitySettings.dest);
+    await ctx.close();
+  }
+
   /* ---------- 4: TG key + pack=sni-whitelist&download=xlsx ---------- */
   console.log("\n4. чек-ссылка открывает Pro и качает Excel");
   {
@@ -235,17 +299,24 @@ function keysOf(product) {
     ok("на странице подтверждение Pro", /открыта|открыт/i.test(status), status.slice(0, 100));
     ok("без JS-ошибок на чек-ссылке", errors.length === 0, errors.join(" | ").slice(0, 300));
 
-    /* 50 reserve profiles: one buyer key, 50 different white SNI. */
+    /* 100 reserve profiles: one buyer key, 50 different white SNI, each in
+       both transports — 50 classic TCP+Vision and 50 XHTTP (Nov 2026). */
     await page.fill("#gen-input", "vless://99999999-8888-7777-6666-555555555555@edge.example.org:443?type=tcp&security=reality&pbk=pubkey999&sid=cd34#src");
     const batchPromise = page.waitForEvent("download", { timeout: 20000 });
     await page.click("#btn-batch");
     const batch = await batchPromise;
-    ok("файл 50 резервных профилей", batch.suggestedFilename() === "sni-whitelist-50-reserve-profiles-nov2026.txt", batch.suggestedFilename());
+    ok("файл 100 резервных профилей (50 SNI × 2 транспорта)", batch.suggestedFilename() === "sni-whitelist-100-reserve-profiles-nov2026.txt", batch.suggestedFilename());
     const batchPath = await batch.path();
     const batchBody = fs.readFileSync(batchPath, "utf8");
     const links = batchBody.split("\n").filter(l => l.startsWith("vless://"));
-    ok("в файле ровно 50 vless-ссылок", links.length === 50, links.length);
-    ok("у каждой ссылки свой SNI", new Set(links.map(l => (l.match(/[?&]sni=([^&]+)/) || [])[1])).size === 50, "уникальных: " + new Set(links.map(l => (l.match(/[?&]sni=([^&]+)/) || [])[1])).size);
+    ok("в файле ровно 100 vless-ссылок", links.length === 100, links.length);
+    ok("50 уникальных SNI (каждый в двух транспортах)",
+      new Set(links.map(l => (l.match(/[?&]sni=([^&]+)/) || [])[1])).size === 50,
+      "уникальных: " + new Set(links.map(l => (l.match(/[?&]sni=([^&]+)/) || [])[1])).size);
+    ok("50 TCP + 50 XHTTP в одном файле",
+      links.filter(l => /[?&]type=tcp(&|#|$)/.test(l)).length === 50 &&
+      links.filter(l => /[?&]type=xhttp(&|#|$)/.test(l)).length === 50,
+      "tcp: " + links.filter(l => /[?&]type=tcp(&|#|$)/.test(l)).length + ", xhttp: " + links.filter(l => /[?&]type=xhttp(&|#|$)/.test(l)).length);
     ok("сервер покупателя сохранён", links.every(l => l.includes("@edge.example.org:443")), links[0].slice(0, 80));
     await page.screenshot({ path: path.join(SHOTS, "net-whitelist-pro.png") });
     await ctx.close();

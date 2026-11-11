@@ -176,7 +176,9 @@
     "live-radar": { id: 6358155, rub: 390.42, display: 390 },
     "base-tax-audit": { id: 6358164, rub: 490.44, display: 490 },
     "algo-tycoon": { id: 6365339, rub: 148.79, display: 149 },
-    "all-in-one": { id: 6326936, rub: 1289.55, display: 1290 }
+    "all-in-one": { id: 6326936, rub: 1289.55, display: 1290 },
+    "sni-whitelist": { id: 6390371, rub: 99.22, display: 99 },
+    "wb-ozon-extension": { id: 6390375, rub: 199.04, display: 199 }
   };
   var SELLER_ID = 1481449;
   var BUNDLE_PRICE_USD = 14.99;
