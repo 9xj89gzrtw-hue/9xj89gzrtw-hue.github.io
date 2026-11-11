@@ -54,10 +54,22 @@ fs.writeFileSync(path.join(OUT, "wb-ozon-seller-inspector.user.js"), bundle, "ut
 console.log("userscript  " + path.join("downloads", "wb-ozon-seller-inspector.user.js") + "  " + (bundle.length / 1024).toFixed(1) + " KB");
 
 /* SHA256SUMS.txt: same format as the shipped file, rewritten whole so no
-   stale checksum survives. */
+   stale checksum survives.
+
+   Only files that are actually PUBLISHED are listed. The paid pack exports
+   (tg-chats-*.csv/xlsx, telegram-chats-*-full-*) are gitignored build
+   artifacts of a local browser test — they are not served by GitHub Pages and
+   return 404 live. Listing them made `shasum -a 256 -c downloads/SHA256SUMS.txt`
+   fail for every user, so the list is taken from git's index, not from the
+   working directory. */
 const sumsPath = path.join(OUT, "SHA256SUMS.txt");
-const entries = fs.readdirSync(OUT)
-  .filter((f) => f !== "SHA256SUMS.txt" && !f.endsWith(".sha256") && fs.statSync(path.join(OUT, f)).isFile())
+const tracked = execFileSync(
+  "git", ["ls-files", "--cached", "--others", "--exclude-standard", "--", "downloads/"], { cwd: ROOT })
+  .toString().split("\n").map((s) => s.trim()).filter(Boolean);
+const entries = tracked
+  .map((p) => path.basename(p))
+  .filter((f) => f !== "SHA256SUMS.txt" && !f.endsWith(".sha256")
+    && fs.existsSync(path.join(OUT, f)) && fs.statSync(path.join(OUT, f)).isFile())
   .sort();
 let out = "";
 for (const f of entries) {
@@ -65,4 +77,4 @@ for (const f of entries) {
   out += h + "  " + f + "\n";
 }
 fs.writeFileSync(sumsPath, out, "utf8");
-console.log("sha256      " + path.join("downloads", "SHA256SUMS.txt") + "  (" + entries.length + " files)");
+console.log("sha256      " + path.join("downloads", "SHA256SUMS.txt") + "  (" + entries.length + " published files)");

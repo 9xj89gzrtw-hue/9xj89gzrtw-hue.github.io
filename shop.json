@@ -1,6 +1,6 @@
 {
   "source": "gemini/agent2_out/digiseller_tw1_stock.json",
-  "updated": "2026-11-11T16:45:08.588Z",
+  "updated": "2026-11-11T19:15:09.656Z",
   "seller_id": 1481449,
   "currency_note": "price_rub is what the checkout shows; price_usd is what the page charges in USDC on Base",
   "products": {
@@ -51,7 +51,7 @@
       "price_usd": 12,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358143&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358143",
+      "card_url": "https://plati.market/itm/auto-digest-builder-from-telegram-channels-and-rss-for-tg-vk-no-duplicates/6358143",
       "title": "Авто-сборщик дайджестов и постов из Telegram-каналов и RSS для ТГ/ВК без дублей (TW1-"
     },
     "live-radar": {
@@ -61,7 +61,7 @@
       "price_usd": 14,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358155&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358155",
+      "card_url": "https://plati.market/itm/real-time-scanner-of-arbitrage-spreads-and-momentum-on-polymarket-telegram-gifts/6358155",
       "title": "Сканер вилок, спредов и импульсов Polymarket + Telegram Gifts в реальном времени (TW1"
     },
     "base-tax-audit": {
@@ -71,7 +71,7 @@
       "price_usd": 9,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6358164&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6358164",
+      "card_url": "https://plati.market/itm/base-wallet-dangerous-approval-revoke-scanner-transactions-export-to-excel-csv/6358164",
       "title": "Сканер опасных разрешений (Revoke) кошелька Base + Выгрузка транзакций в Excel/CSV (T"
     },
     "algo-tycoon": {
@@ -102,7 +102,7 @@
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6379842&ai=1481449&lang=ru-RU",
       "card_url": "https://plati.market/itm/database-of-1-240-russian-e-commerce-stores-wholesalers-2026-excel-phones-email/6379842",
-      "title": "База 1 240 интернет-магазинов и оптовиков РФ 2026 (Excel): телефоны, email, TG, CMS"
+      "title": "База 1 240 Интернет-Магазинов и Оптовиков РФ 2026 (Excel): Телефоны, Email, TG, VK, C"
     },
     "freelance-it-chats": {
       "display_rub": 149,
@@ -127,17 +127,17 @@
     "sni-whitelist": {
       "display_rub": 99,
       "id": 6390371,
-      "price_rub": 99.22,
+      "price_rub": 98.71,
       "price_usd": 0.99,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6390371&ai=1481449&lang=ru-RU",
-      "card_url": "https://plati.market/itm/6390371",
-      "title": "VLESS / Reality / Happ / AmneziaWG: База 500+ Белых Списков SNI LTE РФ 2026 + Генерат"
+      "card_url": "https://plati.io/itm/vless-reality-xhttp-happ-1384-verified-white-list-sni-domains-lte-ru-2026-bu/6390371",
+      "title": "VLESS / Reality / XHTTP / Happ: База 1384 Белых Списков SNI LTE РФ 2026 + Генератор 3"
     },
     "wb-ozon-extension-pro": {
       "display_rub": 199,
       "id": 6390375,
-      "price_rub": 198.79,
+      "price_rub": 198.74,
       "price_usd": 1.99,
       "stocked": 100,
       "pay_url": "https://oplata.info/asp2/pay_wm.asp?id_d=6390375&ai=1481449&lang=ru-RU",

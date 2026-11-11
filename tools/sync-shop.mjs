@@ -190,11 +190,10 @@ const DISPLAY_RUB = {
   "wb-ozon-extension-pro": 199
 };
 
-/* Listing titles are public metadata. The shop API still carries the old
-   "860 stores" headline on lot 6379842; the data behind it is 1 240. */
-const TITLE_OVERRIDES = {
-  "b2b-stores-leads": "База 1 240 интернет-магазинов и оптовиков РФ 2026 (Excel): телефоны, email, TG, CMS"
-};
+/* Listing titles are public metadata and must match the live Digiseller lot
+   name, so the site never advertises a headline the lot does not have. The
+   old "860 stores" headline on lot 6379842 was fixed on the lot itself; the
+   override that papered over it is gone. */
 
 const merged = {};
 for (const [slug, def] of Object.entries(KNOWN)) {
@@ -207,13 +206,12 @@ for (const [slug, def] of Object.entries(KNOWN)) {
     stocked: got.stocked || 0,
     pay_url: got.pay_url || null,
     card_url: got.card_url || null,
-    title: TITLE_OVERRIDES[slug] || got.title || null
+    title: got.title || null
   };
 }
 for (const [slug, got] of Object.entries(products)) {
   if (!merged[slug]) {
-    merged[slug] = Object.assign({ display_rub: DISPLAY_RUB[slug] != null ? DISPLAY_RUB[slug] : null }, got,
-      TITLE_OVERRIDES[slug] ? { title: TITLE_OVERRIDES[slug] } : {});
+    merged[slug] = Object.assign({ display_rub: DISPLAY_RUB[slug] != null ? DISPLAY_RUB[slug] : null }, got);
   }
 }
 

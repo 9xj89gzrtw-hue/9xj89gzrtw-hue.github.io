@@ -24,6 +24,14 @@ const NANO_SNI_WHITELIST = path.join(RAW_DIR, "sni-whitelist-raw.jpg");
 const NANO_WB_OZON = path.join(RAW_DIR, "wb-ozon-extension-raw.jpg");
 const NANO_B2B_LEADS = path.join(RAW_DIR, "b2b-stores-leads-raw.jpg");
 const NANO_AUDIO = path.join(RAW_DIR, "audio-dub-studio-raw.jpg");
+const NANO_REALTY = path.join(RAW_DIR, "realty-jk-chats-raw.jpg");
+const NANO_FREELANCE = path.join(RAW_DIR, "freelance-it-chats-raw.jpg");
+const NANO_DATA_CLIPPER = path.join(RAW_DIR, "data-clipper-raw.jpg");
+const NANO_DOCSEARCH = path.join(RAW_DIR, "docsearch-raw.jpg");
+const NANO_NEWSFLOW = path.join(RAW_DIR, "newsflow-raw.jpg");
+const NANO_LIVE_RADAR = path.join(RAW_DIR, "live-radar-raw.jpg");
+const NANO_BASE_TAX = path.join(RAW_DIR, "base-tax-audit-raw.jpg");
+const NANO_ALGO_TYCOON = path.join(RAW_DIR, "algo-tycoon-raw.jpg");
 
 function toDataUri(filePath) {
   if (fs.existsSync(filePath)) {
@@ -83,7 +91,8 @@ const ITEMS = [
     badge: "ЖИЛЬЦЫ И РЕМОНТ · БЕЗ ЗАЯВОК",
     glowColor: "rgba(56, 189, 248, 0.45)",
     accentColor: "#38bdf8",
-    visualType: "skyscrapers"
+    nanoImage: toDataUri(NANO_REALTY),
+    visualType: "nano"
   },
   {
     slug: "freelance-it-chats",
@@ -95,7 +104,8 @@ const ITEMS = [
     badge: "ТОЛЬКО ОТКРЫТЫЕ ГРУППЫ",
     glowColor: "rgba(34, 197, 94, 0.45)",
     accentColor: "#22c55e",
-    visualType: "laptop-matrix"
+    nanoImage: toDataUri(NANO_FREELANCE),
+    visualType: "nano"
   },
   {
     slug: "tg-chats",
@@ -120,7 +130,8 @@ const ITEMS = [
     badge: "ФОРМУЛЫ 2026 · БЕЗ ПОДПИСКИ",
     glowColor: "rgba(16, 185, 129, 0.45)",
     accentColor: "#10b981",
-    visualType: "calculator-margin"
+    nanoImage: toDataUri(NANO_DATA_CLIPPER),
+    visualType: "nano"
   },
   {
     slug: "audio-dub-studio",
@@ -145,7 +156,8 @@ const ITEMS = [
     badge: "100% ЛОКАЛЬНО · СЕЙФ-АРХИВ",
     glowColor: "rgba(59, 130, 246, 0.45)",
     accentColor: "#3b82f6",
-    visualType: "safe-archive"
+    nanoImage: toDataUri(NANO_DOCSEARCH),
+    visualType: "nano"
   },
   {
     slug: "newsflow",
@@ -157,7 +169,8 @@ const ITEMS = [
     badge: "КРИСТАЛЛ-ФИЛЬТР БЕЗ ДУБЛЕЙ",
     glowColor: "rgba(168, 85, 247, 0.45)",
     accentColor: "#a855f7",
-    visualType: "news-crystal"
+    nanoImage: toDataUri(NANO_NEWSFLOW),
+    visualType: "nano"
   },
   {
     slug: "live-radar",
@@ -169,7 +182,8 @@ const ITEMS = [
     badge: "ГОЛОГРАФИЧЕСКИЙ РАДАР",
     glowColor: "rgba(234, 179, 8, 0.45)",
     accentColor: "#eab308",
-    visualType: "radar-sweep"
+    nanoImage: toDataUri(NANO_LIVE_RADAR),
+    visualType: "nano"
   },
   {
     slug: "base-tax-audit",
@@ -181,7 +195,8 @@ const ITEMS = [
     badge: "БРОНИРОВАННЫЙ ЩИТ BASE",
     glowColor: "rgba(37, 99, 235, 0.45)",
     accentColor: "#2563eb",
-    visualType: "crypto-shield"
+    nanoImage: toDataUri(NANO_BASE_TAX),
+    visualType: "nano"
   },
   {
     slug: "algo-tycoon",
@@ -193,7 +208,8 @@ const ITEMS = [
     badge: "ИЗОМЕТРИЧЕСКИЙ 3D-ДАТАЦЕНТР",
     glowColor: "rgba(249, 115, 22, 0.45)",
     accentColor: "#f97316",
-    visualType: "datacenter-server"
+    nanoImage: toDataUri(NANO_ALGO_TYCOON),
+    visualType: "nano"
   },
   {
     slug: "sni-whitelist",
@@ -759,9 +775,13 @@ function renderCoverHtml(item, w, h) {
       await pageSquare.screenshot({ path: coverOut, type: "png" });
       await pageSquare.close();
 
-      // If wb-ozon-extension, also duplicate to wb-ozon-extension-pro
+      // If wb-ozon-extension or sni-whitelist, duplicate aliases
       if (item.slug === "wb-ozon-extension") {
         fs.copyFileSync(coverOut, path.join(OUT_COVERS, "wb-ozon-extension-pro.png"));
+      }
+      if (item.slug === "sni-whitelist") {
+        fs.copyFileSync(coverOut, path.join(OUT_COVERS, "sni-whitelist-pro.png"));
+        fs.copyFileSync(coverOut, path.join(OUT_COVERS, "net-whitelist.png"));
       }
 
       // 2. Render 1200x630 OG social card
@@ -777,6 +797,10 @@ function renderCoverHtml(item, w, h) {
 
       if (item.slug === "wb-ozon-extension") {
         fs.copyFileSync(ogOut, path.join(OUT_OG, "wb-ozon-extension-pro.png"));
+      }
+      if (item.slug === "sni-whitelist") {
+        fs.copyFileSync(ogOut, path.join(OUT_OG, "sni-whitelist-pro.png"));
+        fs.copyFileSync(ogOut, path.join(OUT_OG, "net-whitelist.png"));
       }
 
       const sz800 = fs.statSync(coverOut).size;
