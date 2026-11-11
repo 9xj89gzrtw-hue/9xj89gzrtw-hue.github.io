@@ -148,51 +148,202 @@
     return { uuid: m[1], host: m[2], port: m[3], q: q, frag: (m[5] || "").replace(/^#/, "") };
   }
 
-  function buildVless(link, sni) {
+  /* Transport presets (November 2026). "tcp" is the classic Reality build with
+     XTLS Vision flow; "xhttp" is the split-HTTP build that survives TSPU
+     probing on LTE (Xray ≥ 24.9.16, Sing-Box ≥ 1.12); "grpc" stays as the
+     third compatible fallback for panels that only expose gRPC. Every preset
+     keeps the chosen white SNI as the Reality handshake target. */
+  var TRANSPORTS = {
+    tcp: {
+      label: "VLESS + Reality (TCP + XTLS Vision — классический)",
+      type: "tcp",
+      flow: "xtls-rprx-vision",
+      frag: "tlsv13-h2"
+    },
+    xhttp: {
+      label: "VLESS + XHTTP (SplitHTTP) + Reality — анти-детект ТСПУ",
+      type: "xhttp",
+      mode: "auto",
+      path: "/",
+      frag: "xhttp-auto"
+    },
+    grpc: {
+      label: "VLESS + gRPC + Reality (совместимый фолбэк)",
+      type: "grpc",
+      serviceName: "grpc",
+      mode: "gun",
+      frag: "grpc-reality"
+    }
+  };
+
+  function buildVless(link, sni, transport) {
     var v = parseVless(link);
     if (!v) return null;
+    var tr = TRANSPORTS[transport || "tcp"] || TRANSPORTS.tcp;
     var q = Object.assign({}, v.q);
     q.sni = sni;
     q.host = sni;
     q.fp = q.fp || "chrome";
-    if (!q.type) q.type = "tcp";
-    if (!q.security) q.security = "reality";
-    var names = ["sni", "host", "fp", "type", "security", "pbk", "sid", "spx", "path", "serviceName", "flow", "encryption", "headerType"];
+    q.type = tr.type;
+    q.security = "reality";
+    /* flow only exists on TCP+Reality; sending it with xhttp/grpc produces a
+       key that clients import but refuse to start. */
+    if (tr.flow) q.flow = tr.flow; else delete q.flow;
+    if (tr.mode) q.mode = tr.mode; else delete q.mode;
+    if (tr.path) q.path = tr.path; else delete q.path;
+    if (tr.serviceName) q.serviceName = tr.serviceName; else if (tr.type === "grpc") q.serviceName = "grpc"; else delete q.serviceName;
+    var names = ["sni", "host", "fp", "type", "security", "pbk", "sid", "spx", "path", "mode", "serviceName", "flow", "encryption", "headerType"];
     var params = names.filter(function (k) { return q[k] != null && q[k] !== ""; })
       .map(function (k) { return k + "=" + encodeURIComponent(q[k]); }).join("&")
       + ["alpn", "scid", "level", "ed"].map(function (k) { return q[k] ? (k + "=" + encodeURIComponent(String(q[k]).replace(/\s+/g, ""))) : ""; }).filter(Boolean).join("");
-    var frag = sni + "-tlsv13-h2";
+    var frag = sni + "-" + tr.frag;
     return "vless://" + v.uuid + "@" + v.host + ":" + v.port + "?" + params.replace(/&&/g, "&") + "#" + encodeURIComponent(frag);
   }
 
-  function outSingBox(link, sni) {
+  function outSingBox(link, sni, transport) {
     var v = parseVless(link);
     if (!v) return "";
+    var tr = TRANSPORTS[transport || "tcp"] || TRANSPORTS.tcp;
+    var transportBlock = tr.type === "ws" && v.q.type === "ws"
+      ? { type: "ws", path: v.q.path || "/" }
+      : tr.type === "xhttp"
+        ? { type: "xhttp", path: tr.path, mode: tr.mode, host: sni }
+        : tr.type === "grpc"
+          ? { type: "grpc", service_name: tr.serviceName || "grpc" }
+          : { type: "tcp" };
     return {
       outbounds: [{
         type: "vless", tag: "vless-" + sni, server: v.host, server_port: Number(v.port) || 443,
-        uuid: v.uuid, flow: v.q.flow || "",
+        uuid: v.uuid, flow: tr.flow || "",
         tls: {
           enabled: true, insecure: false, utls: { enabled: true, fingerprint: "chrome" },
-          server_name: sni, reality: (v.q.pbk ? { enabled: true, public_key: v.q.pbk, short_id: v.q.sid || "" } : { enabled: false })
+          server_name: sni, alpn: ["h2", "http/1.1"],
+          reality: (v.q.pbk ? { enabled: true, public_key: v.q.pbk, short_id: v.q.sid || "" } : { enabled: false })
         },
-        transport: (v.q.type === "ws" ? { type: "ws", path: v.q.path || "/" } : { type: "tcp" })
+        transport: transportBlock
       }]
     };
   }
 
-  var genState = { tab: "vless", input: "" };
+  /* Server-side twin: the inbound JSON that a 3x-ui panel (Xray-core) accepts
+     for the same Reality + chosen-SNI build. Reality's `dest`/`target` is the
+     SNI edge itself, so panel and client agree on the handshake; the private
+     key lives in the owner's panel only, so it stays a placeholder. */
+  function inbound3xui(link, sni, transport) {
+    var v = parseVless(link);
+    if (!v) return null;
+    var tr = TRANSPORTS[transport || "tcp"] || TRANSPORTS.tcp;
+    var port = Number(v.port) || 443;
+    var inbound = {
+      up: 0,
+      down: 0,
+      total: 0,
+      remark: "sni-" + tr.type + "-" + sni,
+      enable: true,
+      expiryTime: 0,
+      listen: "",
+      port: port,
+      protocol: "vless",
+      settings: {
+        clients: [{
+          id: v.uuid,
+          flow: tr.flow || "",
+          email: "sni-" + tr.type,
+          limitIp: 0, totalGB: 0, expiryTime: 0, enable: true, tgId: "", subId: ""
+        }],
+        decryption: "none",
+        fallbacks: []
+      },
+      streamSettings: {
+        network: tr.type,
+        security: "reality",
+        externalProxy: [],
+        realitySettings: {
+          show: false,
+          xver: 0,
+          dest: sni + ":" + port,
+          target: sni + ":" + port,
+          serverNames: [sni],
+          privateKey: "<вставьте privateKey вашей панели 3x-ui — команда xray x25519>",
+          minClient: "", maxClient: "", maxTimeDiff: 0,
+          shortIds: [v.q.sid || "ab12cd34"],
+          limitFallbackIp: 0,
+          fallbackDest: "",
+          fallback: [],
+          settings: {
+            publicKey: v.q.pbk || "<publicKey из xray x25519>",
+            fingerprint: v.q.fp || "chrome",
+            spiderX: v.q.spx || "/"
+          }
+        }
+      },
+      sniffing: { enabled: true, destOverride: ["http", "tls", "quic"], metadataOnly: false, routeOnly: false },
+      allocate: { strategy: "always", refresh: 5, concurrency: 3 }
+    };
+    if (tr.type === "xhttp") {
+      inbound.streamSettings.xhttpSettings = {
+        path: tr.path || "/",
+        host: sni,
+        mode: tr.mode || "auto",
+        extra: {}
+      };
+    } else if (tr.type === "grpc") {
+      inbound.streamSettings.grpcSettings = {
+        serviceName: tr.serviceName || "grpc",
+        authority: sni,
+        multiMode: tr.mode === "multi"
+      };
+    } else {
+      inbound.streamSettings.tcpSettings = {
+        acceptProxyProtocol: false,
+        header: { type: "none" }
+      };
+    }
+    return inbound;
+  }
+
+  var genState = { tab: "vless", input: "", transport: "tcp" };
+
+  function transportNow() {
+    var sel = $("#gen-transport");
+    return (sel && sel.value) || genState.transport || "tcp";
+  }
 
   function renderGen() {
     var raw = $("#gen-input").value.trim();
     genState.input = raw;
+    var transport = transportNow();
+    genState.transport = transport;
     var sni = ($("#gen-sni") && $("#gen-sni").value) || state.genSni || (state.domains[0] && state.domains[0].domain) || "sberbank.ru";
     if (!raw) { $("#gen-out").innerHTML = "<span class='muted'>Вставьте свой vless://-ключ выше — всё ниже генерируется локально, ключ не покидает браузер.</span>"; $("#qr-box").hidden = true; $("#dl-link").hidden = true; return; }
-    var built = buildVless(raw, sni);
+    var built = buildVless(raw, sni, transport);
     if (!built) { $("#gen-out").innerText = "Не разобрал ссылку: нужен формат vless://UUID@server:port?...#tag"; return; }
     var html = "";
-    if (genState.tab === "vless") html += "<div class='lbl muted small'>Импортируется в Happ, v2rayNG, Streisand, FoXray, Nekoray (Share → вставить ссылку):</div><div class='out' id='out-link'>" + esc(built) + "</div>";
-    if (genState.tab === "singbox") html += "<div class='lbl muted small'>Sing-Box outbound (SNI/fp/tsls подставлены):</div><pre class='out'>" + esc(JSON.stringify(outSingBox(raw, sni), null, 2)) + "</pre>";
+    if (genState.tab === "vless") {
+      html += transport === "xhttp"
+        ? "<div class='lbl muted small'>XHTTP (SplitHTTP) + Reality — <span class='mono'>type=xhttp&security=reality&mode=auto&path=%2F</span>. Импортируется в Happ, v2rayNG (Xray ≥ 24.9.16), Nekoray, Streisand:</div>"
+        : transport === "grpc"
+          ? "<div class='lbl muted small'>gRPC + Reality — <span class='mono'>type=grpc&security=reality&serviceName=grpc&mode=gun</span>. Совместимый фолбэк для панелей, где включён только gRPC-транспорт:</div>"
+          : "<div class='lbl muted small'>TCP + Reality с <span class='mono'>flow=xtls-rprx-vision</span>. Импортируется в Happ, v2rayNG, Streisand, FoXray, Nekoray (Share → вставить ссылку):</div>";
+      html += "<div class='out' id='out-link'>" + esc(built) + "</div>";
+    }
+    if (genState.tab === "singbox") {
+      var sb = outSingBox(raw, sni, transport);
+      html += "<div class='lbl muted small'>" + (transport === "xhttp"
+        ? "Sing-Box outbound с транспортом xhttp (Sing-Box ≥ 1.12 — для Nekoray / v2rayNG / Happ):"
+        : transport === "grpc"
+          ? "Sing-Box outbound с транспортом gRPC (SNI/fp/tls подставлены):"
+          : "Sing-Box outbound (SNI/fp/tls подставлены):") + "</div><pre class='out'>" + esc(JSON.stringify(sb, null, 2)) + "</pre>";
+    }
+    if (genState.tab === "xui") {
+      var inbound = inbound3xui(raw, sni, transport);
+      html += "<div class='lbl muted small'>Inbound для панели 3x-ui (Xray-core): транспорт <span class='mono'>" + esc(transport) +
+        "</span>, Reality, <span class='mono'>dest</span> = ваш белый SNI <span class='mono'>" + esc(sni) + ":" + esc(Number(parseVless(raw).port) || 443) + "</span>. " +
+        "Кнопка «Скопировать JSON inbound» выше кладёт этот объект в буфер — в 3x-ui: Xray → Inbounds → Add → JSON." +
+        " Подставьте только свой privateKey панели.</div>" +
+        "<pre class='out' id='out-xui'>" + esc(JSON.stringify(inbound, null, 2)) + "</pre>" +
+        "<div class='note note--warn small'>privateKey — серверный ключ вашей панели (в терминале: <span class='mono'>xray x25519</span>). <span class='mono'>serverNames</span>, <span class='mono'>shortIds</span> и <span class='mono'>uuid</span> уже совпадают с ключом клиента выше: подпись клиента и inbound будут совпадать. <span class='mono'>dest</span> (он же <span class='mono'>target</span> в Xray ≥ 24.9) указывает на выбранный белый SNI.</div>";
+    }
     if (genState.tab === "routing") {
       var set = (state.pro ? state.pro.domains.filter(function (d) { return d.tier === "core"; }) : FREE).map(function (d) { return d.domain; });
       html += "<div class='lbl muted small'>Routing JSON: домены базы идут напрямую (direct), остальное — в туннель:</div><pre class='out'>" + esc(JSON.stringify({
@@ -212,7 +363,56 @@
     renderQR(built);
     $("#dl-link").hidden = false;
     $("#dl-link").href = "data:text/plain;charset=utf-8," + encodeURIComponent(built);
-    $("#dl-link").download = sni + "-vless.txt";
+    $("#dl-link").download = sni + "-vless-" + transport + ".txt";
+  }
+
+  /* Copy the ready 3x-ui inbound JSON. This is the one-click bridge between
+     the client key and the owner's VPS panel: dest/serverNames/xhttpSettings
+     already point at the chosen white SNI, so the only manual step left is the
+     panel's own privateKey. */
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function (resolve, reject) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var done = false;
+      try { done = document.execCommand("copy"); } catch (e) { done = false; }
+      ta.remove();
+      done ? resolve() : reject(new Error("copy command rejected"));
+    });
+  }
+
+  function copyInbound3xui() {
+    var raw = ($("#gen-input").value || "").trim();
+    if (!parseVless(raw)) {
+      toast("Сначала вставьте свой vless://-ключ — inbound собирается под его UUID и порт", true);
+      var inp = $("#gen-input");
+      if (inp && inp.focus) inp.focus();
+      return;
+    }
+    var sni = ($("#gen-sni") && $("#gen-sni").value) || state.genSni || (state.domains[0] && state.domains[0].domain) || "sberbank.ru";
+    var transport = transportNow();
+    var inbound = inbound3xui(raw, sni, transport);
+    var json = JSON.stringify(inbound, null, 2);
+    copyText(json).then(function () {
+      toast("3x-ui inbound JSON скопирован: " + transport + " + Reality, dest " + sni + ":" + (Number(parseVless(raw).port) || 443));
+      genState.tab = "xui";
+      $$(".tab[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x.getAttribute("data-tab") === "xui" ? "true" : "false"); });
+      renderGen();
+    }).catch(function () {
+      /* Clipboard blocked (insecure origin / no permission): show the JSON so
+         the buyer can still select and copy it by hand. */
+      genState.tab = "xui";
+      $$(".tab[data-tab]").forEach(function (x) { x.setAttribute("aria-selected", x.getAttribute("data-tab") === "xui" ? "true" : "false"); });
+      renderGen();
+      toast("Буфер обмена недоступен — JSON открыт во вкладке «3x-ui inbound», скопируйте вручную", true);
+    });
   }
 
   function renderQR(text) {
@@ -321,7 +521,7 @@
     ];
     picks.forEach(function (sni, i) {
       lines.push("# " + (i + 1) + ". " + sni);
-      lines.push(buildVless(raw, sni));
+      lines.push(buildVless(raw, sni, transportNow()));
     });
     var blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
     var a = document.createElement("a");
@@ -354,6 +554,7 @@
     var t = e.target;
     if (t.id === "run-tester") runTester();
     else if (t.id === "gen-run") renderGen();
+    else if (t.id === "btn-xui-json") copyInbound3xui();
     else if (t.id === "btn-xlsx" && state.pro) dlXlsx(state.pro);
     else if (t.id === "btn-json" && state.pro) dlJson(state.pro);
     else if (t.id === "btn-batch" && state.pro) dlBatch(state.pro);
@@ -404,6 +605,7 @@
       ftimer = setTimeout(renderGen, 500);
     }
     if (t.id === "gen-sni") renderGen();
+    if (t.id === "gen-transport") renderGen();
   });
 
   /* --------------------------------------------------------------- init */

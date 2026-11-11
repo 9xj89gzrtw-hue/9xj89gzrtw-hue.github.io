@@ -216,6 +216,39 @@ const MP3 = fs.readFileSync(path.join(ROOT, "tests", "fixtures", "tone.mp3"));
   const realErrors = errors.filter(e => !/Failed to load resource|net::ERR|ERR_NAME_NOT_RESOLVED/i.test(e));
   ok("нет JS-ошибок панели", realErrors.length === 0, realErrors.join(" | "));
 
+  console.log("\nhit-блок WB & Ozon на /userscripts/ (лот 6390375)");
+  {
+    const hitCtx = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: "ru-RU" });
+    const hitPage = await hitCtx.newPage();
+    const hitErrors = [];
+    hitPage.on("pageerror", e => hitErrors.push(String(e.message)));
+    await hitPage.goto(base + "/userscripts/index.html", { waitUntil: "load" });
+    const hit = await hitPage.evaluate(() => {
+      const buy = document.querySelector("#wb-ozon-hit .hit-cmp-buy");
+      const proRow = Array.prototype.map.call(document.querySelectorAll(".row a.btn.ghost"), a => ({
+        href: a.getAttribute("href") || "",
+        text: a.textContent.replace(/\s+/g, " ").trim()
+      })).find(r => /6390375/.test(r.href)) || null;
+      return {
+        visible: !!buy && !buy.hidden && buy.offsetParent !== null,
+        href: buy ? (buy.getAttribute("href") || "") : "",
+        label: buy ? buy.textContent.replace(/\s+/g, " ").trim() : "",
+        title: (document.getElementById("wb-ozon-hit-title") || { textContent: "" }).textContent,
+        proRow: proRow
+      };
+    });
+    ok("hit-блок: кнопка покупки плагина видна", hit.visible, JSON.stringify(hit));
+    ok("hit-блок: кнопка ведёт на кассу лота 6390375 (СБП / Карта РФ)",
+      /id_d=6390375&ai=1481449&lang=ru-RU/.test(hit.href), hit.href);
+    ok("hit-блок: цена плагина 199 ₽ и в кнопке, и в заголовке",
+      /199\s*₽/.test(hit.label) && /199\s*₽/.test(hit.title), hit.label + " | " + hit.title);
+    ok("блок «Купить Pro-ключ»: WB & Ozon Inspector Pro за 199 ₽",
+      hit.proRow && /199\s*₽/.test(hit.proRow.text), JSON.stringify(hit.proRow));
+    ok("userscripts: без JS-ошибок", hitErrors.length === 0, hitErrors.join(" | "));
+    await hitPage.screenshot({ path: path.join(SHOTS, "userscripts-hit-wb-ozon.png") });
+    await hitCtx.close();
+  }
+
   await browser.close();
   server.close();
   console.log("\n" + pass + " ok, " + fail + " fail");

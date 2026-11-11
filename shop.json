@@ -1,6 +1,6 @@
 {
   "source": "gemini/agent2_out/digiseller_tw1_stock.json",
-  "updated": "2026-11-10T19:36:49.462Z",
+  "updated": "2026-11-11T16:45:08.588Z",
   "seller_id": 1481449,
   "currency_note": "price_rub is what the checkout shows; price_usd is what the page charges in USDC on Base",
   "products": {

@@ -192,7 +192,7 @@ const ITEMS = [
   {
     slug: "sni-whitelist",
     kicker: "SNI WHITELIST · LTE RU 2026",
-    title: "1 412 доменов белых списков SNI и VLESS",
+    title: "1 384 домена белых списков SNI и VLESS",
     sub: "25 доменов с живым пингом из браузера, шаблоны Happ / v2rayNG / Sing-Box",
     price: "99 ₽",
     priceAlt: "$0.99 · USDC на Base",
@@ -719,11 +719,18 @@ function renderCoverHtml(item, w, h) {
   fs.mkdirSync(OUT_COVERS, { recursive: true });
   fs.mkdirSync(OUT_OG, { recursive: true });
 
+  const only = process.argv[process.argv.indexOf("--only") + 1] || null;
+  const items = only ? ITEMS.filter((i) => i.slug === only) : ITEMS;
+  if (!items.length) {
+    console.error("no such slug: " + only);
+    process.exit(1);
+  }
+  console.log(`Rendering ${items.length} commercial 3D product cover(s) via Playwright Chromium...`);
+
   const browser = await chromium.launch();
-  console.log("Rendering 15 commercial 3D product covers via Playwright Chromium...");
 
   try {
-    for (const item of ITEMS) {
+    for (const item of items) {
       // 1. Render 800x800 square cover
       const pageSquare = await browser.newPage({
         viewport: { width: 800, height: 800 },
@@ -763,7 +770,7 @@ function renderCoverHtml(item, w, h) {
     await browser.close();
   }
 
-  console.log("\nAll 15 commercial covers & OG images generated successfully!");
+  console.log(`\nAll ${items.length} commercial cover(s) & OG images generated successfully!`);
 })().catch(e => {
   console.error("Render failed:", e);
   process.exit(1);

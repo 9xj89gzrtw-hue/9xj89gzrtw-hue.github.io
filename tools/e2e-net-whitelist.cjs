@@ -96,8 +96,22 @@ function keysOf(product) {
       return { present: !!m, visible: m ? !m.hidden : false, field: !!document.getElementById("unlock-hash") };
     });
     ok("модалка оплаты открылась", modal.visible && modal.field, JSON.stringify(modal));
-    const cardVisible = await page.isVisible("#unlock-card").catch(() => false);
-    ok("карта РФ скрыта: лот Digiseller ещё не заведён", cardVisible === false, String(cardVisible));
+    /* Лот Digiseller 6390371 (seller 1481449) открыт — кнопка СБП/Карты РФ
+       обязана быть видимой, живой и вести на кассу за 99 ₽. */
+    const card = await page.evaluate(() => {
+      const el = document.getElementById("unlock-card");
+      return {
+        hidden: !!el.hidden,
+        inFlow: el.offsetParent !== null,
+        href: el.getAttribute("href") || "",
+        label: (document.getElementById("unlock-card-label").textContent || "").trim()
+      };
+    });
+    ok("кнопка карты РФ видна в модалке (!hidden, offsetParent ≠ null)",
+      !card.hidden && card.inFlow, JSON.stringify(card));
+    ok("кнопка карты РФ ведёт на живой лот SNI id_d=6390371",
+      /id_d=6390371&ai=1481449&lang=ru-RU/.test(card.href), card.href);
+    ok("в подписи кнопки цена 99 ₽ и ключ TW1 сразу", /99\s*₽/.test(card.label) && /TW1/i.test(card.label), card.label);
     ok("50 профилей спрятаны до оплаты", (await page.isVisible("#btn-batch").catch(() => false)) === false);
     await page.screenshot({ path: path.join(SHOTS, "net-whitelist-free.png") });
     await ctx.close();
@@ -129,7 +143,7 @@ function keysOf(product) {
   }
 
   /* ---------- 3: local VLESS build with a new SNI, no network ---------- */
-  console.log("\n3. генератор VLESS без сети");
+  console.log("\n3. генератор VLESS без сети (+ XHTTP ноября 2026)");
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 950 }, deviceScaleFactor: 2, locale: "ru-RU" });
     const page = await ctx.newPage();
@@ -148,6 +162,51 @@ function keysOf(product) {
     ok("новый тег = SNI", /#sberbank\.ru-tlsv13-h2$/.test(link), link);
     ok("QR и файл появились", await page.isVisible("#qr-holder svg") && await page.isVisible("#dl-link"));
     ok("генератор не ходил в сеть", requests.length === before, requests.slice(0, 3).join(" | "));
+
+    /* XHTTP (SplitHTTP) + Reality — режим ноября 2026: валидный URI и JSON-конфиги. */
+    await page.selectOption("#gen-transport", "xhttp");
+    await page.click("#gen-run");
+    const xlink = (await page.textContent("#out-link")).trim();
+    ok("XHTTP: type=xhttp&mode=auto&path=%2F в URI",
+      /[?&]type=xhttp(&|#|$)/.test(xlink) && /[?&]mode=auto(&|#|$)/.test(xlink) && /[?&]path=%2F(&|#|$)/.test(xlink), xlink);
+    ok("XHTTP: reality + sni + fp на месте",
+      /[?&]security=reality(&|#|$)/.test(xlink) && /[?&]sni=sberbank\.ru(&|#|$)/.test(xlink) && /[?&]fp=chrome(&|#|$)/.test(xlink), xlink);
+    ok("XHTTP: тег профиля помечен xhttp", /#sberbank\.ru-xhttp-auto$/.test(xlink), xlink);
+
+    await page.click('[data-tab="singbox"]');
+    const sb = JSON.parse(await page.textContent("#gen-out pre.out"));
+    const ob = sb.outbounds[0];
+    ok("XHTTP: Sing-Box outbound с транспортом xhttp",
+      ob.transport && ob.transport.type === "xhttp" && ob.transport.mode === "auto" && ob.transport.path === "/" && ob.transport.host === "sberbank.ru",
+      JSON.stringify(ob.transport));
+    ok("XHTTP: flow пуст, Reality и SNI в tls-блоке",
+      ob.flow === "" && ob.tls.server_name === "sberbank.ru" && ob.tls.reality.public_key === "pubkey123",
+      JSON.stringify({ flow: ob.flow, sni: ob.tls.server_name }));
+
+    await page.click('[data-tab="xui"]');
+    const inbound = JSON.parse(await page.textContent("#gen-out pre.out"));
+    ok("XHTTP: 3x-ui inbound — vless на xhttp с Reality",
+      inbound.protocol === "vless" && inbound.streamSettings.network === "xhttp" && inbound.streamSettings.security === "reality",
+      JSON.stringify({ protocol: inbound.protocol, network: inbound.streamSettings.network }));
+    ok("XHTTP: 3x-ui inbound — serverNames и shortIds из ключа клиента",
+      inbound.streamSettings.realitySettings.serverNames[0] === "sberbank.ru" &&
+      inbound.streamSettings.realitySettings.shortIds.includes("ab12") &&
+      inbound.streamSettings.xhttpSettings.path === "/" && inbound.streamSettings.xhttpSettings.mode === "auto",
+      JSON.stringify(inbound.streamSettings.realitySettings.serverNames));
+
+    /* Классический TCP тоже остаётся рабочим: переключение туда-обратно не ломает сборку. */
+    await page.click('[data-tab="vless"]');
+    await page.selectOption("#gen-transport", "tcp");
+    await page.click("#gen-run");
+    const backLink = (await page.textContent("#out-link")).trim();
+    ok("TCP: переключение назад даёт классический Reality-URI",
+      /[?&]type=tcp(&|#|$)/.test(backLink) && /#sberbank\.ru-tlsv13-h2$/.test(backLink), backLink);
+    await page.click('[data-tab="xui"]');
+    const tcpInbound = JSON.parse(await page.textContent("#gen-out pre.out"));
+    ok("TCP: 3x-ui inbound тоже собирается",
+      tcpInbound.streamSettings.network === "tcp" && tcpInbound.streamSettings.tcpSettings && tcpInbound.streamSettings.realitySettings.serverNames[0] === "sberbank.ru",
+      JSON.stringify(tcpInbound.streamSettings.network));
+    ok("в XHTTP-режиме генератор не ходил в сеть", requests.length === before, requests.slice(0, 3).join(" | "));
     await page.screenshot({ path: path.join(SHOTS, "net-whitelist-generator.png") });
     await ctx.close();
   }
@@ -229,6 +288,17 @@ function keysOf(product) {
     }));
     ok("SNI-пакет в tg-chats расшифрован", state.pro && state.loaded && state.has, JSON.stringify(state));
     ok("без JS-ошибок на чек-ссылке tg-chats", errors.length === 0, errors.join(" | ").slice(0, 300));
+
+    /* 5-й быстрый пак в каталоге — SNI-база за 99 ₽ на живом лоте 6390371. */
+    const packs = await page.$$eval("#view-base .pack-btn", els => els.map(e => ({
+      href: e.getAttribute("href") || "", text: e.textContent.replace(/\s+/g, " ").trim()
+    })));
+    ok("tg-chats: в блоке быстрых пакетов 5 карточек", packs.length === 5, packs.length);
+    ok("tg-chats: 5-й пак «Белые Списки SNI LTE РФ» ведёт на лот 6390371",
+      packs.length === 5 && /id_d=6390371&ai=1481449/.test(packs[4].href), JSON.stringify(packs[4]));
+    ok("tg-chats: 5-й пак — SNI, 1 384 домена, 99 ₽",
+      packs.length === 5 && /SNI/i.test(packs[4].text) && /1\s?384/.test(packs[4].text) && /99\s*₽/.test(packs[4].text),
+      JSON.stringify(packs[4]));
     await ctx.close();
   }
 

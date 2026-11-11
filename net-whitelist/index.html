@@ -73,7 +73,12 @@
         <textarea id="gen-input" rows="3" placeholder="vless://uuid@server:443?type=tcp&pbk=...#tag"></textarea>
       </div>
       <div style="width:270px">
-        <label class="lbl" for="gen-sni">Лучший проверенный SNI</label>
+        <label class="lbl" for="gen-transport">Транспорт (ноябрь 2026)</label>
+        <select id="gen-transport">
+          <option value="tcp">VLESS + Reality (TCP / H2 — классический)</option>
+          <option value="xhttp">VLESS + XHTTP (SplitHTTP) + Reality — анти-детект ТСПУ</option>
+        </select>
+        <label class="lbl" for="gen-sni" style="margin-top:8px">Лучший проверенный SNI</label>
         <select id="gen-sni"></select>
         <label class="lbl">или выберите из таблицы ↑ (кнопка «SNI →»)</label>
       </div>
@@ -86,6 +91,7 @@
       <button class="tab" data-tab="vless" type="button">vless:// ссылка</button>
       <button class="tab" data-tab="clients" type="button">Все клиенты</button>
       <button class="tab" data-tab="singbox" type="button">Sing-Box JSON</button>
+      <button class="tab" data-tab="xui" type="button">3x-ui inbound</button>
       <button class="tab" data-tab="routing" type="button">Routing JSON</button>
     </div>
     <div id="gen-out"></div>
@@ -97,7 +103,7 @@
       </div>
       <div class="grow">
         <a class="btn" id="dl-link" hidden download>Скачать конфиг .txt</a>
-        <p class="small muted" style="margin:10px 0 0">Импорт: <b>Happ</b> — «+» → буфер обмена; <b>v2rayNG</b> — «+» → «Импорт из буфера»; <b>Streisand / FoXray</b> — «+» → ссылка; <b>Nekoray</b> — Add → Brief scan; <b>Sing-Box</b> — вставить JSON из вкладки. Ключ не покидает браузер: страница статическая, бэкенда нет.</p>
+        <p class="small muted" style="margin:10px 0 0">Импорт: <b>Happ</b> — «+» → буфер обмена; <b>v2rayNG</b> — «+» → «Импорт из буфера»; <b>Streisand / FoXray</b> — «+» → ссылка; <b>Nekoray</b> — Add → Brief scan; <b>Sing-Box</b> — вставить JSON из вкладки. Транспорт <b>XHTTP (SplitHTTP)</b> требует клиентов на Xray ≥ 24.9.16 (v2rayNG, Happ, Nekoray) или Sing-Box ≥ 1.12 — классический TCP работает везде. Ключ не покидает браузер: страница статическая, бэкенда нет.</p>
       </div>
     </div>
   </div>
@@ -152,6 +158,7 @@
 
 <dialog class="umodal" id="unlock-modal" style="display:none;border:none;padding:0;background:transparent"></dialog>
 
+<script src="/assets/shop.js"></script>
 <script src="/assets/verify.js"></script>
 <script src="/assets/unlock.js"></script>
 <script src="/assets/xlsx.js"></script>
