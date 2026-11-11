@@ -537,7 +537,7 @@ function renderCoverHtml(item, w, h) {
   const pad = isOg ? 44 : 48;
   const visualContent = item.nanoImage
     ? `<div class="nano-box"><img src="${item.nanoImage}" alt="${item.title}" /></div>`
-    : `<div class="vector-box">${generate3dVisualSvg(item.visualType, item.accentColor)}</div>`;
+    : `<div class="vector-box">${generate3dVisualSvg(item.visualType, item.accentColor)}<div class="pbr-grain"></div></div>`;
 
   return `<!doctype html><html><head><meta charset="utf-8">
   <style>
@@ -553,6 +553,14 @@ function renderCoverHtml(item, w, h) {
       background: radial-gradient(800px 500px at 50% -10%, ${item.glowColor} 0%, rgba(7, 9, 14, 0) 70%),
                   radial-gradient(700px 400px at 50% 110%, ${item.glowColor} 0%, rgba(7, 9, 14, 0) 65%),
                   #07090e;
+    }
+    .pbr-grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+      border-radius: 20px;
     }
     .top-bar {
       display: flex;
