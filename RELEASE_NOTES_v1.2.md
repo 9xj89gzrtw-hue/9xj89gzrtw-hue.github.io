@@ -22,6 +22,7 @@
 ## Проверки
 
 - `shasum -a 256 -c downloads/SHA256SUMS.txt` — 11 опубликованных файлов, все OK. Манифест строится по списку файлов из git-индекса, поэтому в нём нет локальных пак-выгрузок, которые не публикуются на GitHub Pages.
+- Ассеты релиза v1.2.0 проверяются отдельно: `shasum -a 256 -c SHA256SUMS.txt` в папке со скачанными ассетами → 6/6 OK (манифест релиза покрывает только его собственные ассеты).
 - Живой e2e (`agent2_out/nov11_e2e.cjs` → `nov12_e2e.json`): 15/15 PASS, 0 FAIL. Слои: карточка Plati (HTTP 200 + заголовок совпадает с живым названием лота + ровно 1 превью), ссылка оплаты oplata.info (302 → касса), покупательский путь (ключ TW1 активирует `isPro`, xlsx скачивается в 0 кликов). SNI-лот скачал `sni-whitelist-500-rf-nov2026.xlsx` (613 531 Б) через 1-клик ссылку `?key=…&pack=sni-whitelist&download=xlsx`.
 - Live-статус: `https://9xj89gzrtw-hue.github.io/net-whitelist/` → 200, `tg-chats/` → 200, `downloads/sni-whitelist-demo-25.csv` → 200, `downloads/wb-ozon-seller-inspector.user.js` → `@version 1.2.0`.
 
